@@ -1,0 +1,14 @@
+Supabase SQL Editor — çalıştırma sırası (DailyscheduleApp)
+
+1) İlk kurulum (boş veya yeni proje)
+   → schema.sql        (tam şema: profiles + tasks + RLS + tetikleyiciler)
+
+2) Yalnızca görevler tablosu eksikse (profiles zaten varsa)
+   → gorevler_table_editor_gorunur.sql
+   VEYA mobil_ana_sayfa_ve_gorevler.sql
+   VEYA setup_tasks_only.sql
+
+3) Profilde premium kolonu vb. yükseltme
+   → upgrade_profiles_premium_column.sql
+
+Not: "relation already exists" alırsan ilgili CREATE satırını atlayın veya upgrade dosyası kullanın.
