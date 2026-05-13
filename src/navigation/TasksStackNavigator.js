@@ -1,9 +1,10 @@
 /**
  * Görevler sekmesi: liste → görev detayı.
- * Şema / örnek SQL: supabase/schema.sql, src/constants/tasksContextOperationsSql.js
+ * Şema / örnek SQL: supabase/sql/schema.sql, src/constants/tasksContextOperationsSql.js
  */
+import { Ionicons } from '@expo/vector-icons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import TaskDetailScreen from '../screens/TaskDetailScreen';
 import TaskListScreen from '../screens/TaskListScreen';
@@ -42,11 +43,24 @@ export default function TasksStackNavigator() {
       <Stack.Screen
         name="TaskDetail"
         component={TaskDetailScreen}
-        options={{
+        options={({ navigation }) => ({
           headerShown: true,
           title: 'Görev detayı',
-          headerBackTitle: 'Görevler',
-        }}
+          // Liste satırındaki sağ ok ile uyum: geri ok solda, başlık hemen yanında (sonda değil).
+          headerBackTitleVisible: false,
+          headerTitleAlign: 'left',
+          headerLeft: () => (
+            <Pressable
+              onPress={() => navigation.goBack()}
+              hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
+              style={{ paddingLeft: 4, paddingVertical: 6, paddingRight: 6 }}
+              accessibilityRole="button"
+              accessibilityLabel="Görevlere dön"
+            >
+              <Ionicons name="chevron-back" size={24} color={colors.primary} />
+            </Pressable>
+          ),
+        })}
       />
     </Stack.Navigator>
   );

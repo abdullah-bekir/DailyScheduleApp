@@ -5,14 +5,19 @@ export const SETTINGS_NOTIFY_KEY = '@dailyschedule/settings_notify';
 export const SETTINGS_DAILY_PLAN_GOAL_KEY = '@dailyschedule/settings_daily_plan_goal';
 
 /** Ana sayfa «Bugünün özeti» çubuğunda plan yarısı için günlük görev ölçeği — kullanıcı seçer. */
-export const DAILY_PLAN_GOAL_OPTIONS = Object.freeze([3, 5, 6, 8, 10]);
-export const DEFAULT_DAILY_PLAN_GOAL = 6;
+export const DAILY_PLAN_GOAL_OPTIONS = Object.freeze([3, 5, 8, 10, 15, 20]);
+export const DEFAULT_DAILY_PLAN_GOAL = 8;
 
 export async function loadDailyPlanGoal() {
   try {
     const v = await AsyncStorage.getItem(SETTINGS_DAILY_PLAN_GOAL_KEY);
     const n = parseInt(v, 10);
     if (Number.isFinite(n) && DAILY_PLAN_GOAL_OPTIONS.includes(n)) return n;
+    // Eski sürümde 6 seçenekti; yeni listede yok — varsayılan 8’e taşı.
+    if (Number.isFinite(n) && n === 6) {
+      await saveDailyPlanGoal(DEFAULT_DAILY_PLAN_GOAL);
+      return DEFAULT_DAILY_PLAN_GOAL;
+    }
   } catch {
     /* ignore */
   }

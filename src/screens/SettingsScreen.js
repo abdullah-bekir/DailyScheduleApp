@@ -12,8 +12,6 @@ import { useSupabaseSession } from '../context/SupabaseContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
-import { showRewardedAd } from '../lib/ads/rewardedAd';
-import { showRewardedInterstitialAd } from '../lib/ads/rewardedInterstitialAd';
 import { fetchProfile, pushProfilePatch } from '../lib/profileRemote';
 import { coerceBoolean } from '../lib/taskRemote';
 import { cardShadow } from '../theme/shadows';
@@ -205,8 +203,8 @@ export default function SettingsScreen() {
         />
         <View style={styles.sectionCard}>
           <Text style={styles.premiumHint}>
-            Kaç görevi “bir günlük plan dolusu” sayacağını seçersin. Küçük sayı (ör. 3) çubuğu hızlı doldurur; büyük sayı
-            (ör. 10) daha uzun günlük plan için uygundur.
+            Kaç görevi “bir günlük plan dolusu” sayacağını seçersin. Küçük sayı (ör. 3) plan kısmını hızlı doldurur; 15–20
+            yoğun günler için uygundur (çubuk aynı görev sayısında daha yavaş ilerler).
           </Text>
           <View style={styles.goalChipRow}>
             {DAILY_PLAN_GOAL_OPTIONS.map((n) => {
@@ -234,7 +232,7 @@ export default function SettingsScreen() {
         <View style={styles.sectionCard}>
           <Text style={styles.premiumHint}>
             {isPro
-              ? 'Premium aktif: tam ekran reklamlar ve app open kapalı; ödüllü birimler yine Ayarlar’dan test edilebilir.'
+              ? 'Premium aktif: tam ekran reklamlar ve app open kapalı.'
               : 'Paywall üzerinden aylık/yıllık plan; mağaza ve RevenueCat panelinde ürünleri tanımlamanız gerekir. Reklamları göstermek için .env içinde EXPO_PUBLIC_ADS_UI_ENABLED=true kullanın.'}
           </Text>
           <PrimaryButton
@@ -242,60 +240,6 @@ export default function SettingsScreen() {
             variant="outline"
             onPress={() => navigation.navigate('Paywall')}
             mutedCta
-          />
-        </View>
-
-        <SectionHeader title="Reklam testleri" subtitle="Tam ekran, ödüllü ve ödüllü interstitial — EXPO_PUBLIC_ADS_UI_ENABLED=true iken gösterilir." />
-        <View style={styles.sectionCard}>
-          <Text style={styles.premiumHint}>
-            Varsayılan olarak reklamlar kapalıdır. Göstermek için EXPO_PUBLIC_ADS_UI_ENABLED=true ve native build gerekir; Expo Go’da çalışmaz.
-          </Text>
-          <PrimaryButton
-            title="Ödüllü reklamı dene"
-            variant="outline"
-            mutedCta
-            onPress={async () => {
-              const r = await showRewardedAd();
-              if (r.reason === 'disabled') {
-                Alert.alert('Reklamlar kapalı', 'Göstermek için EXPO_PUBLIC_ADS_UI_ENABLED=true ayarlayıp uygulamayı yeniden derleyin.');
-                return;
-              }
-              if (r.reason === 'expo-go') {
-                Alert.alert('Expo Go', 'Ödüllü reklam için development veya release build kullanın.');
-                return;
-              }
-              if (r.earned) {
-                Alert.alert('Teşekkürler', 'Ödül kazanıldı (test ortamında örnek mesaj).');
-              } else if (r.shown) {
-                Alert.alert('Bilgi', 'Reklam kapandı; ödül için tamamlanmış izlenme gerekir.');
-              } else {
-                Alert.alert('Reklam', 'Yüklenemedi veya gösterilemedi; internet ve birim ID’yi kontrol edin.');
-              }
-            }}
-          />
-          <View style={{ height: 12 }} />
-          <PrimaryButton
-            title="Ödüllü tam ekran (rewarded interstitial) dene"
-            variant="outline"
-            mutedCta
-            onPress={async () => {
-              const r = await showRewardedInterstitialAd();
-              if (r.reason === 'disabled') {
-                Alert.alert('Reklamlar kapalı', 'Göstermek için EXPO_PUBLIC_ADS_UI_ENABLED=true ayarlayıp uygulamayı yeniden derleyin.');
-                return;
-              }
-              if (r.reason === 'expo-go') {
-                Alert.alert('Expo Go', 'Bu format için development veya release build kullanın.');
-                return;
-              }
-              if (r.earned) {
-                Alert.alert('Teşekkürler', 'Ödül kazanıldı (test).');
-              } else if (r.shown) {
-                Alert.alert('Bilgi', 'Reklam kapandı.');
-              } else {
-                Alert.alert('Reklam', 'Yüklenemedi veya gösterilemedi.');
-              }
-            }}
           />
         </View>
 

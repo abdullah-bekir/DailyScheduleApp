@@ -41,6 +41,7 @@ yarn-error.*
 *.tsbuildinfo
 eas-build-log.txt
 .expo-export-test/
+.expo-export-test-eas/
 .expo-export-verify/
 .expo-healthcheck-export/
 .expo-verify-export/

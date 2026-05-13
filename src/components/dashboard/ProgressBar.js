@@ -27,28 +27,29 @@ function createStyles(colors, variant) {
       gap: 2,
     },
     percentNum: {
-      color: colors.primary,
+      color: isFeatured ? colors.textSecondary : colors.primary,
       fontSize: isFeatured ? 30 : 14,
       fontWeight: '800',
       letterSpacing: -1,
     },
     percentSign: {
-      color: colors.primary,
+      color: isFeatured ? colors.textSecondary : colors.primary,
       fontSize: isFeatured ? 14 : 14,
       fontWeight: '700',
-      opacity: 0.85,
+      opacity: isFeatured ? 1 : 0.85,
     },
     track: {
       height: isFeatured ? 14 : 10,
       borderRadius: 999,
-      backgroundColor: colors.calendarMuted,
+      // Ana sayfa özet / üst şerit ile uyumlu nötr gri; primary (köşe siyahı) kullanılmaz.
+      backgroundColor: isFeatured ? colors.surfaceSubtle : colors.calendarMuted,
       overflow: 'hidden',
       borderWidth: 1,
       borderColor: colors.border,
     },
     fill: {
       height: isFeatured ? 14 : 10,
-      backgroundColor: colors.primary,
+      backgroundColor: isFeatured ? colors.textSecondary : colors.primary,
       borderRadius: 999,
     },
     caption: {
