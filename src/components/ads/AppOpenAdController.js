@@ -1,0 +1,31 @@
+import Constants from 'expo-constants';
+import { useEffect, useRef } from 'react';
+import { AppState } from 'react-native';
+
+import { useSubscription } from '../../context/SubscriptionContext';
+import { isAdsUiEnabled } from '../../lib/ads/adsConfig';
+import { showAppOpenIfReady } from '../../lib/ads/appOpenAd';
+
+/**
+ * Uygulama arka plandan öne gelince app open tam ekran (yalnızca free + reklam anahtarı açık).
+ */
+export default function AppOpenAdController() {
+  const { isPro } = useSubscription();
+  const appStateRef = useRef(AppState.currentState);
+
+  useEffect(() => {
+    if (Constants.appOwnership === 'expo') return undefined;
+    if (!isAdsUiEnabled() || isPro) return undefined;
+
+    const sub = AppState.addEventListener('change', (next) => {
+      if (appStateRef.current.match(/inactive|background/) && next === 'active') {
+        showAppOpenIfReady();
+      }
+      appStateRef.current = next;
+    });
+
+    return () => sub.remove();
+  }, [isPro]);
+
+  return null;
+}

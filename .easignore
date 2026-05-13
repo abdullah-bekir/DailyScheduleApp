@@ -1,0 +1,16 @@
+# EAS'e gönderilen arşivi sadeleştirir (Windows/IDE çöplüğü, tar hataları riskini azaltır)
+.expo/
+android/.gradle/
+android/app/build/
+android/build/
+.idea/
+.vscode/
+*.log
+**/.DS_Store
+**/Thumbs.db
+**/*:Zone.Identifier
+eas-build-log.txt
+.expo-export-test/
+.expo-export-verify/
+.expo-healthcheck-export/
+.expo-verify-export/

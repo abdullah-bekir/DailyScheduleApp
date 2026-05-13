@@ -1,0 +1,23 @@
+Planly — mağaza ve güncelleme adımları (kısa)
+
+A) Her Play Store / App Store sürümü (native değişiklik veya büyük sürüm)
+   1. app.json içinde:
+      - "version": örn. 1.0.0 -> 1.0.1 (kullanıcıya görünen sürüm)
+      - android.versionCode: her yüklemede +1 (zorunlu; Play aynı kodu kabul etmez)
+      - ios.buildNumber: her yüklemede +1 (App Store için string, örn. "2")
+   2. npm run eas:build:production:android   (veya iOS)
+   3. Çıkan AAB/APK ile Play Console veya App Store Connect’e yükle.
+
+B) Sadece JavaScript / arayüz düzeltmesi (aynı native sürüm, kullanıcı mağazadan yeniden indirmeden)
+   - Proje "bare" (android/ var): runtimeVersion = app.json "version" metni (app.config.js otomatik eşler).
+   - EAS Update atarken bu sürümle aynı runtime hedefte olmalı.
+   - Terminal:
+       npm run eas:update:production -- --message "Kısa açıklama"
+   - Preview kanalı test için:
+       npm run eas:update:preview -- --message "Test"
+
+C) Ne zaman A, ne zaman B?
+   - Yeni izin, Expo SDK yükseltmesi, yeni native modül, ikon/splash değişimi -> mutlaka A (yeni build).
+   - Metin, ekran düzeni, JS mantığı -> genelde B (EAS Update) yeterli.
+
+Not: İlk kez EAS Update kullanıyorsan expo.dev üzerinde projede Updates özelliği açık olmalı; ilk production build channel=production ile alındıktan sonra update yayınlanır.
