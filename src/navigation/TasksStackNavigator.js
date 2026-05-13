@@ -3,6 +3,7 @@
  * Şema / örnek SQL: supabase/schema.sql, src/constants/tasksContextOperationsSql.js
  */
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StyleSheet } from 'react-native';
 
 import TaskDetailScreen from '../screens/TaskDetailScreen';
 import TaskListScreen from '../screens/TaskListScreen';
@@ -18,10 +19,19 @@ export default function TasksStackNavigator() {
       screenOptions={{
         headerShown: false,
         headerTintColor: colors.primary,
-        headerStyle: { backgroundColor: colors.surface },
+        headerStyle: {
+          backgroundColor: colors.surface,
+          borderBottomWidth: StyleSheet.hairlineWidth,
+          borderBottomColor: colors.border,
+        },
         headerTitleStyle: {
           color: colors.textPrimary,
-          fontWeight: '700',
+          fontWeight: '800',
+          fontSize: 18,
+          letterSpacing: -0.25,
+        },
+        headerBackTitleStyle: {
+          fontWeight: '600',
           fontSize: 17,
         },
         headerShadowVisible: false,

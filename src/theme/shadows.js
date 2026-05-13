@@ -19,13 +19,13 @@ export function cardShadow(colors, size = 'lg') {
   return size === 'lg' ? lg : sm;
 }
 
-/** Üst gölge — alt sekme çubuğu için */
+/** Üst gölge — alt sekme çubuğu (hafif; üst çizgi TabNavigator’da) */
 export function tabBarLift(colors) {
   return {
     shadowColor: colors.shadowColor,
-    shadowOpacity: Platform.OS === 'android' ? 0 : Math.min(colors.shadowOpacityCard + 0.03, 0.14),
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: -10 },
-    elevation: 20,
+    shadowOpacity: Platform.OS === 'android' ? 0 : Math.min(colors.shadowOpacitySm + 0.025, 0.09),
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 12,
   };
 }

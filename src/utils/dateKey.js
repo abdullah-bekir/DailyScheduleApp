@@ -25,6 +25,15 @@ export function formatTodayCompactLabel(d = new Date()) {
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
+/** Üst şerit: SALI, 9 MAYIS 2026 (tr-TR büyük harf) */
+export function formatTodayHeaderCapsLine(d = new Date()) {
+  const weekday = d.toLocaleDateString('tr-TR', { weekday: 'long' }).toLocaleUpperCase('tr-TR');
+  const day = d.getDate();
+  const month = d.toLocaleDateString('tr-TR', { month: 'long' }).toLocaleUpperCase('tr-TR');
+  const year = d.getFullYear();
+  return `${weekday}, ${day} ${month} ${year}`;
+}
+
 /** tr-TR uzun tarih etiketi */
 export function formatDateKeyForDisplay(dateKey) {
   if (!isValidDateKey(dateKey)) return '';

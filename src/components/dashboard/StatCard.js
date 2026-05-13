@@ -22,9 +22,9 @@ function createStyles(colors, accent) {
     card: {
       flex: 1,
       backgroundColor: colors.surface,
-      borderRadius: 15,
-      paddingVertical: 11,
-      paddingHorizontal: 11,
+      borderRadius: 18,
+      paddingVertical: 13,
+      paddingHorizontal: 12,
       borderWidth: 1,
       borderColor: colors.border,
       gap: 6,

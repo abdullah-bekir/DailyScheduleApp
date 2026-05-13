@@ -8,10 +8,6 @@ import { getMotivationQuotesForStats } from '../../utils/dailyMotivation';
 /** Tüm motivasyon sözlerinde aynı işaret (Günlük rutin… satırında kullanılan ✨ ile uyumlu) */
 const MOTIVATION_QUOTE_EMOJI = '✨';
 
-/** Kart her zaman düz beyaz; tema yüzey rengi morumsu görünmesin diye sabit */
-const MOTIVATION_CARD_WHITE = '#FFFFFF';
-const MOTIVATION_BORDER_NEUTRAL = '#E5E7EB';
-
 function randomQuoteIndex(poolLength, avoidIdx = undefined) {
   if (poolLength <= 0) return 0;
   if (poolLength === 1) return 0;
@@ -25,17 +21,17 @@ function randomQuoteIndex(poolLength, avoidIdx = undefined) {
   return n;
 }
 
-function createStyles(colors, isDark) {
-  const quoteColor = isDark ? '#0F172A' : colors.textPrimary;
+function createStyles(colors) {
+  const quoteColor = colors.textPrimary;
 
   return StyleSheet.create({
     wrap: {
-      borderRadius: 16,
-      paddingVertical: 14,
-      paddingHorizontal: 14,
+      borderRadius: 18,
+      paddingVertical: 15,
+      paddingHorizontal: 15,
       borderWidth: 1,
-      borderColor: MOTIVATION_BORDER_NEUTRAL,
-      backgroundColor: MOTIVATION_CARD_WHITE,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
       gap: 12,
     },
     label: {
@@ -57,8 +53,8 @@ function createStyles(colors, isDark) {
       width: 34,
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: MOTIVATION_BORDER_NEUTRAL,
-      backgroundColor: MOTIVATION_CARD_WHITE,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceSubtle,
       alignItems: 'center',
       justifyContent: 'center',
       alignSelf: 'stretch',
@@ -95,8 +91,8 @@ function createStyles(colors, isDark) {
 }
 
 export default function MotivationQuoteBrowser({ totalToday, remainingToday }) {
-  const { colors, isDark } = useTheme();
-  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
+  const { colors } = useTheme();
+  const styles = useMemo(() => createStyles(colors), [colors]);
 
   const quotes = useMemo(
     () => getMotivationQuotesForStats({ total: totalToday, remaining: remainingToday }),

@@ -18,7 +18,7 @@ function priorityColor(colors, priority) {
 function createStyles(colors) {
   return StyleSheet.create({
     wrap: {
-      borderRadius: 16,
+      borderRadius: 18,
       overflow: 'hidden',
     },
     row: {
@@ -28,7 +28,7 @@ function createStyles(colors) {
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 16,
+      borderRadius: 18,
       paddingVertical: 14,
       paddingHorizontal: 14,
       ...cardShadow(colors, 'sm'),

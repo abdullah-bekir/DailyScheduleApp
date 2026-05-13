@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
 import { getSupabase, getSupabaseConfig } from '../lib/supabaseClient';
 
@@ -10,6 +10,12 @@ export function SupabaseProvider({ children }) {
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
+    if (!isConfigured) {
+      setAuthReady(true);
+      setUserId(null);
+      return undefined;
+    }
+
     const sb = getSupabase();
     if (!sb) {
       setAuthReady(true);
@@ -20,37 +26,44 @@ export function SupabaseProvider({ children }) {
     let cancelled = false;
 
     const applySession = (session) => {
+      if (cancelled) return;
       setUserId(session?.user?.id ?? null);
+      setAuthReady(true);
     };
 
-    (async () => {
-      try {
-        const { data: { session } } = await sb.auth.getSession();
-        if (cancelled) return;
-        if (session?.user) {
-          applySession(session);
-          setAuthReady(true);
-          return;
-        }
-        const { data, error } = await sb.auth.signInAnonymously();
-        if (cancelled) return;
-        if (error) {
-          applySession(null);
+    sb.auth
+      .getSession()
+      .then(({ data }) => {
+        if (data?.session) {
+          applySession(data.session);
         } else {
-          applySession(data?.session ?? null);
+          return sb.auth.signInAnonymously();
         }
-      } finally {
+        return null;
+      })
+      .then((anonRes) => {
+        if (cancelled) return;
+        if (anonRes?.data?.session) {
+          applySession(anonRes.data.session);
+        } else if (!anonRes) {
+          /* getSession already set */
+        } else {
+          setAuthReady(true);
+        }
+      })
+      .catch(() => {
         if (!cancelled) setAuthReady(true);
-      }
-    })();
+      });
 
-    const { data: sub } = sb.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = sb.auth.onAuthStateChange((_event, session) => {
       applySession(session);
     });
 
     return () => {
       cancelled = true;
-      sub?.subscription?.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, [isConfigured]);
 

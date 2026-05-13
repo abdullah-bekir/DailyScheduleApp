@@ -2,6 +2,31 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const SETTINGS_THEME_KEY = '@dailyschedule/settings_theme';
 export const SETTINGS_NOTIFY_KEY = '@dailyschedule/settings_notify';
+export const SETTINGS_DAILY_PLAN_GOAL_KEY = '@dailyschedule/settings_daily_plan_goal';
+
+/** Ana sayfa «Bugünün özeti» çubuğunda plan yarısı için günlük görev ölçeği — kullanıcı seçer. */
+export const DAILY_PLAN_GOAL_OPTIONS = Object.freeze([3, 5, 6, 8, 10]);
+export const DEFAULT_DAILY_PLAN_GOAL = 6;
+
+export async function loadDailyPlanGoal() {
+  try {
+    const v = await AsyncStorage.getItem(SETTINGS_DAILY_PLAN_GOAL_KEY);
+    const n = parseInt(v, 10);
+    if (Number.isFinite(n) && DAILY_PLAN_GOAL_OPTIONS.includes(n)) return n;
+  } catch {
+    /* ignore */
+  }
+  return DEFAULT_DAILY_PLAN_GOAL;
+}
+
+export async function saveDailyPlanGoal(goal) {
+  try {
+    const n = DAILY_PLAN_GOAL_OPTIONS.includes(goal) ? goal : DEFAULT_DAILY_PLAN_GOAL;
+    await AsyncStorage.setItem(SETTINGS_DAILY_PLAN_GOAL_KEY, String(n));
+  } catch {
+    /* ignore */
+  }
+}
 
 export async function loadThemeMode() {
   try {

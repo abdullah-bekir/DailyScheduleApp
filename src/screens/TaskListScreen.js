@@ -1,13 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { useMemo, useState } from 'react';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useNavigation, useScrollToTop } from '@react-navigation/native';
+import { useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import AdMobBannerCard from '../components/ads/AdMobBannerCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ScreenHero from '../components/layout/ScreenHero';
+import { useSubscription } from '../context/SubscriptionContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
+import { isAdsUiEnabled } from '../lib/ads/adsConfig';
 import { cardShadow } from '../theme/shadows';
 import { addDaysToDateKey, formatDateKeyForDisplay, getTodayDateKey } from '../utils/dateKey';
 import { sortTasksByTime } from '../utils/sortTasks';
@@ -20,7 +24,7 @@ function createStyles(colors) {
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 16,
+      borderRadius: 18,
       padding: 12,
       marginBottom: 12,
       ...cardShadow(colors),
@@ -74,7 +78,7 @@ function createStyles(colors) {
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 16,
+      borderRadius: 18,
       padding: 14,
       marginBottom: 12,
       ...cardShadow(colors),
@@ -120,12 +124,11 @@ function createStyles(colors) {
       borderWidth: 1,
       borderColor: colors.border,
       borderRadius: 12,
-      paddingHorizontal: 10,
+      paddingHorizontal: 8,
       paddingVertical: 10,
       marginBottom: 8,
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
       backgroundColor: colors.surfaceSubtle,
     },
     taskRowDone: {
@@ -149,23 +152,6 @@ function createStyles(colors) {
     },
     emptyText: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', paddingVertical: 14 },
     footerPad: { height: 12 },
-    fabWrap: {
-      position: 'absolute',
-      right: 20,
-      bottom: 20,
-      borderRadius: 999,
-      ...cardShadow(colors, 'sm'),
-    },
-    fabBtn: {
-      width: 58,
-      height: 58,
-      borderRadius: 999,
-      backgroundColor: colors.primary,
-      alignItems: 'center',
-      justifyContent: 'center',
-      borderWidth: 1,
-      borderColor: colors.primary,
-    },
   });
 }
 
@@ -188,9 +174,18 @@ function dayStripFromSelected(selectedDateKey) {
 
 export default function TaskListScreen() {
   const navigation = useNavigation();
+  const scrollRef = useRef(null);
+  useScrollToTop(scrollRef);
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const { isPro } = useSubscription();
+
+  const scrollBottomPad = useMemo(() => {
+    const tab = tabBarHeight + 12;
+    return Math.max(insets.bottom + tab + 8, tab + 20);
+  }, [insets.bottom, tabBarHeight]);
 
   const { tasks, openAddTaskModalForDate, toggleTaskDone, deleteTask } = useTasks();
   const [selectedDateKey, setSelectedDateKey] = useState(getTodayDateKey());
@@ -212,9 +207,12 @@ export default function TaskListScreen() {
       <ScreenHero eyebrow="GÖREVLER" title="Görevler" subtitle={subtitle} titleSize={30} />
 
       <ScrollView
+        ref={scrollRef}
         style={styles.body}
-        contentContainerStyle={{ paddingBottom: Math.max(insets.bottom + 12, 24) }}
+        contentContainerStyle={{ paddingBottom: scrollBottomPad }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       >
         <View style={styles.dateCard}>
           <View style={styles.dateRow}>
@@ -263,9 +261,13 @@ export default function TaskListScreen() {
         <View style={styles.planCard}>
           <Text style={styles.planTitle}>Görev planı ekle</Text>
           <Text style={styles.planText}>
-            Seçtiğin gün için yeni görev ekle. Alttaki butonla planını hemen oluşturabilirsin.
+            Seçtiğin gün için yeni görev ekle. «Görev planı ekle» butonuyla planını oluşturabilirsin.
           </Text>
-          <PrimaryButton title="+ Görev planı ekle" onPress={() => openAddTaskModalForDate(selectedDateKey)} />
+          <PrimaryButton
+            title="+ Görev planı ekle"
+            onPress={() => openAddTaskModalForDate(selectedDateKey)}
+            mutedCta
+          />
         </View>
 
         <View style={styles.listCard}>
@@ -288,19 +290,14 @@ export default function TaskListScreen() {
               const itemId = item?.id != null ? String(item.id) : '';
               if (!itemId) return null;
               return (
-                <Pressable
-                  key={itemId}
-                  style={[styles.taskRow, item?.done && styles.taskRowDone]}
-                  onPress={() => navigation.navigate('TaskDetail', { taskId: itemId })}
-                  accessibilityRole="button"
-                  accessibilityLabel="Görev detayını aç"
-                >
+                <View key={itemId} style={[styles.taskRow, item?.done && styles.taskRowDone]}>
                   <Pressable
                     style={styles.iconBtn}
                     onPress={() => toggleTaskDone(itemId)}
                     accessibilityRole="checkbox"
                     accessibilityState={{ checked: Boolean(item?.done) }}
                     accessibilityLabel="Tamamlandı durumunu değiştir"
+                    hitSlop={8}
                   >
                     <Ionicons
                       name={item?.done ? 'checkbox' : 'square-outline'}
@@ -308,20 +305,26 @@ export default function TaskListScreen() {
                       color={item?.done ? colors.success : colors.textSecondary}
                     />
                   </Pressable>
-                  <View style={styles.taskTextWrap}>
-                    <Text style={[styles.taskTitle, item?.done && styles.taskTitleDone]} numberOfLines={1}>
+                  <Pressable
+                    style={styles.taskTextWrap}
+                    onPress={() => navigation.navigate('TaskDetail', { taskId: itemId })}
+                    accessibilityRole="button"
+                    accessibilityLabel="Görev detayını aç"
+                  >
+                    <Text style={[styles.taskTitle, item?.done && styles.taskTitleDone]} numberOfLines={2}>
                       {item?.title || 'Adsız görev'}
                     </Text>
                     <Text style={styles.taskMeta}>
                       {item?.time || '--:--'} · {item?.done ? 'Tamamlandı' : 'Tamamlanmadı'}
                     </Text>
-                  </View>
+                  </Pressable>
                   <View style={styles.rowBtns}>
                     <Pressable
                       style={styles.iconBtn}
                       onPress={() => navigation.navigate('TaskDetail', { taskId: itemId })}
                       accessibilityRole="button"
                       accessibilityLabel="Görev detayını aç"
+                      hitSlop={6}
                     >
                       <Ionicons name="chevron-forward" size={17} color={colors.primary} />
                     </Pressable>
@@ -330,28 +333,25 @@ export default function TaskListScreen() {
                       onPress={() => deleteTask(itemId)}
                       accessibilityRole="button"
                       accessibilityLabel="Sil"
+                      hitSlop={6}
                     >
                       <Ionicons name="trash-outline" size={17} color={colors.danger} />
                     </Pressable>
                   </View>
-                </Pressable>
+                </View>
               );
             })
           )}
         </View>
 
+        {!isPro && isAdsUiEnabled() ? (
+          <View style={{ marginTop: 8, marginBottom: 8 }}>
+            <AdMobBannerCard />
+          </View>
+        ) : null}
+
         <View style={styles.footerPad} />
       </ScrollView>
-      <View style={[styles.fabWrap, { bottom: Math.max(insets.bottom + 14, 24) }]}>
-        <Pressable
-          style={styles.fabBtn}
-          onPress={() => openAddTaskModalForDate(selectedDateKey)}
-          accessibilityRole="button"
-          accessibilityLabel="Hızlı görev ekleme"
-        >
-          <Ionicons name="add" size={28} color={colors.onPrimary} />
-        </Pressable>
-      </View>
     </View>
   );
 }

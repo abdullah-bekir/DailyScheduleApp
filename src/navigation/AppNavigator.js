@@ -1,99 +1,146 @@
+import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
+import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import TabBarIcon from '../components/common/TabBarIcon';
+import { useTheme } from '../context/ThemeContext';
 import HomeScreen from '../screens/HomeScreen';
+import PaywallScreen from '../screens/PaywallScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import StatsScreen from '../screens/StatsScreen';
-import TasksStackNavigator from './TasksStackNavigator';
-import { useTheme } from '../context/ThemeContext';
-import { tabBarLift } from '../theme/shadows';
+import TaskDetailScreen from '../screens/TaskDetailScreen';
+import TaskListScreen from '../screens/TaskListScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
-const tabConfig = {
-  AnaSayfa: {
-    component: HomeScreen,
-    icon: { outline: 'home-outline', filled: 'home' },
-    label: 'Ana Sayfa',
-  },
-  Gorevler: {
-    component: TasksStackNavigator,
-    icon: { outline: 'list-outline', filled: 'list' },
-    label: 'Görevler',
-  },
-  Istatistikler: {
-    component: StatsScreen,
-    icon: { outline: 'bar-chart-outline', filled: 'bar-chart' },
-    label: 'İstatistikler',
-  },
-  Ayarlar: {
-    component: SettingsScreen,
-    icon: { outline: 'settings-outline', filled: 'settings' },
-    label: 'Ayarlar',
-  },
-};
-
-export default function AppNavigator() {
+function MainTabs() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
+  const tabBarScreenOptions = useMemo(() => {
+    const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 10 : 8);
+    const row = 52;
+    return {
+      headerShown: false,
+      tabBarShowLabel: false,
+      tabBarHideOnKeyboard: true,
+      tabBarStyle: {
+        borderTopWidth: 0,
+        borderTopColor: 'transparent',
+        elevation: 0,
+        shadowOpacity: 0,
+        shadowOffset: { width: 0, height: 0 },
+        shadowRadius: 0,
+        shadowColor: 'transparent',
+        backgroundColor: colors.surface,
+        paddingTop: 10,
+        paddingBottom: bottomInset,
+        paddingHorizontal: 2,
+        height: row + 10 + bottomInset,
+      },
+    };
+  }, [colors.surface, insets.bottom]);
 
-  const navTheme = useMemo(
-    () => ({
-      ...DefaultTheme,
+  return (
+    <Tab.Navigator screenOptions={tabBarScreenOptions}>
+      <Tab.Screen
+        name="AnaSayfa"
+        component={HomeScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon
+              outline="home-outline"
+              filled="home"
+              focused={focused}
+              label="Ana sayfa"
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Gorevler"
+        component={TaskListScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon
+              outline="checkbox-outline"
+              filled="checkbox"
+              focused={focused}
+              label="Görevler"
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Istatistikler"
+        component={StatsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon
+              outline="stats-chart-outline"
+              filled="stats-chart"
+              focused={focused}
+              label="İstatistikler"
+            />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Ayarlar"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabBarIcon
+              outline="settings-outline"
+              filled="settings"
+              focused={focused}
+              label="Ayarlar"
+            />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+function RootStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Tabs" component={MainTabs} />
+      <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
+      <Stack.Screen
+        name="Paywall"
+        component={PaywallScreen}
+        options={{ presentation: 'modal', animation: 'slide_from_bottom' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+export default function AppNavigator() {
+  const { isDark, colors } = useTheme();
+
+  const navigationTheme = useMemo(() => {
+    const base = isDark ? DarkTheme : DefaultTheme;
+    return {
+      ...base,
       colors: {
-        ...DefaultTheme.colors,
-        primary: colors.primary,
+        ...base.colors,
         background: colors.background,
         card: colors.surface,
         text: colors.textPrimary,
         border: colors.border,
-        notification: colors.primary,
+        primary: colors.primary,
       },
-    }),
-    [colors],
-  );
-
-  const tabBarBottomPadding = Math.max(insets.bottom, 10);
+    };
+  }, [isDark, colors]);
 
   return (
-    <NavigationContainer theme={navTheme}>
-      <Tab.Navigator
-        detachInactiveScreens={false}
-        screenOptions={({ route }) => ({
-          headerShown: false,
-          tabBarActiveTintColor: colors.primary,
-          tabBarInactiveTintColor: colors.textTertiary,
-          tabBarHideOnKeyboard: true,
-          tabBarStyle: {
-            height: 56 + tabBarBottomPadding,
-            paddingBottom: tabBarBottomPadding,
-            paddingTop: 6,
-            borderTopWidth: 0,
-            backgroundColor: colors.surface,
-            ...tabBarLift(colors),
-          },
-          tabBarLabelStyle: {
-            fontSize: 11,
-            fontWeight: '600',
-            letterSpacing: 0.15,
-          },
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon {...tabConfig[route.name].icon} focused={focused} />
-          ),
-        })}
-      >
-        {Object.entries(tabConfig).map(([name, config]) => (
-          <Tab.Screen
-            key={name}
-            name={name}
-            component={config.component}
-            options={{ title: config.label }}
-          />
-        ))}
-      </Tab.Navigator>
+    <NavigationContainer theme={navigationTheme}>
+      <RootStack />
     </NavigationContainer>
   );
 }

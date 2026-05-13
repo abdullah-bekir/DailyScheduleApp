@@ -39,7 +39,7 @@ function createStyles(colors, variant) {
       opacity: 0.85,
     },
     track: {
-      height: isFeatured ? 12 : 10,
+      height: isFeatured ? 14 : 10,
       borderRadius: 999,
       backgroundColor: colors.calendarMuted,
       overflow: 'hidden',
@@ -47,29 +47,44 @@ function createStyles(colors, variant) {
       borderColor: colors.border,
     },
     fill: {
-      height: isFeatured ? 12 : 10,
+      height: isFeatured ? 14 : 10,
       backgroundColor: colors.primary,
       borderRadius: 999,
     },
     caption: {
       marginTop: 2,
-      fontSize: 13,
+      fontSize: 14,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      lineHeight: 21,
+    },
+    footnote: {
+      marginTop: 6,
+      fontSize: 12,
       fontWeight: '500',
-      color: colors.textSecondary,
-      lineHeight: 19,
+      color: colors.textTertiary,
+      lineHeight: 17,
     },
   });
 }
 
-export default function ProgressBar({ progress, variant = 'default', caption }) {
+export default function ProgressBar({
+  progress,
+  variant = 'default',
+  caption,
+  footnote,
+  headerTitle,
+}) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors, variant), [colors, variant]);
   const clampedProgress = Math.min(Math.max(progress, 0), 100);
+  const title =
+    headerTitle ?? (variant === 'featured' ? 'Tamamlama oranı' : 'Günlük ilerleme');
 
   return (
     <View style={styles.wrapper}>
       <View style={styles.header}>
-        <Text style={styles.title}>{variant === 'featured' ? 'İlerleme' : 'Günlük ilerleme'}</Text>
+        <Text style={styles.title}>{title}</Text>
         <View style={styles.percentWrap}>
           <Text style={styles.percentNum}>{clampedProgress}</Text>
           <Text style={styles.percentSign}>%</Text>
@@ -79,6 +94,7 @@ export default function ProgressBar({ progress, variant = 'default', caption }) 
         <View style={[styles.fill, { width: `${clampedProgress}%` }]} />
       </View>
       {caption ? <Text style={styles.caption}>{caption}</Text> : null}
+      {footnote ? <Text style={styles.footnote}>{footnote}</Text> : null}
     </View>
   );
 }

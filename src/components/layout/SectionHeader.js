@@ -13,11 +13,11 @@ function createStyles(colors, compact) {
       paddingRight: 4,
     },
     accent: {
-      width: 3,
-      height: compact ? 22 : 28,
+      width: 4,
+      height: compact ? 24 : 30,
       borderRadius: 999,
       backgroundColor: colors.primary,
-      opacity: 0.95,
+      opacity: 0.88,
     },
     block: {
       flex: 1,
@@ -26,9 +26,9 @@ function createStyles(colors, compact) {
     },
     title: {
       color: colors.textPrimary,
-      fontSize: compact ? 16 : 19,
+      fontSize: compact ? 16 : 20,
       fontWeight: '800',
-      letterSpacing: compact ? -0.35 : -0.45,
+      letterSpacing: compact ? -0.35 : -0.5,
     },
     subtitle: {
       color: colors.textSecondary,

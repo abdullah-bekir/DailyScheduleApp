@@ -1,14 +1,20 @@
-import { useFocusEffect } from '@react-navigation/native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import AdMobBannerCard from '../components/ads/AdMobBannerCard';
+import PrimaryButton from '../components/common/PrimaryButton';
 import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import SectionHeader from '../components/layout/SectionHeader';
+import ScreenHero from '../components/layout/ScreenHero';
 import TaskFilterChips from '../components/tasks/TaskFilterChips';
+import { useSubscription } from '../context/SubscriptionContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
+import { getAdsRewardBonusPoints, isAdsUiEnabled } from '../lib/ads/adsConfig';
+import { showRewardedAd } from '../lib/ads/rewardedAd';
 import { cardShadow } from '../theme/shadows';
 import { COMPLETION_WEIGHT, TIER_SIZE } from '../utils/completionTally';
 import { formatDateKeyForDisplay } from '../utils/dateKey';
@@ -40,12 +46,13 @@ function createStyles(colors, chartUi) {
     },
     body: {
       paddingHorizontal: 20,
-      gap: 14,
-      paddingBottom: 28,
+      gap: 16,
+      marginTop: -16,
+      paddingTop: 4,
     },
     card: {
       backgroundColor: colors.surface,
-      borderRadius: 20,
+      borderRadius: 22,
       borderWidth: 1,
       borderColor: colors.border,
       padding: 16,
@@ -68,7 +75,7 @@ function createStyles(colors, chartUi) {
       flexGrow: 1,
       minWidth: '28%',
       backgroundColor: colors.surfaceSubtle,
-      borderRadius: 16,
+      borderRadius: 18,
       borderWidth: 1,
       borderColor: colors.border,
       paddingVertical: 14,
@@ -199,7 +206,7 @@ function createStyles(colors, chartUi) {
     chartMiniHint: {
       fontSize: 10,
       fontWeight: '600',
-      color: colors.textTertiary,
+      color: chartUi.captionColor,
     },
     chartPlotRow: {
       flexDirection: 'row',
@@ -254,7 +261,7 @@ function createStyles(colors, chartUi) {
       paddingHorizontal: 3,
     },
     chartBarHighlight: {
-      borderRadius: 14,
+      borderRadius: 16,
       paddingHorizontal: 4,
       paddingBottom: 2,
       alignItems: 'center',
@@ -281,7 +288,7 @@ function createStyles(colors, chartUi) {
     chartBarPct: {
       fontSize: 9,
       fontWeight: '700',
-      color: colors.primary,
+      color: chartUi.barTextColor,
       fontVariant: ['tabular-nums'],
       textAlign: 'center',
     },
@@ -294,7 +301,7 @@ function createStyles(colors, chartUi) {
     chartBarFill: {
       width: '88%',
       maxWidth: 38,
-      backgroundColor: colors.primary,
+      backgroundColor: chartUi.barColor,
       borderTopLeftRadius: 10,
       borderTopRightRadius: 10,
       minHeight: 0,
@@ -304,7 +311,7 @@ function createStyles(colors, chartUi) {
     },
     chartBarFillToday: {
       opacity: 1,
-      shadowColor: colors.primary,
+      shadowColor: chartUi.barColor,
       shadowOpacity: 0.35,
       shadowRadius: 8,
       shadowOffset: { width: 0, height: 4 },
@@ -346,7 +353,7 @@ function createStyles(colors, chartUi) {
       lineHeight: 11,
     },
     chartXToday: {
-      color: colors.primary,
+      color: chartUi.barColor,
       fontWeight: '800',
     },
     chartXCaption: {
@@ -366,7 +373,7 @@ function createStyles(colors, chartUi) {
       paddingVertical: 14,
       paddingHorizontal: 16,
       paddingLeft: 14,
-      borderRadius: 16,
+      borderRadius: 18,
       backgroundColor: colors.surfaceSubtle,
       borderWidth: 1,
       borderColor: colors.border,
@@ -391,7 +398,7 @@ function createStyles(colors, chartUi) {
       borderWidth: 1,
       borderStyle: 'dashed',
       borderColor: colors.borderStrong,
-      borderRadius: 20,
+      borderRadius: 22,
       padding: 22,
       alignItems: 'center',
       gap: 10,
@@ -429,17 +436,24 @@ const CHART_SUB = {
 
 export default function StatsScreen() {
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
+  const scrollRef = useRef(null);
+  useScrollToTop(scrollRef);
+  const { isPro } = useSubscription();
   const { colors, isDark } = useTheme();
   const chartUi = useMemo(
     () =>
       isDark
         ? {
-            plotBg: '#162032',
-            plotBorder: colors.border,
-            axisColor: 'rgba(148, 163, 184, 0.45)',
-            gridColor: 'rgba(148, 163, 184, 0.11)',
-            tickColor: colors.textTertiary,
-            captionColor: colors.textSecondary,
+            // Koyu modda bile grafik alanını beyaz tut: değerler daha hızlı okunur.
+            plotBg: '#FFFFFF',
+            plotBorder: '#D4D4D8',
+            axisColor: 'rgba(15, 23, 42, 0.24)',
+            gridColor: 'rgba(15, 23, 42, 0.08)',
+            tickColor: '#475569',
+            captionColor: '#334155',
+            barColor: '#3F3F46',
+            barTextColor: '#334155',
           }
         : {
             plotBg: '#F1F5FB',
@@ -448,11 +462,42 @@ export default function StatsScreen() {
             gridColor: 'rgba(15, 23, 42, 0.06)',
             tickColor: colors.textTertiary,
             captionColor: colors.textSecondary,
+            barColor: colors.primary,
+            barTextColor: colors.primary,
           },
-    [colors.border, colors.textSecondary, colors.textTertiary, isDark],
+    [colors.border, colors.primary, colors.textSecondary, colors.textTertiary, isDark],
   );
   const styles = useMemo(() => createStyles(colors, chartUi), [colors, chartUi]);
-  const { tasks, completionTally, tasksHydrated, tasksDataReady, refreshTasksFromSupabase } = useTasks();
+  const { tasks, completionTally, tasksHydrated, tasksDataReady, refreshTasksFromSupabase, grantAdRewardBonus } =
+    useTasks();
+  const [rewardBusy, setRewardBusy] = useState(false);
+  const bonusPoints = useMemo(() => getAdsRewardBonusPoints(), []);
+
+  const onAdRewardPress = useCallback(async () => {
+    if (!isAdsUiEnabled() || isPro) return;
+    setRewardBusy(true);
+    try {
+      const r = await showRewardedAd();
+      if (r.reason === 'disabled') {
+        Alert.alert('Reklamlar kapalı', 'Açmak için EXPO_PUBLIC_ADS_UI_ENABLED=true ile derleyin.');
+        return;
+      }
+      if (r.reason === 'expo-go') {
+        Alert.alert('Expo Go', 'Ödüllü reklam için development veya release build gerekir.');
+        return;
+      }
+      if (r.earned) {
+        grantAdRewardBonus(bonusPoints);
+        Alert.alert('Teşekkürler', `+${bonusPoints} tamamlama puanı hesabına eklendi.`);
+      } else if (r.shown) {
+        Alert.alert('Bilgi', 'Reklam kapandı; ödül için tamamlanmış izlenme gerekir.');
+      } else {
+        Alert.alert('Reklam', 'Şu an yüklenemedi. Biraz sonra tekrar deneyin.');
+      }
+    } finally {
+      setRewardBusy(false);
+    }
+  }, [isPro, bonusPoints, grantAdRewardBonus]);
   const statsTasks = useMemo(() => (tasksDataReady ? tasks : []), [tasksDataReady, tasks]);
 
   useFocusEffect(
@@ -516,19 +561,28 @@ export default function StatsScreen() {
   const yTicks = useMemo(() => getYTicks(chartSeries.maxBar), [chartSeries.maxBar]);
   const xCompact = chartSeries.granularity !== 'day';
 
-  return (
-    <View style={[styles.root, { paddingTop: Math.max(insets.top, 12) }]}>
-      <ScrollView
-        contentContainerStyle={styles.body}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <SectionHeader
-          compact
-          title="İstatistikler"
-          subtitle="Özet paneller; grafik günlük, haftalık, aylık veya yıllık seçilebilir."
-        />
+  const scrollBottomPad = useMemo(() => {
+    const base = Math.max(insets.bottom + tabBarHeight + 40, tabBarHeight + 56);
+    if (isPro) return base;
+    return Math.max(insets.bottom + tabBarHeight + 40 + 88, tabBarHeight + 144);
+  }, [insets.bottom, isPro, tabBarHeight]);
 
+  return (
+    <ScrollView
+      ref={scrollRef}
+      style={styles.root}
+      contentContainerStyle={{ paddingBottom: scrollBottomPad }}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      <ScreenHero
+        eyebrow="Özet"
+        title="İstatistikler"
+        subtitle="Günlük, haftalık, aylık veya yıllık grafik; paneller aşağıda."
+        titleSize={30}
+      />
+
+      <View style={styles.body}>
         <TasksCloudLoadingBanner colors={colors} visible={tasksHydrated && !tasksDataReady} />
 
         {tasksDataReady && s.total === 0 ? (
@@ -779,7 +833,33 @@ export default function StatsScreen() {
             </View>
           </>
         ) : null}
-      </ScrollView>
-    </View>
+
+        {tasksDataReady && !isPro && isAdsUiEnabled() ? (
+          <View style={[styles.card, { marginTop: 14 }]}>
+            <Text style={styles.cardTitle}>Destek & bonus</Text>
+            <Text style={styles.hint}>
+              İsteğe bağlı ödüllü reklam: izlersen +{bonusPoints} tamamlama puanı kazanırsın. Tam ekran geçiş
+              reklamları ise en az birkaç dakika arayla ve yalnızca bazı geçişlerde gösterilir; sık sık çıkmaz.
+            </Text>
+            <View style={{ marginTop: 12 }}>
+              <PrimaryButton
+                title={rewardBusy ? 'Açılıyor…' : `Reklam izle (+${bonusPoints} puan)`}
+                onPress={onAdRewardPress}
+                disabled={rewardBusy}
+                variant="outline"
+                mutedCta
+              />
+            </View>
+          </View>
+        ) : null}
+
+        {tasksDataReady && !isPro && isAdsUiEnabled() ? (
+          <View style={{ marginTop: 16 }}>
+            <AdMobBannerCard />
+          </View>
+        ) : null}
+
+      </View>
+    </ScrollView>
   );
 }

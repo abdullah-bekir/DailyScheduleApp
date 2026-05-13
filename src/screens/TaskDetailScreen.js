@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,9 +12,9 @@ import { formatDateKeyForDisplay } from '../utils/dateKey';
 function createStyles(colors) {
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
-    body: { flex: 1, marginTop: -18, paddingHorizontal: 20, gap: 12 },
+    body: { flex: 1, marginTop: -18, paddingHorizontal: 20, gap: 14 },
     card: {
-      borderRadius: 16,
+      borderRadius: 18,
       borderWidth: 1,
       borderColor: colors.border,
       backgroundColor: colors.surface,
@@ -86,6 +87,8 @@ function createStyles(colors) {
 }
 
 export default function TaskDetailScreen({ route }) {
+  const navigation = useNavigation();
+  const scrollRef = useRef(null);
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
@@ -93,6 +96,27 @@ export default function TaskDetailScreen({ route }) {
   const taskId = route?.params?.taskId ? String(route.params.taskId) : '';
   const task = useMemo(() => tasks.find((t) => String(t.id) === taskId), [tasks, taskId]);
   const [attachmentDraft, setAttachmentDraft] = useState('');
+
+  /** Yığın kökü değilken useScrollToTop devreye girmez; sekme tekrarında yine yukarı kaydır */
+  useEffect(() => {
+    const tabNavigations = [];
+    let nav = navigation;
+    while (nav) {
+      if (nav.getState?.()?.type === 'tab') tabNavigations.push(nav);
+      nav = nav.getParent();
+    }
+    if (tabNavigations.length === 0) return undefined;
+    const unsubs = tabNavigations.map((tab) =>
+      tab.addListener('tabPress', (e) => {
+        requestAnimationFrame(() => {
+          if (navigation.isFocused() && !e.defaultPrevented) {
+            scrollRef.current?.scrollTo?.({ y: 0, animated: true });
+          }
+        });
+      }),
+    );
+    return () => unsubs.forEach((u) => u());
+  }, [navigation]);
 
   if (!task) {
     return (
@@ -111,6 +135,7 @@ export default function TaskDetailScreen({ route }) {
     <View style={styles.root}>
       <ScreenHero eyebrow="GÖREV" title="Görev detayı" subtitle={task.title} titleSize={28} />
       <ScrollView
+        ref={scrollRef}
         style={styles.body}
         contentContainerStyle={{ paddingBottom: Math.max(insets.bottom + 12, 24) }}
         showsVerticalScrollIndicator={false}

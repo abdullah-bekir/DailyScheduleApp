@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { pushProfilePatch } from '../lib/profileRemote';
 import { darkPalette, lightPalette } from '../theme/palettes';
@@ -6,59 +6,54 @@ import { loadThemeMode, saveThemeMode } from '../utils/appSettingsStorage';
 
 const ThemeContext = createContext(null);
 
+function normalizeRemoteMode(mode) {
+  if (mode === true || mode === 'dark') return 'dark';
+  return 'light';
+}
+
 export function ThemeProvider({ children }) {
-  const [mode, setMode] = useState('light');
-  const [ready, setReady] = useState(false);
+  const [themeMode, setThemeModeState] = useState('light');
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const stored = await loadThemeMode();
-      if (!cancelled) {
-        setMode(stored);
-        setReady(true);
+    let active = true;
+    loadThemeMode().then((m) => {
+      if (active) {
+        setThemeModeState(normalizeRemoteMode(m));
+        setHydrated(true);
       }
-    })();
+    });
     return () => {
-      cancelled = true;
+      active = false;
     };
   }, []);
 
-  const applyRemoteTheme = useCallback((next) => {
-    if (next !== 'light' && next !== 'dark') return;
-    setMode(next);
-    saveThemeMode(next);
-  }, []);
+  const isDark = themeMode === 'dark';
+  const colors = useMemo(() => (isDark ? darkPalette : lightPalette), [isDark]);
 
-  const setThemeMode = useCallback((next) => {
-    if (next !== 'light' && next !== 'dark') return;
-    setMode(next);
+  const setThemeMode = useCallback((mode) => {
+    const next = normalizeRemoteMode(mode);
+    setThemeModeState(next);
     saveThemeMode(next);
     pushProfilePatch({ theme_mode: next });
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setMode((m) => {
-      const next = m === 'dark' ? 'light' : 'dark';
-      saveThemeMode(next);
-      pushProfilePatch({ theme_mode: next });
-      return next;
-    });
+  const applyRemoteTheme = useCallback((mode) => {
+    if (mode !== 'dark' && mode !== 'light') return;
+    setThemeModeState(mode);
+    saveThemeMode(mode);
   }, []);
-
-  const colors = useMemo(() => (mode === 'dark' ? darkPalette : lightPalette), [mode]);
 
   const value = useMemo(
     () => ({
-      mode,
+      themeMode,
+      isDark,
       colors,
-      isDark: mode === 'dark',
-      themeReady: ready,
       setThemeMode,
-      toggleTheme,
       applyRemoteTheme,
+      hydrated,
     }),
-    [mode, colors, ready, setThemeMode, toggleTheme, applyRemoteTheme],
+    [themeMode, isDark, colors, setThemeMode, applyRemoteTheme, hydrated],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

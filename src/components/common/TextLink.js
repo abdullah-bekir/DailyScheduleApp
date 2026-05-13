@@ -5,6 +5,11 @@ import { useTheme } from '../../context/ThemeContext';
 
 function createStyles(colors) {
   return StyleSheet.create({
+    hitArea: {
+      paddingVertical: 6,
+      paddingHorizontal: 2,
+      alignSelf: 'flex-start',
+    },
     label: {
       fontSize: 14,
       fontWeight: '700',
@@ -24,7 +29,11 @@ export default function TextLink({ title, onPress }) {
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
-    <Pressable onPress={onPress} hitSlop={10} style={({ pressed }) => pressed && styles.pressed}>
+    <Pressable
+      onPress={onPress}
+      hitSlop={12}
+      style={({ pressed }) => [styles.hitArea, pressed && styles.pressed]}
+    >
       <Text style={styles.label}>{title}</Text>
     </Pressable>
   );

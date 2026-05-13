@@ -1,6 +1,7 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { useFocusEffect, useNavigation, useScrollToTop } from '@react-navigation/native';
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PrimaryButton from '../components/common/PrimaryButton';
@@ -8,12 +9,22 @@ import ScreenHero from '../components/layout/ScreenHero';
 import SectionHeader from '../components/layout/SectionHeader';
 import SettingsToggleRow from '../components/settings/SettingsToggleRow';
 import { useSupabaseSession } from '../context/SupabaseContext';
+import { useSubscription } from '../context/SubscriptionContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
+import { showRewardedAd } from '../lib/ads/rewardedAd';
+import { showRewardedInterstitialAd } from '../lib/ads/rewardedInterstitialAd';
 import { fetchProfile, pushProfilePatch } from '../lib/profileRemote';
 import { coerceBoolean } from '../lib/taskRemote';
 import { cardShadow } from '../theme/shadows';
-import { loadNotificationsEnabled, saveNotificationsEnabled } from '../utils/appSettingsStorage';
+import {
+  DAILY_PLAN_GOAL_OPTIONS,
+  DEFAULT_DAILY_PLAN_GOAL,
+  loadDailyPlanGoal,
+  loadNotificationsEnabled,
+  saveDailyPlanGoal,
+  saveNotificationsEnabled,
+} from '../utils/appSettingsStorage';
 
 function createStyles(colors) {
   return StyleSheet.create({
@@ -23,13 +34,13 @@ function createStyles(colors) {
     },
     body: {
       paddingHorizontal: 20,
-      gap: 22,
-      marginTop: -18,
+      gap: 20,
+      marginTop: -20,
       paddingBottom: 36,
     },
     sectionCard: {
       backgroundColor: colors.surface,
-      borderRadius: 22,
+      borderRadius: 24,
       borderWidth: 1,
       borderColor: colors.border,
       paddingHorizontal: 14,
@@ -44,48 +55,59 @@ function createStyles(colors) {
       lineHeight: 21,
       paddingHorizontal: 2,
     },
-    footerNoteWrap: {
-      marginTop: 8,
-      paddingVertical: 16,
+    goalChipRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      paddingVertical: 8,
+      paddingHorizontal: 2,
+      marginBottom: 8,
+    },
+    goalChip: {
       paddingHorizontal: 14,
-      borderRadius: 18,
+      paddingVertical: 10,
+      borderRadius: 12,
       borderWidth: 1,
-      borderStyle: 'dashed',
       borderColor: colors.borderStrong,
       backgroundColor: colors.surfaceSubtle,
-      alignItems: 'center',
     },
-    footerNote: {
-      fontSize: 12,
-      fontWeight: '500',
-      color: colors.textSecondary,
-      textAlign: 'center',
-      lineHeight: 18,
+    goalChipSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryLight,
+    },
+    goalChipText: {
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    goalChipTextSelected: {
+      color: colors.primary,
     },
   });
 }
 
 export default function SettingsScreen() {
+  const navigation = useNavigation();
+  const scrollRef = useRef(null);
+  useScrollToTop(scrollRef);
   const insets = useSafeAreaInsets();
+  const tabBarHeight = useBottomTabBarHeight();
   const { colors, isDark, setThemeMode, applyRemoteTheme } = useTheme();
+  const { isPro } = useSubscription();
   const { supabaseConfigured, authReady, userId } = useSupabaseSession();
   const { tasksDataReady, applyRemoteCompletionTally, resetAllTaskData } = useTasks();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [notificationsOn, setNotificationsOn] = useState(true);
-
-  const heroSubtitle = useMemo(
-    () =>
-      supabaseConfigured
-        ? 'Tercihler cihazda saklanır; Supabase profiles ile senkron. Bu ekrana gelince sunucudan güncellenir.'
-        : 'Tercihler cihazda saklanır. Bulut için EXPO_PUBLIC_SUPABASE_URL ve ANON_KEY ekleyin.',
-    [supabaseConfigured],
-  );
+  const [dailyPlanGoal, setDailyPlanGoal] = useState(DEFAULT_DAILY_PLAN_GOAL);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
       loadNotificationsEnabled().then((v) => {
         if (active) setNotificationsOn(v);
+      });
+      loadDailyPlanGoal().then((g) => {
+        if (active) setDailyPlanGoal(g);
       });
       return () => {
         active = false;
@@ -143,15 +165,20 @@ export default function SettingsScreen() {
   }, [resetAllTaskData]);
 
   return (
-    <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
-      <ScreenHero
-        eyebrow="Tercihler"
-        title="Ayarlar"
-        subtitle={heroSubtitle}
-        titleSize={30}
-      />
+    <ScrollView
+      ref={scrollRef}
+      style={styles.screen}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      <ScreenHero eyebrow="Tercihler" title="Ayarlar" titleSize={30} />
 
-      <View style={[styles.body, { paddingBottom: Math.max(insets.bottom, 24) }]}>
+      <View
+        style={[
+          styles.body,
+          { paddingBottom: Math.max(insets.bottom + tabBarHeight + 40, tabBarHeight + 56) },
+        ]}
+      >
         <SectionHeader title="Görünüm" subtitle="Okuma konforu ve tema seçimi." />
         <View style={styles.sectionCard}>
           <SettingsToggleRow
@@ -172,17 +199,103 @@ export default function SettingsScreen() {
           />
         </View>
 
-        <SectionHeader title="Premium" subtitle="Yakında genişleyecek özellikler." />
+        <SectionHeader
+          title="Ana sayfa ilerlemesi"
+          subtitle="«Bugünün özeti» çubuğunun plan yarısı; günlük rutinine uygun sayıyı seç."
+        />
         <View style={styles.sectionCard}>
           <Text style={styles.premiumHint}>
-            Özel temalar, yapay zekâ ile günlük plan ve gelişmiş istatistikler yakında burada olacak.
+            Kaç görevi “bir günlük plan dolusu” sayacağını seçersin. Küçük sayı (ör. 3) çubuğu hızlı doldurur; büyük sayı
+            (ör. 10) daha uzun günlük plan için uygundur.
+          </Text>
+          <View style={styles.goalChipRow}>
+            {DAILY_PLAN_GOAL_OPTIONS.map((n) => {
+              const selected = dailyPlanGoal === n;
+              return (
+                <Pressable
+                  key={n}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={`Günlük plan ölçüsü ${n} görev`}
+                  style={[styles.goalChip, selected && styles.goalChipSelected]}
+                  onPress={async () => {
+                    setDailyPlanGoal(n);
+                    await saveDailyPlanGoal(n);
+                  }}
+                >
+                  <Text style={[styles.goalChipText, selected && styles.goalChipTextSelected]}>{n}</Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </View>
+
+        <SectionHeader title="Premium" subtitle="Abonelik RevenueCat üzerinden; entitlement ile reklamlar kapatılır." />
+        <View style={styles.sectionCard}>
+          <Text style={styles.premiumHint}>
+            {isPro
+              ? 'Premium aktif: tam ekran reklamlar ve app open kapalı; ödüllü birimler yine Ayarlar’dan test edilebilir.'
+              : 'Paywall üzerinden aylık/yıllık plan; mağaza ve RevenueCat panelinde ürünleri tanımlamanız gerekir. Reklamları göstermek için .env içinde EXPO_PUBLIC_ADS_UI_ENABLED=true kullanın.'}
           </Text>
           <PrimaryButton
-            title="Premium’a geç (yakında)"
+            title={isPro ? 'Premium aktif' : 'Premium’a geç'}
             variant="outline"
-            onPress={() =>
-              Alert.alert('Premium', 'Bu özellik henüz hazır değil; uygulama geliştikçe buradan erişilecek.')
-            }
+            onPress={() => navigation.navigate('Paywall')}
+            mutedCta
+          />
+        </View>
+
+        <SectionHeader title="Reklam testleri" subtitle="Tam ekran, ödüllü ve ödüllü interstitial — EXPO_PUBLIC_ADS_UI_ENABLED=true iken gösterilir." />
+        <View style={styles.sectionCard}>
+          <Text style={styles.premiumHint}>
+            Varsayılan olarak reklamlar kapalıdır. Göstermek için EXPO_PUBLIC_ADS_UI_ENABLED=true ve native build gerekir; Expo Go’da çalışmaz.
+          </Text>
+          <PrimaryButton
+            title="Ödüllü reklamı dene"
+            variant="outline"
+            mutedCta
+            onPress={async () => {
+              const r = await showRewardedAd();
+              if (r.reason === 'disabled') {
+                Alert.alert('Reklamlar kapalı', 'Göstermek için EXPO_PUBLIC_ADS_UI_ENABLED=true ayarlayıp uygulamayı yeniden derleyin.');
+                return;
+              }
+              if (r.reason === 'expo-go') {
+                Alert.alert('Expo Go', 'Ödüllü reklam için development veya release build kullanın.');
+                return;
+              }
+              if (r.earned) {
+                Alert.alert('Teşekkürler', 'Ödül kazanıldı (test ortamında örnek mesaj).');
+              } else if (r.shown) {
+                Alert.alert('Bilgi', 'Reklam kapandı; ödül için tamamlanmış izlenme gerekir.');
+              } else {
+                Alert.alert('Reklam', 'Yüklenemedi veya gösterilemedi; internet ve birim ID’yi kontrol edin.');
+              }
+            }}
+          />
+          <View style={{ height: 12 }} />
+          <PrimaryButton
+            title="Ödüllü tam ekran (rewarded interstitial) dene"
+            variant="outline"
+            mutedCta
+            onPress={async () => {
+              const r = await showRewardedInterstitialAd();
+              if (r.reason === 'disabled') {
+                Alert.alert('Reklamlar kapalı', 'Göstermek için EXPO_PUBLIC_ADS_UI_ENABLED=true ayarlayıp uygulamayı yeniden derleyin.');
+                return;
+              }
+              if (r.reason === 'expo-go') {
+                Alert.alert('Expo Go', 'Bu format için development veya release build kullanın.');
+                return;
+              }
+              if (r.earned) {
+                Alert.alert('Teşekkürler', 'Ödül kazanıldı (test).');
+              } else if (r.shown) {
+                Alert.alert('Bilgi', 'Reklam kapandı.');
+              } else {
+                Alert.alert('Reklam', 'Yüklenemedi veya gösterilemedi.');
+              }
+            }}
           />
         </View>
 
@@ -191,11 +304,7 @@ export default function SettingsScreen() {
           <Text style={styles.premiumHint}>
             Sorun giderme için görevler, tamamlanma puanı ve yerel önbellek tek dokunuşla temizlenir.
           </Text>
-          <PrimaryButton title="Tüm veriyi sıfırla" variant="outline" onPress={onResetData} />
-        </View>
-
-        <View style={styles.footerNoteWrap}>
-          <Text style={styles.footerNote}>DailyscheduleApp · planına uygun sade yapı</Text>
+          <PrimaryButton title="Tüm veriyi sıfırla" variant="outline" onPress={onResetData} mutedCta />
         </View>
       </View>
     </ScrollView>
