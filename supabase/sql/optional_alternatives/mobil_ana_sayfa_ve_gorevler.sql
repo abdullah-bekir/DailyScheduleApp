@@ -19,7 +19,7 @@
 --     → aynı tablo; insert/update/delete istemci tarafında Supabase SDK ile.
 --
 -- Diğer tablolar: İstatistik/puan için profiles.completion_tally kullanılır;
--- profiles kurulumu için supabase/schema.sql veya mevcut ana şemanız yeterli.
+-- profiles kurulumu için supabase/sql/schema.sql veya mevcut ana şemanız yeterli.
 -- =============================================================================
 
 -- updated_at — tetikleyici (profiles tablosuyla paylaşılabilir)

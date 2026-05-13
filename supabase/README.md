@@ -2,6 +2,17 @@
 
 UI değiştirmeden backend’i devreye almak için sıra:
 
+## Klasör yapısı (`supabase/sql/`)
+
+| Klasör | İçerik |
+|--------|--------|
+| `sql/schema.sql` | İlk kurulum: tam şema (`profiles`, `tasks`, RLS, tetikleyiciler). |
+| `sql/upgrades/` | Mevcut projeye **üst üste** uygulanan yükseltme betikleri. |
+| `sql/optional_alternatives/` | Farklı senaryolar (yalnızca görevler tablosu vb.) — **birini** seçin, hepsini değil. |
+| `sql/settings/` | Ayarlar ekranı ile ilgili ek SQL. |
+
+Dosya sırası özeti: kökteki `ROLLOUT_ORDER.txt`.
+
 ## 1) Dashboard ayarları
 
 1. **Project Settings → API:** `Project URL` ve `anon` `public` anahtarını kopyala.
@@ -23,9 +34,7 @@ Sunucuyu yeniden başlat: `npx expo start` (gerekirse `-c`).
 
 ## 3) Veritabanı şeması (SQL Editor)
 
-**İlk kurulum (önerilen):** `schema.sql` dosyasının **tamamını** tek seferde çalıştır → `profiles`, `tasks`, tetikleyiciler, RLS.
-
-Dosya sırası özeti: `ROLLOUT_ORDER.txt`.
+**İlk kurulum (önerilen):** `sql/schema.sql` dosyasının **tamamını** tek seferde çalıştır → `profiles`, `tasks`, tetikleyiciler, RLS.
 
 ## 4) Kod tarafı (zaten bağlı)
 
@@ -36,4 +45,4 @@ Dosya sırası özeti: `ROLLOUT_ORDER.txt`.
 | Görevler | `src/context/TasksContext.js` |
 | Profil senkron | `src/components/sync/RemoteProfileSync.js`, `src/lib/profileRemote.js` |
 
-Detaylı mimari: depo kökündeki `backend-plan`.
+Detaylı mimari: depo kökündeki `backend-plan` (veya `docs/` altı plan dosyaları).

@@ -1,7 +1,7 @@
 /**
  * Görevler yığını (TasksStackNavigator): TaskList + TaskDetail + SQL yardım ekranı.
  * Uygulama ham SQL çalıştırmaz; Supabase SQL Editor’de kopyala-yapıştır için.
- * Kolonlar: supabase/schema.sql ve lib/taskRemote.js ile uyumludur.
+ * Kolonlar: supabase/sql/schema.sql ve lib/taskRemote.js ile uyumludur.
  */
 
 export const TASKS_STACK_OVERVIEW_SQL = `-- =============================================================================
