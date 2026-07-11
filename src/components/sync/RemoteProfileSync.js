@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useSupabaseSession } from '../../context/SupabaseContext';
 import { useTasks } from '../../context/TasksContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLocale } from '../../context/LocaleContext';
 import { coerceBoolean } from '../../lib/taskRemote';
 import { fetchProfile } from '../../lib/profileRemote';
 import { saveNotificationsEnabled } from '../../utils/appSettingsStorage';
@@ -13,6 +14,7 @@ import { saveNotificationsEnabled } from '../../utils/appSettingsStorage';
  */
 export default function RemoteProfileSync() {
   const { authReady, userId, supabaseConfigured } = useSupabaseSession();
+  const { applyRemoteLanguage } = useLocale();
   const { applyRemoteTheme } = useTheme();
   const { tasksDataReady, applyRemoteCompletionTally } = useTasks();
 
@@ -29,6 +31,7 @@ export default function RemoteProfileSync() {
       applyRemoteTheme(profile.theme_mode);
       await saveNotificationsEnabled(coerceBoolean(profile.notifications_enabled, true));
       applyRemoteCompletionTally(profile.completion_tally);
+      if (profile.language_code) await applyRemoteLanguage(profile.language_code);
     })();
     return () => {
       cancelled = true;
@@ -40,6 +43,7 @@ export default function RemoteProfileSync() {
     tasksDataReady,
     applyRemoteTheme,
     applyRemoteCompletionTally,
+    applyRemoteLanguage,
   ]);
 
   return null;

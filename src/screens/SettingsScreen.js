@@ -1,19 +1,21 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { useFocusEffect, useNavigation, useScrollToTop } from '@react-navigation/native';
+import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PrimaryButton from '../components/common/PrimaryButton';
 import ScreenHero from '../components/layout/ScreenHero';
-import SectionHeader from '../components/layout/SectionHeader';
+import SettingsSectionCard from '../components/settings/SettingsSectionCard';
 import SettingsToggleRow from '../components/settings/SettingsToggleRow';
+import { useLocale } from '../context/LocaleContext';
 import { useSupabaseSession } from '../context/SupabaseContext';
-import { useSubscription } from '../context/SubscriptionContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
-import { fetchProfile, pushProfilePatch } from '../lib/profileRemote';
-import { coerceBoolean } from '../lib/taskRemote';
+import { pushProfilePatch } from '../lib/profileRemote';
 import { cardShadow } from '../theme/shadows';
 import {
   DAILY_PLAN_GOAL_OPTIONS,
@@ -24,7 +26,7 @@ import {
   saveNotificationsEnabled,
 } from '../utils/appSettingsStorage';
 
-function createStyles(colors) {
+function createStyles(colors, isDark) {
   return StyleSheet.create({
     screen: {
       flex: 1,
@@ -32,71 +34,217 @@ function createStyles(colors) {
     },
     body: {
       paddingHorizontal: 20,
-      gap: 20,
-      marginTop: -20,
-      paddingBottom: 36,
+      gap: 18,
+      marginTop: -18,
     },
-    sectionCard: {
+    overviewCard: {
       backgroundColor: colors.surface,
-      borderRadius: 24,
+      borderRadius: 22,
       borderWidth: 1,
       borderColor: colors.border,
-      paddingHorizontal: 14,
-      paddingVertical: 6,
+      padding: 18,
+      gap: 14,
       ...cardShadow(colors),
     },
-    premiumHint: {
-      fontSize: 14,
+    overviewTitle: {
+      fontSize: 13,
+      fontWeight: '800',
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+      color: colors.textSecondary,
+    },
+    overviewPills: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    pill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 999,
+      backgroundColor: colors.surfaceSubtle,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    pillText: {
+      fontSize: 13,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    goalHint: {
+      fontSize: 13,
       fontWeight: '500',
       color: colors.textSecondary,
-      marginBottom: 14,
-      lineHeight: 21,
-      paddingHorizontal: 2,
+      lineHeight: 19,
+    },
+    goalPreview: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      padding: 12,
+      borderRadius: 14,
+      backgroundColor: colors.surfaceSubtle,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    goalPreviewText: {
+      flex: 1,
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      lineHeight: 18,
     },
     goalChipRow: {
       flexDirection: 'row',
       flexWrap: 'wrap',
-      gap: 8,
-      paddingVertical: 8,
-      paddingHorizontal: 2,
-      marginBottom: 8,
+      gap: 10,
+      justifyContent: 'space-between',
     },
     goalChip: {
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-      borderRadius: 12,
-      borderWidth: 1,
+      width: '31%',
+      minWidth: 88,
+      paddingVertical: 12,
+      borderRadius: 14,
+      borderWidth: 1.5,
       borderColor: colors.borderStrong,
       backgroundColor: colors.surfaceSubtle,
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'row',
+      gap: 6,
     },
     goalChipSelected: {
       borderColor: colors.primary,
-      backgroundColor: colors.primaryLight,
+      backgroundColor: isDark ? colors.primaryLight : colors.primary,
     },
     goalChipText: {
-      fontSize: 15,
-      fontWeight: '700',
+      fontSize: 16,
+      fontWeight: '800',
       color: colors.textPrimary,
     },
     goalChipTextSelected: {
-      color: colors.primary,
+      color: isDark ? colors.primary : colors.onPrimary,
+    },
+    dangerNote: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: colors.danger,
+      lineHeight: 19,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: colors.border,
+      marginVertical: 2,
+    },
+    syncRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      padding: 12,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceSubtle,
+    },
+    syncDot: {
+      width: 10,
+      height: 10,
+      borderRadius: 999,
+    },
+    syncTextBlock: {
+      flex: 1,
+      gap: 2,
+      minWidth: 0,
+    },
+    syncTitle: {
+      fontSize: 14,
+      fontWeight: '800',
+      color: colors.textPrimary,
+    },
+    syncSub: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: colors.textSecondary,
+      lineHeight: 17,
+    },
+    versionText: {
+      fontSize: 12,
+      fontWeight: '600',
+      color: colors.textTertiary,
+      textAlign: 'center',
+      marginTop: 4,
     },
   });
 }
 
 export default function SettingsScreen() {
-  const navigation = useNavigation();
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
+  const { t } = useTranslation();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const { colors, isDark, setThemeMode, applyRemoteTheme } = useTheme();
-  const { isPro } = useSubscription();
+  const { colors, isDark, setThemeMode } = useTheme();
+  const { language, setLanguage, supportedLanguages } = useLocale();
   const { supabaseConfigured, authReady, userId } = useSupabaseSession();
-  const { tasksDataReady, applyRemoteCompletionTally, resetAllTaskData } = useTasks();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData } = useTasks();
+  const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const [notificationsOn, setNotificationsOn] = useState(true);
   const [dailyPlanGoal, setDailyPlanGoal] = useState(DEFAULT_DAILY_PLAN_GOAL);
+  const [syncBusy, setSyncBusy] = useState(false);
+
+  const appVersion = Constants.expoConfig?.version ?? Constants.manifest?.version ?? '—';
+
+  const syncStatus = useMemo(() => {
+    if (!supabaseConfigured) {
+      return {
+        tone: colors.textSecondary,
+        label: t('settings.syncLocal'),
+        detail: t('settings.syncLocalDetail'),
+        icon: 'phone-portrait-outline',
+      };
+    }
+    if (!authReady) {
+      return {
+        tone: colors.warning,
+        label: t('settings.syncConnecting'),
+        detail: t('settings.syncConnectingDetail'),
+        icon: 'cloud-outline',
+      };
+    }
+    if (!userId) {
+      return {
+        tone: colors.warning,
+        label: t('settings.syncNoSession'),
+        detail: t('settings.syncNoSessionDetail'),
+        icon: 'cloud-offline-outline',
+      };
+    }
+    if (!tasksDataReady) {
+      return {
+        tone: colors.primary,
+        label: t('settings.syncProgress'),
+        detail: t('settings.syncProgressDetail'),
+        icon: 'sync-outline',
+      };
+    }
+    if (tasksSyncError) {
+      return {
+        tone: colors.danger,
+        label: t('settings.syncError'),
+        detail: tasksSyncError,
+        icon: 'alert-circle-outline',
+      };
+    }
+    return {
+      tone: colors.success,
+      label: t('settings.syncActive'),
+      detail: t('settings.syncActiveDetail'),
+      icon: 'cloud-done-outline',
+    };
+  }, [supabaseConfigured, authReady, userId, tasksDataReady, tasksSyncError, colors, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -113,46 +261,35 @@ export default function SettingsScreen() {
     }, []),
   );
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!supabaseConfigured || !authReady || !userId || !tasksDataReady) return undefined;
-      let cancelled = false;
-      (async () => {
-        const profile = await fetchProfile();
-        if (cancelled || !profile) return;
-        applyRemoteTheme(profile.theme_mode);
-        const notifyOn = coerceBoolean(profile.notifications_enabled, true);
-        await saveNotificationsEnabled(notifyOn);
-        setNotificationsOn(notifyOn);
-        applyRemoteCompletionTally(profile.completion_tally);
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }, [
-      supabaseConfigured,
-      authReady,
-      userId,
-      tasksDataReady,
-      applyRemoteTheme,
-      applyRemoteCompletionTally,
-    ]),
-  );
-
   const onNotificationsChange = async (value) => {
     setNotificationsOn(value);
     await saveNotificationsEnabled(value);
     pushProfilePatch({ notifications_enabled: value });
   };
 
+  const onSelectGoal = async (n) => {
+    setDailyPlanGoal(n);
+    await saveDailyPlanGoal(n);
+  };
+
+  const onManualSync = useCallback(async () => {
+    if (!supabaseConfigured || !userId || syncBusy) return;
+    setSyncBusy(true);
+    try {
+      await retryCloudSync();
+    } finally {
+      setSyncBusy(false);
+    }
+  }, [supabaseConfigured, userId, syncBusy, retryCloudSync]);
+
   const onResetData = useCallback(() => {
     Alert.alert(
-      'Veriyi sıfırla',
-      'Tüm görevler ve istatistik puanı temizlenecek. Bu işlem geri alınamaz.',
+      t('settings.resetTitle'),
+      t('settings.resetBody'),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Sıfırla',
+          text: t('settings.resetConfirm'),
           style: 'destructive',
           onPress: () => {
             resetAllTaskData();
@@ -160,7 +297,9 @@ export default function SettingsScreen() {
         },
       ],
     );
-  }, [resetAllTaskData]);
+  }, [resetAllTaskData, t]);
+
+  const scrollBottom = Math.max(insets.bottom + tabBarHeight + 40, tabBarHeight + 56);
 
   return (
     <ScrollView
@@ -169,43 +308,96 @@ export default function SettingsScreen() {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <ScreenHero eyebrow="Tercihler" title="Ayarlar" titleSize={30} />
+      <ScreenHero
+        eyebrow={t('settings.eyebrow')}
+        title={t('settings.title')}
+        subtitle={t('settings.subtitle')}
+        titleSize={30}
+      />
 
-      <View
-        style={[
-          styles.body,
-          { paddingBottom: Math.max(insets.bottom + tabBarHeight + 40, tabBarHeight + 56) },
-        ]}
-      >
-        <SectionHeader title="Görünüm" subtitle="Okuma konforu ve tema seçimi." />
-        <View style={styles.sectionCard}>
+      <View style={[styles.body, { paddingBottom: scrollBottom }]}>
+        <View style={styles.overviewCard}>
+          <Text style={styles.overviewTitle}>{t('settings.overview')}</Text>
+          <View style={styles.overviewPills}>
+            <View style={styles.pill}>
+              <Ionicons name="flag-outline" size={16} color={colors.primary} />
+              <Text style={styles.pillText}>{t('settings.goalPill', { goal: dailyPlanGoal })}</Text>
+            </View>
+            <View style={styles.pill}>
+              <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={16} color={colors.primary} />
+              <Text style={styles.pillText}>{isDark ? t('settings.darkTheme') : t('settings.lightTheme')}</Text>
+            </View>
+            <View style={styles.pill}>
+              <Ionicons name={notificationsOn ? 'notifications' : 'notifications-off-outline'} size={16} color={colors.primary} />
+              <Text style={styles.pillText}>{notificationsOn ? t('settings.notifyOn') : t('settings.notifyOff')}</Text>
+            </View>
+          </View>
+        </View>
+
+        <SettingsSectionCard
+          icon="cloud-outline"
+          title={t('settings.syncTitle')}
+          subtitle={t('settings.syncSubtitle')}
+        >
+          <View style={styles.syncRow}>
+            <Ionicons name={syncStatus.icon} size={22} color={syncStatus.tone} />
+            <View style={styles.syncTextBlock}>
+              <Text style={styles.syncTitle}>{syncStatus.label}</Text>
+              <Text style={styles.syncSub}>{syncStatus.detail}</Text>
+            </View>
+            <View style={[styles.syncDot, { backgroundColor: syncStatus.tone }]} />
+          </View>
+          {supabaseConfigured && userId ? (
+            <PrimaryButton
+              title={syncBusy ? t('settings.syncProgress') : t('settings.syncNow')}
+              variant="outline"
+              onPress={onManualSync}
+              disabled={syncBusy}
+              mutedCta
+            />
+          ) : null}
+        </SettingsSectionCard>
+
+        <SettingsSectionCard
+          icon="color-palette-outline"
+          title={t('settings.appearanceTitle')}
+          subtitle={t('settings.appearanceSub')}
+        >
           <SettingsToggleRow
-            title="Koyu tema"
-            subtitle="Karanlık arka plan ile göz yorgunluğunu azalt."
+            icon="moon-outline"
+            title={t('settings.darkMode')}
+            subtitle={t('settings.darkModeSub')}
             value={isDark}
             onValueChange={(v) => setThemeMode(v ? 'dark' : 'light')}
           />
-        </View>
+        </SettingsSectionCard>
 
-        <SectionHeader title="Bildirimler" subtitle="Hatırlatıcılar için hazırlık." />
-        <View style={styles.sectionCard}>
+        <SettingsSectionCard
+          icon="notifications-outline"
+          title={t('settings.notifyTitle')}
+          subtitle={t('settings.notifySub')}
+        >
           <SettingsToggleRow
-            title="Hatırlatıcı bildirimleri"
-            subtitle="Şimdilik yalnızca tercih olarak kaydedilir; gerçek bildirim izni sonraki sürümde eklenecek."
+            icon="alarm-outline"
+            title={t('settings.notifyToggle')}
+            subtitle={t('settings.notifyToggleSub')}
             value={notificationsOn}
             onValueChange={onNotificationsChange}
           />
-        </View>
+        </SettingsSectionCard>
 
-        <SectionHeader
-          title="Ana sayfa ilerlemesi"
-          subtitle="«Bugünün özeti» çubuğunun plan yarısı; günlük rutinine uygun sayıyı seç."
-        />
-        <View style={styles.sectionCard}>
-          <Text style={styles.premiumHint}>
-            Kaç görevi “bir günlük plan dolusu” sayacağını seçersin. Küçük sayı (ör. 3) plan kısmını hızlı doldurur; 15–20
-            yoğun günler için uygundur (çubuk aynı görev sayısında daha yavaş ilerler).
-          </Text>
+        <SettingsSectionCard
+          icon="trending-up-outline"
+          title={t('settings.goalTitle')}
+          subtitle={t('settings.goalSub')}
+        >
+          <Text style={styles.goalHint}>{t('settings.goalHint')}</Text>
+          <View style={styles.goalPreview}>
+            <Ionicons name="analytics-outline" size={22} color={colors.primary} />
+            <Text style={styles.goalPreviewText}>
+              {t('settings.goalPreview', { goal: dailyPlanGoal })}
+            </Text>
+          </View>
           <View style={styles.goalChipRow}>
             {DAILY_PLAN_GOAL_OPTIONS.map((n) => {
               const selected = dailyPlanGoal === n;
@@ -214,42 +406,70 @@ export default function SettingsScreen() {
                   key={n}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
-                  accessibilityLabel={`Günlük plan ölçüsü ${n} görev`}
+                  accessibilityLabel={t('settings.goalA11y', { goal: n })}
                   style={[styles.goalChip, selected && styles.goalChipSelected]}
-                  onPress={async () => {
-                    setDailyPlanGoal(n);
-                    await saveDailyPlanGoal(n);
-                  }}
+                  onPress={() => onSelectGoal(n)}
                 >
+                  {selected ? (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={18}
+                      color={isDark ? colors.primary : colors.onPrimary}
+                    />
+                  ) : null}
                   <Text style={[styles.goalChipText, selected && styles.goalChipTextSelected]}>{n}</Text>
                 </Pressable>
               );
             })}
           </View>
-        </View>
+        </SettingsSectionCard>
 
-        <SectionHeader title="Premium" subtitle="Abonelik RevenueCat üzerinden; entitlement ile reklamlar kapatılır." />
-        <View style={styles.sectionCard}>
-          <Text style={styles.premiumHint}>
-            {isPro
-              ? 'Premium aktif: tam ekran reklamlar ve app open kapalı.'
-              : 'Paywall üzerinden aylık/yıllık plan; mağaza ve RevenueCat panelinde ürünleri tanımlamanız gerekir. Reklamları göstermek için .env içinde EXPO_PUBLIC_ADS_UI_ENABLED=true kullanın.'}
-          </Text>
-          <PrimaryButton
-            title={isPro ? 'Premium aktif' : 'Premium’a geç'}
-            variant="outline"
-            onPress={() => navigation.navigate('Paywall')}
-            mutedCta
-          />
-        </View>
+        <SettingsSectionCard
+          icon="language-outline"
+          title={t('settings.languageTitle')}
+          subtitle={t('settings.languageSub')}
+        >
+          <Text style={styles.goalHint}>{t('settings.languageHint')}</Text>
+          <View style={styles.goalChipRow}>
+            {supportedLanguages.map(({ code }) => {
+              const selected = language === code;
+              return (
+                <Pressable
+                  key={code}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                  accessibilityLabel={t(`languages.${code}`)}
+                  style={[styles.goalChip, selected && styles.goalChipSelected]}
+                  onPress={() => setLanguage(code)}
+                >
+                  {selected ? (
+                    <Ionicons
+                      name="checkmark-circle"
+                      size={18}
+                      color={isDark ? colors.primary : colors.onPrimary}
+                    />
+                  ) : null}
+                  <Text style={[styles.goalChipText, selected && styles.goalChipTextSelected]} numberOfLines={1}>
+                    {t(`languages.${code}`)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </SettingsSectionCard>
 
-        <SectionHeader title="Veri yönetimi" subtitle="Uygulama verisini temizleme araçları." />
-        <View style={styles.sectionCard}>
-          <Text style={styles.premiumHint}>
-            Sorun giderme için görevler, tamamlanma puanı ve yerel önbellek tek dokunuşla temizlenir.
-          </Text>
-          <PrimaryButton title="Tüm veriyi sıfırla" variant="outline" onPress={onResetData} mutedCta />
-        </View>
+        <SettingsSectionCard
+          icon="trash-outline"
+          title={t('settings.dataTitle')}
+          subtitle={t('settings.dataSub')}
+          tone="danger"
+        >
+          <Text style={styles.dangerNote}>{t('settings.dataWarning')}</Text>
+          <View style={styles.divider} />
+          <PrimaryButton title={t('settings.resetBtn')} variant="outline" onPress={onResetData} />
+        </SettingsSectionCard>
+
+        <Text style={styles.versionText}>{t('settings.version', { version: appVersion })}</Text>
       </View>
     </ScrollView>
   );

@@ -19,27 +19,38 @@ export function addDaysToDateKey(dateKey, deltaDays) {
   return getTodayDateKey(dt);
 }
 
-/** Ana sayfa gibi yerler için kısa etiket (ör. Cuma, 1 May) */
-export function formatTodayCompactLabel(d = new Date()) {
-  const s = d.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long' });
+function resolveLocale(locale) {
+  return locale && typeof locale === 'string' ? locale : 'tr-TR';
+}
+
+/** Ana sayfa gibi yerler için kısa etiket */
+export function formatTodayCompactLabel(d = new Date(), locale = 'tr-TR') {
+  const loc = resolveLocale(locale);
+  const s = d.toLocaleDateString(loc, { weekday: 'long', day: 'numeric', month: 'long' });
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-/** Üst şerit: SALI, 9 MAYIS 2026 (tr-TR büyük harf) */
-export function formatTodayHeaderCapsLine(d = new Date()) {
-  const weekday = d.toLocaleDateString('tr-TR', { weekday: 'long' }).toLocaleUpperCase('tr-TR');
+/** Üst şerit: büyük harf tarih satırı */
+export function formatTodayHeaderCapsLine(d = new Date(), locale = 'tr-TR') {
+  const loc = resolveLocale(locale);
+  const weekday = d.toLocaleDateString(loc, { weekday: 'long' }).toLocaleUpperCase(loc);
   const day = d.getDate();
-  const month = d.toLocaleDateString('tr-TR', { month: 'long' }).toLocaleUpperCase('tr-TR');
+  const month = d.toLocaleDateString(loc, { month: 'long' }).toLocaleUpperCase(loc);
   const year = d.getFullYear();
   return `${weekday}, ${day} ${month} ${year}`;
 }
 
-/** tr-TR uzun tarih etiketi */
-export function formatDateKeyForDisplay(dateKey) {
+/** Uzun tarih etiketi */
+export function formatDateKeyForDisplay(dateKey, locale = 'tr-TR') {
   if (!isValidDateKey(dateKey)) return '';
   const [y, m, d] = dateKey.split('-').map(Number);
   const dt = new Date(y, m - 1, d);
-  return dt.toLocaleDateString('tr-TR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return dt.toLocaleDateString(resolveLocale(locale), {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
 }
 
 /** Pazartesi başlangıçlı haftanın 7 günü (Date nesneleri, saat sıfır) */

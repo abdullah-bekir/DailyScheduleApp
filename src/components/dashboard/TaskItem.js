@@ -1,5 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
@@ -110,40 +112,47 @@ function createStyles(colors) {
 const hintHitSlop = { top: 12, bottom: 12, left: 10, right: 10 };
 
 export default function TaskItem({ task }) {
+  const navigation = useNavigation();
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { toggleTaskDone, deleteTask } = useTasks();
 
   const taskId = task?.id != null ? String(task.id).trim() : '';
-  const titlePreview = task?.title?.trim() ? task.title.trim() : 'Bu görev';
+  const titlePreview = task?.title?.trim() ? task.title.trim() : t('common.thisTask');
 
   const confirmDelete = useCallback(() => {
     if (!taskId) return;
     Alert.alert(
-      'Görevi sil',
-      `“${titlePreview}” kalıcı olarak silinsin mi?`,
+      t('tasks.deleteTitle'),
+      t('tasks.deleteBody', { title: titlePreview }),
       [
-        { text: 'İptal', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Sil',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: () => deleteTask(taskId),
         },
       ],
     );
-  }, [deleteTask, taskId, titlePreview]);
+  }, [deleteTask, taskId, titlePreview, t]);
 
   const onToggle = useCallback(() => {
     if (!taskId) return;
     toggleTaskDone(taskId);
   }, [toggleTaskDone, taskId]);
 
+  const openDetail = useCallback(() => {
+    if (!taskId) return;
+    navigation.navigate('TaskDetail', { taskId });
+  }, [navigation, taskId]);
+
   if (!task || !taskId) {
     return null;
   }
 
   const stripeColor = priorityColor(colors, task.priority);
-  const leftLabel = task.done ? 'Geri' : 'Tamamla';
+  const leftLabel = task.done ? t('tasks.undo') : t('tasks.complete');
 
   return (
     <View style={styles.wrap} accessible={false}>
@@ -154,22 +163,27 @@ export default function TaskItem({ task }) {
           hitSlop={hintHitSlop}
           onPress={onToggle}
           accessibilityRole="button"
-          accessibilityLabel={task.done ? 'Geri al' : 'Tamamla'}
+          accessibilityLabel={task.done ? t('tasks.undo') : t('tasks.complete')}
         >
           <Ionicons name="checkmark-circle-outline" size={22} color={colors.success} />
           <Text style={[styles.actionLabel, { color: colors.success }]} numberOfLines={2}>
             {leftLabel}
           </Text>
         </Pressable>
-        <View style={styles.info}>
+        <Pressable
+          style={styles.info}
+          onPress={openDetail}
+          accessibilityRole="button"
+          accessibilityLabel={t('tasks.openDetail')}
+        >
           <Text style={[styles.title, task.done && styles.titleDone]} numberOfLines={2}>
             {task.title}
           </Text>
           <Text style={styles.time}>{task.time}</Text>
-        </View>
+        </Pressable>
         <View style={[styles.statusBadge, task.done ? styles.doneBadge : styles.pendingBadge]}>
           <Text style={[styles.statusText, task.done ? styles.doneText : styles.pendingText]}>
-            {task.done ? 'Tamamlandı' : 'Bekliyor'}
+            {task.done ? t('common.completed') : t('common.pending')}
           </Text>
         </View>
         <Pressable
@@ -177,11 +191,11 @@ export default function TaskItem({ task }) {
           hitSlop={hintHitSlop}
           onPress={confirmDelete}
           accessibilityRole="button"
-          accessibilityLabel="Sil"
+          accessibilityLabel={t('common.delete')}
         >
           <Ionicons name="trash-outline" size={22} color={colors.danger} />
           <Text style={[styles.actionLabel, { color: colors.danger }]} numberOfLines={2}>
-            Sil
+            {t('common.delete')}
           </Text>
         </Pressable>
       </View>

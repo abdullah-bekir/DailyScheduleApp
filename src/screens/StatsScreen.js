@@ -1,6 +1,7 @@
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import AdMobBannerCard from '../components/ads/AdMobBannerCard';
@@ -10,6 +11,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import ScreenHero from '../components/layout/ScreenHero';
 import TaskFilterChips from '../components/tasks/TaskFilterChips';
+import { useLocale } from '../context/LocaleContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
@@ -420,21 +422,30 @@ function createStyles(colors, chartUi) {
   });
 }
 
-const CHART_HEADLINE = {
-  day: 'Günlük tamamlanan dağılımı',
-  week: 'Haftalık tamamlanan dağılımı',
-  month: 'Aylık tamamlanan dağılımı',
-  year: 'Yıllık tamamlanan dağılımı',
+const CHART_HEADLINE_KEY = {
+  day: 'stats.chartDay',
+  week: 'stats.chartWeek',
+  month: 'stats.chartMonth',
+  year: 'stats.chartYear',
 };
 
-const CHART_SUB = {
-  day: 'Son 7 günde her gün: tamamlanan / günün görevi ve tamamlama yüzdesi',
-  week: 'Son 8 haftada (Pzt–Paz): haftalık toplamlar ve haftalık tamamlama yüzdesi',
-  month: 'Son 6 ayda: aylık toplamlar ve o ayın tamamlama yüzdesi',
-  year: 'Son 5 yılda: yıllık toplamlar ve o yılın tamamlama yüzdesi',
+const CHART_SUB_KEY = {
+  day: 'stats.chartSubDay',
+  week: 'stats.chartSubWeek',
+  month: 'stats.chartSubMonth',
+  year: 'stats.chartSubYear',
+};
+
+const CHART_GRANULARITY_KEY = {
+  day: 'stats.granDay',
+  week: 'stats.granWeek',
+  month: 'stats.granMonth',
+  year: 'stats.granYear',
 };
 
 export default function StatsScreen() {
+  const { t } = useTranslation();
+  const { dateLocale } = useLocale();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const scrollRef = useRef(null);
@@ -468,9 +479,10 @@ export default function StatsScreen() {
     [colors.border, colors.primary, colors.textSecondary, colors.textTertiary, isDark],
   );
   const styles = useMemo(() => createStyles(colors, chartUi), [colors, chartUi]);
-  const { tasks, completionTally, tasksHydrated, tasksDataReady, refreshTasksFromSupabase, grantAdRewardBonus } =
+  const { tasks, completionTally, tasksHydrated, tasksDataReady, tasksSyncError, refreshTasksFromSupabase, retryCloudSync, grantAdRewardBonus } =
     useTasks();
   const [rewardBusy, setRewardBusy] = useState(false);
+  const [syncRetryBusy, setSyncRetryBusy] = useState(false);
   const bonusPoints = useMemo(() => getAdsRewardBonusPoints(), []);
 
   const onAdRewardPress = useCallback(async () => {
@@ -479,25 +491,35 @@ export default function StatsScreen() {
     try {
       const r = await showRewardedAd();
       if (r.reason === 'disabled') {
-        Alert.alert('Reklamlar kapalı', 'Açmak için EXPO_PUBLIC_ADS_UI_ENABLED=true ile derleyin.');
+        Alert.alert(t('ads.disabled'), t('ads.disabledHint'));
         return;
       }
       if (r.reason === 'expo-go') {
-        Alert.alert('Expo Go', 'Ödüllü reklam için development veya release build gerekir.');
+        Alert.alert(t('ads.expoGo'), t('ads.expoGoHint'));
         return;
       }
       if (r.earned) {
         grantAdRewardBonus(bonusPoints);
-        Alert.alert('Teşekkürler', `+${bonusPoints} tamamlama puanı hesabına eklendi.`);
+        Alert.alert(t('common.thanks'), t('ads.accountPoints', { points: bonusPoints }));
       } else if (r.shown) {
-        Alert.alert('Bilgi', 'Reklam kapandı; ödül için tamamlanmış izlenme gerekir.');
+        Alert.alert(t('common.info'), t('ads.needComplete'));
       } else {
-        Alert.alert('Reklam', 'Şu an yüklenemedi. Biraz sonra tekrar deneyin.');
+        Alert.alert(t('tabs.home'), t('ads.retryLater'));
       }
     } finally {
       setRewardBusy(false);
     }
-  }, [isPro, bonusPoints, grantAdRewardBonus]);
+  }, [isPro, bonusPoints, grantAdRewardBonus, t]);
+
+  const onRetrySync = useCallback(async () => {
+    setSyncRetryBusy(true);
+    try {
+      await retryCloudSync();
+    } finally {
+      setSyncRetryBusy(false);
+    }
+  }, [retryCloudSync]);
+
   const statsTasks = useMemo(() => (tasksDataReady ? tasks : []), [tasksDataReady, tasks]);
 
   useFocusEffect(
@@ -552,11 +574,11 @@ export default function StatsScreen() {
 
   const s = useMemo(() => buildTaskStats(statsTasks), [statsTasks]);
   const chartSeries = useMemo(() => {
-    if (granularity === 'week') return buildWeeklySeries(statsTasks, 8);
-    if (granularity === 'month') return buildMonthlySeries(statsTasks, 6);
-    if (granularity === 'year') return buildYearlySeries(statsTasks, 5);
-    return buildDailySeries(statsTasks, 7);
-  }, [statsTasks, granularity]);
+    if (granularity === 'week') return buildWeeklySeries(statsTasks, 8, dateLocale);
+    if (granularity === 'month') return buildMonthlySeries(statsTasks, 6, dateLocale);
+    if (granularity === 'year') return buildYearlySeries(statsTasks, 5, dateLocale);
+    return buildDailySeries(statsTasks, 7, dateLocale);
+  }, [statsTasks, granularity, dateLocale]);
 
   const yTicks = useMemo(() => getYTicks(chartSeries.maxBar), [chartSeries.maxBar]);
   const xCompact = chartSeries.granularity !== 'day';
@@ -576,55 +598,59 @@ export default function StatsScreen() {
       keyboardShouldPersistTaps="handled"
     >
       <ScreenHero
-        eyebrow="Özet"
-        title="İstatistikler"
-        subtitle="Günlük, haftalık, aylık veya yıllık grafik; paneller aşağıda."
+        eyebrow={t('stats.eyebrow')}
+        title={t('stats.title')}
+        subtitle={t('stats.subtitle')}
         titleSize={30}
       />
 
       <View style={styles.body}>
-        <TasksCloudLoadingBanner colors={colors} visible={tasksHydrated && !tasksDataReady} />
+        <TasksCloudLoadingBanner
+          colors={colors}
+          visible={tasksHydrated && !tasksDataReady}
+          error={tasksDataReady ? tasksSyncError : null}
+          onRetry={onRetrySync}
+          retryBusy={syncRetryBusy}
+        />
 
         {tasksDataReady && s.total === 0 ? (
           <View style={styles.emptyBox}>
-            <Text style={styles.emptyTitle}>Henüz veri yok</Text>
-            <Text style={styles.emptyText}>
-              Görev ekledikçe kartlar ve grafik otomatik güncellenir.
-            </Text>
+            <Text style={styles.emptyTitle}>{t('stats.emptyTitle')}</Text>
+            <Text style={styles.emptyText}>{t('stats.emptyBody')}</Text>
           </View>
         ) : null}
         {s.total > 0 ? (
           <>
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Genel</Text>
+              <Text style={styles.cardTitle}>{t('stats.general')}</Text>
               <View style={styles.statRow}>
                 <View style={styles.statPill}>
                   <Text style={styles.statValue}>{s.total}</Text>
-                  <Text style={styles.statLabel}>Toplam görev</Text>
+                  <Text style={styles.statLabel}>{t('common.total')}</Text>
                 </View>
                 <View style={styles.statPill}>
                   <Text style={styles.statValue}>{s.done}</Text>
-                  <Text style={styles.statLabel}>Tamamlanan</Text>
+                  <Text style={styles.statLabel}>{t('common.completed')}</Text>
                 </View>
                 <View style={styles.statPill}>
                   <Text style={styles.statValue}>{s.pending}</Text>
-                  <Text style={styles.statLabel}>Bekleyen</Text>
+                  <Text style={styles.statLabel}>{t('stats.pending')}</Text>
                 </View>
                 <View style={styles.statPill}>
                   <Text style={styles.statValue}>{displayTally}</Text>
-                  <Text style={styles.statLabel}>Tamamlama puanı</Text>
+                  <Text style={styles.statLabel}>{t('stats.completionPoints')}</Text>
                 </View>
               </View>
 
               <View style={styles.tierBlock}>
                 <View style={styles.tierRow}>
-                  <Text style={styles.tierLevel}>Kademe {tierMeta.level}</Text>
+                  <Text style={styles.tierLevel}>{t('stats.tier', { level: tierMeta.level })}</Text>
                   <Text style={styles.tierSub} numberOfLines={2}>
-                    Bu basamakta {tierMeta.within}/{TIER_SIZE} · Sonraki kademeye{' '}
-                    <Text style={{ fontWeight: '800', color: colors.textPrimary }}>
-                      {tierMeta.toNext}
-                    </Text>{' '}
-                    puan
+                    {t('stats.tierSub', {
+                      within: tierMeta.within,
+                      size: TIER_SIZE,
+                      toNext: tierMeta.toNext,
+                    })}
                   </Text>
                 </View>
                 <View style={styles.tierTrack}>
@@ -633,64 +659,67 @@ export default function StatsScreen() {
               </View>
 
               <Text style={styles.hint}>
-                Tamamlama oranı{' '}
-                <Text style={{ fontWeight: '800', color: colors.primary }}>%{s.rate}</Text>
-                {' · '}
-                Görevi her tamamladığında puan eklenir (yüksek +{COMPLETION_WEIGHT.high}, orta +
-                {COMPLETION_WEIGHT.medium}, düşük +{COMPLETION_WEIGHT.low}). Puan göstergesi artışları
-                basamak basamak sayılır; çubuk her {TIER_SIZE} puanda bir üst kademeye döner.
+                {t('stats.rateHint', {
+                  rate: s.rate,
+                  high: COMPLETION_WEIGHT.high,
+                  medium: COMPLETION_WEIGHT.medium,
+                  low: COMPLETION_WEIGHT.low,
+                  size: TIER_SIZE,
+                })}
               </Text>
             </View>
 
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Bugün ve hafta</Text>
+              <Text style={styles.cardTitle}>{t('stats.todayWeek')}</Text>
               <View style={styles.statRow}>
                 <View style={styles.statPill}>
                   <Text style={styles.statValue}>
                     {s.todayDone}/{s.todayTotal || 0}
                   </Text>
-                  <Text style={styles.statLabel}>Bugün</Text>
+                  <Text style={styles.statLabel}>{t('common.today')}</Text>
                 </View>
                 <View style={styles.statPill}>
                   <Text style={styles.statValue}>
                     {s.weekDone}/{s.weekTotal || 0}
                   </Text>
-                  <Text style={styles.statLabel}>Hafta (Pzt–Paz)</Text>
+                  <Text style={styles.statLabel}>{t('stats.weekLabel')}</Text>
                 </View>
               </View>
-              <Text style={styles.hint}>{formatDateKeyForDisplay(s.todayKey)}</Text>
+              <Text style={styles.hint}>{formatDateKeyForDisplay(s.todayKey, dateLocale)}</Text>
             </View>
 
             <View style={styles.card}>
               <View style={styles.chartCardHeader}>
                 <View style={styles.chartBadge}>
-                  <Text style={styles.chartBadgeText}>{chartSeries.badgeLabel}</Text>
+                  <Text style={styles.chartBadgeText}>
+                    {chartSeries.points.length} {t(CHART_GRANULARITY_KEY[chartSeries.granularity])}
+                  </Text>
                 </View>
                 <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={styles.chartHeadline}>{CHART_HEADLINE[chartSeries.granularity]}</Text>
-                  <Text style={styles.chartSub}>{CHART_SUB[chartSeries.granularity]}</Text>
+                  <Text style={styles.chartHeadline}>{t(CHART_HEADLINE_KEY[chartSeries.granularity])}</Text>
+                  <Text style={styles.chartSub}>{t(CHART_SUB_KEY[chartSeries.granularity])}</Text>
                 </View>
               </View>
 
               <View style={styles.chartGranularity}>
-                <Text style={styles.chartGranularityLabel}>Aralık</Text>
+                <Text style={styles.chartGranularityLabel}>{t('stats.range')}</Text>
                 <TaskFilterChips
                   compact
                   value={granularity}
                   onChange={setGranularity}
                   options={[
-                    { id: 'day', label: 'Günlük' },
-                    { id: 'week', label: 'Haftalık' },
-                    { id: 'month', label: 'Aylık' },
-                    { id: 'year', label: 'Yıllık' },
+                    { id: 'day', label: t('stats.granDay') },
+                    { id: 'week', label: t('stats.granWeek') },
+                    { id: 'month', label: t('stats.granMonth') },
+                    { id: 'year', label: t('stats.granYear') },
                   ]}
                 />
               </View>
 
               <View style={styles.chartWell}>
                 <View style={styles.chartMetaRow}>
-                  <Text style={styles.chartYCaption}>Tamamlanan (adet)</Text>
-                  <Text style={styles.chartMiniHint}>{chartSeries.hintScale}</Text>
+                  <Text style={styles.chartYCaption}>{t('stats.yAxis')}</Text>
+                  <Text style={styles.chartMiniHint}>{t(CHART_SUB_KEY[chartSeries.granularity])}</Text>
                 </View>
 
                 <View style={styles.chartPlotRow}>
@@ -798,34 +827,35 @@ export default function StatsScreen() {
                           ]}
                           numberOfLines={2}
                         >
-                          {pt.labelSecondary}
+                          {pt.labelSecondary ||
+                            (chartSeries.granularity === 'year' ? t('stats.chartYearSecondary') : '')}
                         </Text>
                       </View>
                     );
                   })}
                 </View>
-                <Text style={styles.chartXCaption}>{chartSeries.captionFoot}</Text>
+                <Text style={styles.chartXCaption}>{t('stats.chartCaption')}</Text>
               </View>
             </View>
 
             <View style={styles.card}>
-              <Text style={styles.cardTitle}>Öncelik</Text>
+              <Text style={styles.cardTitle}>{t('stats.priority')}</Text>
               <View style={styles.priorityWrap}>
                 <View style={[styles.priorityRow, { borderLeftColor: colors.danger }]}>
                   <View style={styles.priorityMid}>
-                    <Text style={styles.priorityLabel}>Yüksek</Text>
+                    <Text style={styles.priorityLabel}>{t('priority.high')}</Text>
                   </View>
                   <Text style={styles.priorityCount}>{s.priorityCounts.high}</Text>
                 </View>
                 <View style={[styles.priorityRow, { borderLeftColor: colors.warning }]}>
                   <View style={styles.priorityMid}>
-                    <Text style={styles.priorityLabel}>Orta</Text>
+                    <Text style={styles.priorityLabel}>{t('priority.medium')}</Text>
                   </View>
                   <Text style={styles.priorityCount}>{s.priorityCounts.medium}</Text>
                 </View>
                 <View style={[styles.priorityRow, { borderLeftColor: colors.success }]}>
                   <View style={styles.priorityMid}>
-                    <Text style={styles.priorityLabel}>Düşük</Text>
+                    <Text style={styles.priorityLabel}>{t('priority.low')}</Text>
                   </View>
                   <Text style={styles.priorityCount}>{s.priorityCounts.low}</Text>
                 </View>
@@ -836,14 +866,11 @@ export default function StatsScreen() {
 
         {tasksDataReady && !isPro && isAdsUiEnabled() ? (
           <View style={[styles.card, { marginTop: 14 }]}>
-            <Text style={styles.cardTitle}>Destek & bonus</Text>
-            <Text style={styles.hint}>
-              İsteğe bağlı ödüllü reklam: izlersen +{bonusPoints} tamamlama puanı kazanırsın. Tam ekran geçiş
-              reklamları ise en az birkaç dakika arayla ve yalnızca bazı geçişlerde gösterilir; sık sık çıkmaz.
-            </Text>
+            <Text style={styles.cardTitle}>{t('stats.supportTitle')}</Text>
+            <Text style={styles.hint}>{t('stats.supportBody', { points: bonusPoints })}</Text>
             <View style={{ marginTop: 12 }}>
               <PrimaryButton
-                title={rewardBusy ? 'Açılıyor…' : `Reklam izle (+${bonusPoints} puan)`}
+                title={rewardBusy ? t('common.opening') : t('stats.watchAd', { points: bonusPoints })}
                 onPress={onAdRewardPress}
                 disabled={rewardBusy}
                 variant="outline"

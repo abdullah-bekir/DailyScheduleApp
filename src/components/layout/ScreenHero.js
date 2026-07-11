@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import AppBrandMark from '../brand/AppBrandMark';
 import { useTheme } from '../../context/ThemeContext';
 import { cardShadow } from '../../theme/shadows';
 
@@ -110,6 +111,19 @@ function createGreetingStyles() {
       lineHeight: 22,
       letterSpacing: -0.1,
     },
+    brandRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 12,
+    },
+    brandLabel: {
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 1.4,
+      color: GREETING.title,
+      opacity: 0.92,
+    },
   });
 }
 
@@ -124,6 +138,10 @@ export default function ScreenHero({
   subtitle,
   titleSize = 32,
   dateLine,
+  /** variant=greeting: üstte mini Planly logosu */
+  showBrandMark = false,
+  /** Üstte ScreenBackBar varsa çift safe-area boşluğunu önler */
+  compactTop = false,
 }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -139,6 +157,12 @@ export default function ScreenHero({
 
     return (
       <View style={[gStyles.shell, { paddingTop: padTop, backgroundColor: bandBg }]}>
+        {showBrandMark ? (
+          <View style={gStyles.brandRow}>
+            <AppBrandMark size={34} />
+            <Text style={gStyles.brandLabel}>PLANLY</Text>
+          </View>
+        ) : null}
         {dateLine ? (
           <Text style={gStyles.dateLine} numberOfLines={2}>
             {dateLine}
@@ -152,8 +176,10 @@ export default function ScreenHero({
     );
   }
 
+  const defaultPadTop = compactTop ? 4 : Math.max(insets.top, 12) + 10;
+
   return (
-    <View style={[styles.shell, { paddingTop: Math.max(insets.top, 12) + 10 }]}>
+    <View style={[styles.shell, { paddingTop: defaultPadTop }]}>
       <View style={styles.inner}>
         <View style={styles.accent} />
         <View style={styles.textCol}>

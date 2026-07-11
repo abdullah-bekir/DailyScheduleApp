@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
+import { useLocale } from '../../context/LocaleContext';
 import { useTheme } from '../../context/ThemeContext';
 import { getMotivationQuotesForStats } from '../../utils/dailyMotivation';
 
@@ -91,18 +93,20 @@ function createStyles(colors) {
 }
 
 export default function MotivationQuoteBrowser({ totalToday, remainingToday }) {
+  const { t } = useTranslation();
+  const { language } = useLocale();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   const quotes = useMemo(
-    () => getMotivationQuotesForStats({ total: totalToday, remaining: remainingToday }),
-    [totalToday, remainingToday],
+    () => getMotivationQuotesForStats({ total: totalToday, remaining: remainingToday }, language),
+    [language, totalToday, remainingToday],
   );
 
   const quotesLenRef = useRef(quotes.length);
   quotesLenRef.current = quotes.length;
 
-  const segmentKey = `${totalToday}-${remainingToday}`;
+  const segmentKey = `${language}-${totalToday}-${remainingToday}`;
 
   const [index, setIndex] = useState(0);
 
@@ -137,14 +141,14 @@ export default function MotivationQuoteBrowser({ totalToday, remainingToday }) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.label}>Bugünün motivasyonu</Text>
+      <Text style={styles.label}>{t('motivation.label')}</Text>
 
       <View style={styles.navRow}>
         <Pressable
           style={styles.navArrow}
           onPress={goPrev}
           accessibilityRole="button"
-          accessibilityLabel="Önceki motivasyon sözü"
+          accessibilityLabel={t('motivation.prev')}
         >
           <Ionicons name="chevron-back" size={20} color={colors.primary} />
         </Pressable>
@@ -163,7 +167,7 @@ export default function MotivationQuoteBrowser({ totalToday, remainingToday }) {
           style={styles.navArrow}
           onPress={goNext}
           accessibilityRole="button"
-          accessibilityLabel="Sonraki motivasyon sözü"
+          accessibilityLabel={t('motivation.next')}
         >
           <Ionicons name="chevron-forward" size={20} color={colors.primary} />
         </Pressable>

@@ -1,13 +1,8 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../context/ThemeContext';
-
-const DEFAULT_OPTIONS = [
-  { id: 'all', label: 'Tümü' },
-  { id: 'active', label: 'Bekleyen' },
-  { id: 'done', label: 'Tamamlanan' },
-];
 
 function createStyles(colors, compact) {
   return StyleSheet.create({
@@ -40,13 +35,23 @@ function createStyles(colors, compact) {
   });
 }
 
-export default function TaskFilterChips({ value, onChange, options = DEFAULT_OPTIONS, compact = false }) {
+export default function TaskFilterChips({ value, onChange, options, compact = false }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors, compact), [colors, compact]);
+  const defaultOptions = useMemo(
+    () => [
+      { id: 'all', label: t('filter.all') },
+      { id: 'active', label: t('filter.pending') },
+      { id: 'done', label: t('filter.completed') },
+    ],
+    [t],
+  );
+  const resolvedOptions = options ?? defaultOptions;
 
   return (
     <View style={styles.row}>
-      {options.map((opt) => {
+      {resolvedOptions.map((opt) => {
         const selected = opt.id === value;
         return (
           <Pressable

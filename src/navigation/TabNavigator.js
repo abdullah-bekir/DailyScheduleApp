@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import TabBarIcon from '../components/common/TabBarIcon';
@@ -16,30 +17,27 @@ const tabConfig = {
   AnaSayfa: {
     component: HomeScreen,
     icon: { outline: 'home-outline', filled: 'home' },
-    label: 'Ana Sayfa',
-    navLabel: 'Anasayfa',
+    labelKey: 'tabs.home',
   },
   Gorevler: {
     component: TasksStackNavigator,
     icon: { outline: 'list-outline', filled: 'list' },
-    label: 'Görevler',
-    navLabel: 'Görevler',
+    labelKey: 'tabs.tasks',
   },
   Istatistikler: {
     component: StatsScreen,
     icon: { outline: 'bar-chart-outline', filled: 'bar-chart' },
-    label: 'İstatistikler',
-    navLabel: 'İstatistikler',
+    labelKey: 'tabs.stats',
   },
   Ayarlar: {
     component: SettingsScreen,
     icon: { outline: 'settings-outline', filled: 'settings' },
-    label: 'Ayarlar',
-    navLabel: 'Ayarlar',
+    labelKey: 'tabs.settings',
   },
 };
 
 export default function TabNavigator() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -73,16 +71,16 @@ export default function TabNavigator() {
           paddingTop: 0,
         },
         tabBarIcon: ({ focused }) => (
-          <TabBarIcon {...tabConfig[route.name].icon} focused={focused} label={tabConfig[route.name].navLabel} />
+          <TabBarIcon {...tabConfig[route.name].icon} focused={focused} label={t(tabConfig[route.name].labelKey)} />
         ),
       }),
-    [colors, tabBarBottomInset],
+    [colors, tabBarBottomInset, t],
   );
 
   return (
     <Tab.Navigator detachInactiveScreens={false} screenOptions={tabScreenOptions}>
       {Object.entries(tabConfig).map(([name, config]) => (
-        <Tab.Screen key={name} name={name} component={config.component} options={{ title: config.label }} />
+        <Tab.Screen key={name} name={name} component={config.component} options={{ title: t(config.labelKey) }} />
       ))}
     </Tab.Navigator>
   );

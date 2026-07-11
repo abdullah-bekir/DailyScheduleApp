@@ -2,14 +2,16 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useLocale } from '../../context/LocaleContext';
 import { useTheme } from '../../context/ThemeContext';
 import { cardShadow } from '../../theme/shadows';
 
-function createStyles(colors, variant, compact) {
+function createStyles(colors, variant, compact, isRtl) {
   const rich = variant === 'rich';
   return StyleSheet.create({
     card: {
       flexDirection: 'row',
+      direction: isRtl ? 'rtl' : 'ltr',
       alignItems: 'center',
       gap: compact ? 9 : rich ? 14 : 12,
       backgroundColor: colors.surface,
@@ -91,6 +93,7 @@ function createStyles(colors, variant, compact) {
 
 export default function DashboardPreviewCard({
   icon,
+  iconName,
   title,
   subtitle,
   onPress,
@@ -100,16 +103,26 @@ export default function DashboardPreviewCard({
   compact = false,
 }) {
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors, variant, compact), [colors, variant, compact]);
-  const rich = variant === 'rich';
-
-  const iconEl = rich || compact ? (
-    <View style={styles.iconBadge}>
-      <Text style={styles.icon}>{icon}</Text>
-    </View>
-  ) : (
-    <Text style={styles.icon}>{icon}</Text>
+  const { isRtl } = useLocale();
+  const styles = useMemo(
+    () => createStyles(colors, variant, compact, isRtl),
+    [colors, variant, compact, isRtl],
   );
+  const rich = variant === 'rich';
+  const iconSize = compact ? 20 : rich ? 24 : 22;
+
+  const iconContent = iconName ? (
+    <Ionicons name={iconName} size={iconSize} color={colors.primary} />
+  ) : icon ? (
+    <Text style={styles.icon}>{icon}</Text>
+  ) : null;
+
+  const iconEl =
+    rich || compact ? (
+      <View style={styles.iconBadge}>{iconContent}</View>
+    ) : (
+      iconContent
+    );
 
   const inner = (
     <>
@@ -133,7 +146,11 @@ export default function DashboardPreviewCard({
       </View>
       {!disabled ? (
         <View style={styles.chevronWrap}>
-          <Ionicons name="chevron-forward" size={compact ? 18 : 22} color={colors.primary} />
+          <Ionicons
+            name={isRtl ? 'chevron-back' : 'chevron-forward'}
+            size={compact ? 18 : 22}
+            color={colors.primary}
+          />
         </View>
       ) : null}
     </>

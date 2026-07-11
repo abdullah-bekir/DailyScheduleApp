@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { useTheme } from '../../context/ThemeContext';
 
@@ -76,11 +77,12 @@ export default function ProgressBar({
   footnote,
   headerTitle,
 }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors, variant), [colors, variant]);
   const clampedProgress = Math.min(Math.max(progress, 0), 100);
   const title =
-    headerTitle ?? (variant === 'featured' ? 'Tamamlama oranı' : 'Günlük ilerleme');
+    headerTitle ?? (variant === 'featured' ? t('home.progressTitle') : t('tasks.dayProgress'));
 
   return (
     <View style={styles.wrapper}>

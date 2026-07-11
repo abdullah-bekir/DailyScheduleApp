@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useTranslation } from 'react-i18next';
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -14,6 +16,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useLocale } from '../../context/LocaleContext';
 import { useTheme } from '../../context/ThemeContext';
 import { formatDateKeyForDisplay } from '../../utils/dateKey';
 import PrimaryButton from '../common/PrimaryButton';
@@ -35,13 +38,16 @@ function timeStringToDate(time) {
 
 function createStyles(colors, isDark) {
   return StyleSheet.create({
-    overlay: {
+    root: {
       flex: 1,
       justifyContent: 'flex-end',
     },
     backdrop: {
       ...StyleSheet.absoluteFillObject,
       backgroundColor: colors.overlayBackdrop,
+    },
+    sheetOuter: {
+      maxHeight: '90%',
     },
     sheet: {
       backgroundColor: colors.surface,
@@ -107,12 +113,13 @@ function createStyles(colors, isDark) {
       borderColor: colors.borderStrong,
       borderRadius: 16,
       paddingHorizontal: 16,
-      paddingVertical: Platform.OS === 'android' ? 12 : 14,
+      paddingVertical: Platform.OS === 'android' ? 14 : 14,
       fontSize: 16,
       color: colors.textPrimary,
       backgroundColor: colors.surfaceSubtle,
       fontWeight: '500',
-      minHeight: 48,
+      minHeight: 52,
+      maxHeight: 120,
     },
     planBox: {
       borderWidth: 1,
@@ -190,6 +197,8 @@ function createStyles(colors, isDark) {
 }
 
 export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
+  const { t } = useTranslation();
+  const { dateLocale } = useLocale();
   const insets = useSafeAreaInsets();
   const titleRef = useRef(null);
   const scrollRef = useRef(null);
@@ -199,7 +208,6 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
   const [time, setTime] = useState(() => timeStringToDate('09:00'));
   const [priority, setPriority] = useState('medium');
   const [error, setError] = useState('');
-  /** Saat tekerleği kapalı başlar; kullanıcı önce görevini yazar, plan kutusundan saat açar. */
   const [timeExpanded, setTimeExpanded] = useState(false);
 
   useEffect(() => {
@@ -216,7 +224,7 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
     scrollRef.current?.scrollTo?.({ y: 0, animated: false });
     let timeoutId;
     const rafId = requestAnimationFrame(() => {
-      timeoutId = setTimeout(() => titleRef.current?.focus?.(), 120);
+      timeoutId = setTimeout(() => titleRef.current?.focus?.(), 280);
     });
     return () => {
       cancelAnimationFrame(rafId);
@@ -224,123 +232,144 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
     };
   }, [visible, dateKey]);
 
+  const scrollTitleIntoView = useCallback(() => {
+    requestAnimationFrame(() => {
+      scrollRef.current?.scrollTo?.({ y: 0, animated: true });
+    });
+  }, []);
+
   function handleSave() {
     if (!title.trim()) {
-      setError('Görev başlığı zorunlu.');
+      setError(t('addTask.titleRequired'));
+      scrollTitleIntoView();
+      titleRef.current?.focus?.();
       return;
     }
+    Keyboard.dismiss();
     onSave({ title, time: dateToTimeString(time), priority, dateKey });
     onClose();
   }
 
-  const dateLabel = formatDateKeyForDisplay(dateKey);
-  const sheetPadBottom = Math.max(insets.bottom, 12) + 8;
+  const dateLabel = formatDateKeyForDisplay(dateKey, dateLocale);
+  const sheetPadBottom = Math.max(insets.bottom, 12) + 12;
   const timeLabel = dateToTimeString(time);
+  const keyboardOffset = Platform.OS === 'ios' ? insets.top : 0;
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.overlay}
-      >
-        <Pressable style={styles.backdrop} onPress={onClose} accessibilityRole="button" />
-        <ScrollView
-          ref={scrollRef}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-          bounces={false}
-          style={{ maxHeight: '88%' }}
-          contentContainerStyle={{ paddingBottom: sheetPadBottom }}
+      <View style={styles.root}>
+        <Pressable
+          style={styles.backdrop}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.close')}
+        />
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.sheetOuter}
+          keyboardVerticalOffset={keyboardOffset}
         >
-          <View style={styles.sheet}>
-            <View style={styles.handle} />
-            <View style={styles.headerRow}>
-              <View style={styles.headerIconWrap}>
-                <Ionicons name="create-outline" size={24} color={colors.primary} />
-              </View>
-              <View style={styles.headerTextBlock}>
-                <Text style={styles.sheetTitle}>Yeni görev</Text>
-                {dateLabel ? <Text style={styles.dateLine}>{dateLabel}</Text> : null}
-              </View>
-            </View>
-
-            <Text style={styles.fieldLabel}>Görev</Text>
-            <TextInput
-              ref={titleRef}
-              style={styles.input}
-              placeholder="Bugün ne yapacaksın? Buraya yaz…"
-              placeholderTextColor={colors.textTertiary}
-              value={title}
-              onChangeText={(text) => {
-                setTitle(text);
-                if (error) setError('');
-              }}
-              autoCorrect
-              autoCapitalize="sentences"
-              returnKeyType="done"
-              blurOnSubmit={false}
-              multiline
-              textAlignVertical="top"
-            />
-
-            <Text style={styles.fieldLabel}>Öncelik</Text>
-            <PriorityChips value={priority} onChange={setPriority} />
-
-            <View style={styles.planBox}>
-              <Text style={styles.planBoxTitle}>Görev planı · saat</Text>
-              <Text style={styles.planBoxHint}>
-                Saat burada; önce görevini yaz. İstersen aşağıdan saati açıp değiştir.
-              </Text>
-              <Pressable
-                onPress={() => setTimeExpanded((v) => !v)}
-                accessibilityRole="button"
-                accessibilityLabel={timeExpanded ? 'Saat seçiciyi gizle' : 'Saat seçiciyi göster'}
-                style={styles.timeSummaryRow}
-              >
-                <View style={{ flex: 1, minWidth: 0 }}>
-                  <Text style={styles.timeSummaryText}>{timeLabel}</Text>
-                  <Text style={styles.timeSummarySub}>
-                    {timeExpanded ? 'Kapatmak için dokun' : 'Saati değiştirmek için dokun'}
-                  </Text>
+          <Pressable onPress={() => {}} accessibilityViewIsModal>
+            <ScrollView
+              ref={scrollRef}
+              keyboardShouldPersistTaps="always"
+              showsVerticalScrollIndicator={false}
+              bounces={false}
+              nestedScrollEnabled
+            >
+              <View style={[styles.sheet, { paddingBottom: sheetPadBottom }]}>
+                <View style={styles.handle} />
+                <View style={styles.headerRow}>
+                  <View style={styles.headerIconWrap}>
+                    <Ionicons name="create-outline" size={24} color={colors.primary} />
+                  </View>
+                  <View style={styles.headerTextBlock}>
+                    <Text style={styles.sheetTitle}>{t('addTask.title')}</Text>
+                    {dateLabel ? <Text style={styles.dateLine}>{dateLabel}</Text> : null}
+                  </View>
                 </View>
-                <Ionicons
-                  name={timeExpanded ? 'chevron-up' : 'chevron-down'}
-                  size={22}
-                  color={colors.primary}
+
+                <Text style={styles.fieldLabel}>{t('addTask.fieldTask')}</Text>
+                <TextInput
+                  ref={titleRef}
+                  style={styles.input}
+                  placeholder={t('addTask.placeholder')}
+                  placeholderTextColor={colors.textTertiary}
+                  value={title}
+                  onChangeText={(text) => {
+                    setTitle(text);
+                    if (error) setError('');
+                  }}
+                  onFocus={scrollTitleIntoView}
+                  autoCorrect
+                  autoCapitalize="sentences"
+                  returnKeyType="done"
+                  submitBehavior="blurAndSubmit"
+                  blurOnSubmit
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                  importantForAutofill="yes"
                 />
-              </Pressable>
-              {timeExpanded ? (
-                <View style={styles.pickerWrap}>
-                  <DateTimePicker
-                    value={time}
-                    mode="time"
-                    display={Platform.OS === 'ios' ? 'spinner' : 'spinner'}
-                    style={styles.picker}
-                    textColor={isDark ? '#FFFFFF' : colors.textPrimary}
-                    themeVariant={isDark ? 'dark' : 'light'}
-                    is24Hour
-                    onChange={(_event, selectedDate) => {
-                      if (selectedDate) setTime(selectedDate);
-                    }}
-                    minuteInterval={5}
-                  />
+
+                <Text style={styles.fieldLabel}>{t('addTask.fieldPriority')}</Text>
+                <PriorityChips value={priority} onChange={setPriority} />
+
+                <View style={styles.planBox}>
+                  <Text style={styles.planBoxTitle}>{t('addTask.planTimeTitle')}</Text>
+                  <Text style={styles.planBoxHint}>{t('addTask.planTimeHint')}</Text>
+                  <Pressable
+                    onPress={() => setTimeExpanded((v) => !v)}
+                    accessibilityRole="button"
+                    accessibilityLabel={timeExpanded ? t('addTask.timeHide') : t('addTask.timeShow')}
+                    style={styles.timeSummaryRow}
+                  >
+                    <View style={{ flex: 1, minWidth: 0 }}>
+                      <Text style={styles.timeSummaryText}>{timeLabel}</Text>
+                      <Text style={styles.timeSummarySub}>
+                        {timeExpanded ? t('addTask.timeTapClose') : t('addTask.timeTapOpen')}
+                      </Text>
+                    </View>
+                    <Ionicons
+                      name={timeExpanded ? 'chevron-up' : 'chevron-down'}
+                      size={22}
+                      color={colors.primary}
+                    />
+                  </Pressable>
+                  {timeExpanded ? (
+                    <View style={styles.pickerWrap}>
+                      <DateTimePicker
+                        value={time}
+                        mode="time"
+                        display="spinner"
+                        style={styles.picker}
+                        textColor={isDark ? '#FFFFFF' : colors.textPrimary}
+                        themeVariant={isDark ? 'dark' : 'light'}
+                        is24Hour
+                        onChange={(_event, selectedDate) => {
+                          if (selectedDate) setTime(selectedDate);
+                        }}
+                        minuteInterval={5}
+                      />
+                    </View>
+                  ) : null}
                 </View>
-              ) : null}
-            </View>
 
-            {error ? <Text style={styles.error}>{error}</Text> : null}
+                {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <View style={styles.actions}>
-              <View style={styles.actionGrow}>
-                <PrimaryButton title="İptal" variant="outline" onPress={onClose} />
+                <View style={styles.actions}>
+                  <View style={styles.actionGrow}>
+                    <PrimaryButton title={t('common.cancel')} variant="outline" onPress={onClose} />
+                  </View>
+                  <View style={styles.actionGrow}>
+                    <PrimaryButton title={t('common.save')} onPress={handleSave} mutedCta />
+                  </View>
+                </View>
               </View>
-              <View style={styles.actionGrow}>
-                <PrimaryButton title="Kaydet" onPress={handleSave} mutedCta />
-              </View>
-            </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+            </ScrollView>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 }

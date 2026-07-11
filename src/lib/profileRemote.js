@@ -1,3 +1,4 @@
+import { mergeUserPreferences } from './supabase/mergeUserPreferences';
 import { getSupabase } from './supabaseClient';
 
 export async function fetchProfile() {
@@ -13,9 +14,9 @@ export async function fetchProfile() {
 
 export async function pushProfilePatch(patch) {
   const sb = getSupabase();
-  if (!sb) return;
+  if (!sb) return { ok: false, error: 'no_client' };
   const { data: sessionData } = await sb.auth.getSession();
   const uid = sessionData?.session?.user?.id;
-  if (!uid) return;
-  await sb.from('profiles').update(patch).eq('id', uid);
+  if (!uid) return { ok: false, error: 'no_session' };
+  return mergeUserPreferences(sb, uid, patch);
 }

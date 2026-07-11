@@ -47,7 +47,7 @@ function mondayOfWeekContaining(date = new Date()) {
  */
 
 /** Son `nDays` gün (eskiden yeniye) */
-export function buildDailySeries(tasks, nDays = 7) {
+export function buildDailySeries(tasks, nDays = 7, locale) {
   const safeTasks = sanitizeTasksForStats(tasks);
   const keys = getRollingDayKeys(nDays);
   const highlightKey = getTodayDateKey();
@@ -55,7 +55,7 @@ export function buildDailySeries(tasks, nDays = 7) {
     const dayTasks = safeTasks.filter((t) => t.dateKey === dateKey);
     const [y, m, d] = dateKey.split('-').map(Number);
     const dt = new Date(y, m - 1, d);
-    const labelPrimary = dt.toLocaleDateString('tr-TR', { weekday: 'short' });
+    const labelPrimary = dt.toLocaleDateString(locale, { weekday: 'short' });
     const labelSecondary = String(dt.getDate());
     return {
       periodKey: dateKey,
@@ -68,10 +68,6 @@ export function buildDailySeries(tasks, nDays = 7) {
   const maxBar = Math.max(1, ...points.map((p) => p.doneCount));
   return {
     granularity: 'day',
-    badgeLabel: `${nDays} GÜN`,
-    hintScale: 'Ölçek: seçili günler içinde günlük en çok tamamlanan',
-    captionFoot:
-      'Üst satır: tamamlanan / o günün görevi · alt: tamamlama yüzdesi · Bugün vurgulu',
     points,
     maxBar,
     highlightKey,
@@ -79,7 +75,7 @@ export function buildDailySeries(tasks, nDays = 7) {
 }
 
 /** Son `nWeeks` tam hafta (Pzt–Paz), eskiden yeniye */
-export function buildWeeklySeries(tasks, nWeeks = 8) {
+export function buildWeeklySeries(tasks, nWeeks = 8, locale) {
   const safeTasks = sanitizeTasksForStats(tasks);
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -97,8 +93,8 @@ export function buildWeeklySeries(tasks, nWeeks = 8) {
       doneCount += dayList.filter((t) => t.done).length;
     }
     const sunday = addDays(monday, 6);
-    const labelPrimary = `${monday.getDate()} ${monday.toLocaleDateString('tr-TR', { month: 'short' })}`;
-    const labelSecondary = `– ${sunday.getDate()} ${sunday.toLocaleDateString('tr-TR', { month: 'short' })}`;
+    const labelPrimary = `${monday.getDate()} ${monday.toLocaleDateString(locale, { month: 'short' })}`;
+    const labelSecondary = `– ${sunday.getDate()} ${sunday.toLocaleDateString(locale, { month: 'short' })}`;
     points.push({
       periodKey: getTodayDateKey(monday),
       labelPrimary,
@@ -113,10 +109,6 @@ export function buildWeeklySeries(tasks, nWeeks = 8) {
 
   return {
     granularity: 'week',
-    badgeLabel: `${nWeeks} HAFTA`,
-    hintScale: 'Ölçek: seçili haftalar içinde haftalık en çok tamamlanan',
-    captionFoot:
-      'Üst satır: haftalık tamamlanan / haftanın görevi · alt: yüzde · Bu hafta vurgulu',
     points,
     maxBar,
     highlightKey,
@@ -124,7 +116,7 @@ export function buildWeeklySeries(tasks, nWeeks = 8) {
 }
 
 /** Son `nMonths` takvim ayı (eskiden yeniye) */
-export function buildMonthlySeries(tasks, nMonths = 6) {
+export function buildMonthlySeries(tasks, nMonths = 6, locale) {
   const safeTasks = sanitizeTasksForStats(tasks);
   const now = new Date();
   const points = [];
@@ -137,7 +129,7 @@ export function buildMonthlySeries(tasks, nMonths = 6) {
     const monthTasks = safeTasks.filter((t) => t.dateKey.startsWith(`${prefix}-`));
     const totalCount = monthTasks.length;
     const doneCount = monthTasks.filter((t) => t.done).length;
-    const labelPrimary = d.toLocaleDateString('tr-TR', { month: 'short' });
+    const labelPrimary = d.toLocaleDateString(locale, { month: 'short' });
     const labelSecondary = String(y);
     points.push({
       periodKey: prefix,
@@ -153,10 +145,6 @@ export function buildMonthlySeries(tasks, nMonths = 6) {
 
   return {
     granularity: 'month',
-    badgeLabel: `${nMonths} AY`,
-    hintScale: 'Ölçek: seçili aylar içinde aylık en çok tamamlanan',
-    captionFoot:
-      'Üst satır: aylık tamamlanan / ayın görevi · alt: yüzde · Bu ay vurgulu',
     points,
     maxBar,
     highlightKey,
@@ -164,7 +152,7 @@ export function buildMonthlySeries(tasks, nMonths = 6) {
 }
 
 /** Son `nYears` takvim yılı (eskiden yeniye) */
-export function buildYearlySeries(tasks, nYears = 5) {
+export function buildYearlySeries(tasks, nYears = 5, locale) {
   const safeTasks = sanitizeTasksForStats(tasks);
   const currentY = new Date().getFullYear();
   const points = [];
@@ -177,8 +165,8 @@ export function buildYearlySeries(tasks, nYears = 5) {
     const doneCount = yearTasks.filter((t) => t.done).length;
     points.push({
       periodKey: String(y),
-      labelPrimary: String(y),
-      labelSecondary: 'yılı',
+      labelPrimary: new Date(y, 0, 1).toLocaleDateString(locale, { year: 'numeric' }),
+      labelSecondary: null,
       doneCount,
       totalCount,
     });
@@ -189,10 +177,6 @@ export function buildYearlySeries(tasks, nYears = 5) {
 
   return {
     granularity: 'year',
-    badgeLabel: `${nYears} YIL`,
-    hintScale: 'Ölçek: seçili yıllar içinde yıllık en çok tamamlanan',
-    captionFoot:
-      'Üst satır: yıllık tamamlanan / yılın görevi · alt: yüzde · Bu yıl vurgulu',
     points,
     maxBar,
     highlightKey,

@@ -1,12 +1,15 @@
 // Expo: app.json içeriği `config` olarak gelir; .env içindeki EXPO_PUBLIC_* burada extra'ya da yazılır
 // (bazı ortamlarda process.env okunur, Constants.expoConfig.extra yedek olur).
 
+import { runtimeVersion } from "expo-updates";
+
 export default ({ config }) => ({
   ...config,
   /** Bare workflow (android/ klasörü var): runtimeVersion metin olmalı; policy kullanılamaz. app.json version ile hizalı tutulur. */
   runtimeVersion: String(config.version ?? '1.0.0'),
   plugins: [
     ...(config.plugins || []),
+    'expo-localization',
     'expo-updates',
     'expo-font',
     '@react-native-community/datetimepicker',

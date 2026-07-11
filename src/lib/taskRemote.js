@@ -12,6 +12,17 @@ export function coerceBoolean(value, fallback = false) {
   return fallback;
 }
 
+function taskUpdatedAtMs(task) {
+  const t = Date.parse(task?.updatedAt || '');
+  return Number.isFinite(t) ? t : 0;
+}
+
+function normalizeUpdatedAt(value) {
+  if (typeof value === 'string' && Number.isFinite(Date.parse(value))) return value;
+  if (value instanceof Date && Number.isFinite(value.getTime())) return value.toISOString();
+  return '';
+}
+
 export function mapRowToTask(row) {
   const dk =
     typeof row.date_key === 'string'
@@ -19,6 +30,7 @@ export function mapRowToTask(row) {
       : row.date_key instanceof Date
         ? row.date_key.toISOString().slice(0, 10)
         : String(row.date_key);
+  const updatedAt = normalizeUpdatedAt(row.updated_at);
   return {
     id: String(row.id),
     title: String(row.title ?? ''),
@@ -32,6 +44,7 @@ export function mapRowToTask(row) {
           .map((x) => String(x ?? '').trim())
           .filter((x) => x.length > 0)
       : [],
+    ...(updatedAt ? { updatedAt } : {}),
   };
 }
 
@@ -52,16 +65,15 @@ export function taskToRemoteRow(task, userId) {
   };
 }
 
-/**
- * Aynı id hem yerelde hem sunucuda varsa sunucu satırı kullanılır (updated_at güvenilirliği).
- */
 /** Yerel listeden gelen görevde done/priority sapmasını düzeltir */
 export function sanitizeTask(task) {
   if (!task) return task;
+  const updatedAt = normalizeUpdatedAt(task.updatedAt ?? task.updated_at);
   return {
     ...task,
     done: coerceBoolean(task.done, false),
     priority: ['high', 'medium', 'low'].includes(task.priority) ? task.priority : 'medium',
+    ...(updatedAt ? { updatedAt } : {}),
   };
 }
 
@@ -84,6 +96,8 @@ export function normalizeTaskRecord(task) {
   else if (dkRaw instanceof Date) dateKey = getTodayDateKey(dkRaw);
   if (!dateKey) return null;
 
+  const updatedAt = normalizeUpdatedAt(task.updatedAt ?? task.updated_at) || new Date().toISOString();
+
   return {
     id,
     title,
@@ -97,6 +111,7 @@ export function normalizeTaskRecord(task) {
           .map((x) => String(x ?? '').trim())
           .filter((x) => x.length > 0)
       : [],
+    updatedAt,
   };
 }
 
@@ -114,17 +129,24 @@ export function mergeTasksWithRemote(localTasks, remoteRows) {
     const r = rMap.get(id);
     const l = lMap.get(id);
     if (r && l) {
-      /** Uzak satır not/ek dosya taşımıyorsa yereldekini koru */
+      const local = sanitizeTask(l);
+      const localAttachments = Array.isArray(local.attachments)
+        ? local.attachments.map((x) => String(x ?? '').trim()).filter((x) => x.length > 0)
+        : [];
+      const remoteAttachments = Array.isArray(r.attachments)
+        ? r.attachments.map((x) => String(x ?? '').trim()).filter((x) => x.length > 0)
+        : [];
+      /** Daha yeni updatedAt kazanır; eşitlikte yerel tercih edilir (çevrimdışı değişiklik korunur). */
+      const localMs = taskUpdatedAtMs(local);
+      const remoteMs = taskUpdatedAtMs(r);
+      const localWins = localMs >= remoteMs;
+      const base = localWins ? local : r;
+      const other = localWins ? r : local;
       merged.push({
-        ...r,
-        notes: String(l.notes ?? r.notes ?? ''),
-        attachments: Array.isArray(l.attachments)
-          ? l.attachments
-              .map((x) => String(x ?? '').trim())
-              .filter((x) => x.length > 0)
-          : Array.isArray(r.attachments)
-            ? r.attachments
-            : [],
+        ...base,
+        notes: String(base.notes ?? other.notes ?? ''),
+        attachments: localAttachments.length > 0 ? localAttachments : remoteAttachments,
+        updatedAt: base.updatedAt || other.updatedAt || new Date().toISOString(),
       });
     }
     else merged.push(r || sanitizeTask(l));
@@ -139,10 +161,5 @@ export function applyRemoteTaskRowsToState(sb, userId, setTasks, rows) {
   /** Sunucu yanıtı yoksa (data undefined) state'i dokunma — yanlışlıkla tam upsert tetiklenmesin */
   if (rows == null) return;
   const rowList = Array.isArray(rows) ? rows : [];
-  setTasks((prev) => {
-    /** Bulut kaynak kabul edilir: uzak boşsa yerel de boşaltılır (hayalet kayıtları önler). */
-    if (!rowList.length) return [];
-    if (rowList.length) return mergeTasksWithRemote(prev, rowList);
-    return prev;
-  });
+  setTasks((prev) => mergeTasksWithRemote(prev, rowList));
 }

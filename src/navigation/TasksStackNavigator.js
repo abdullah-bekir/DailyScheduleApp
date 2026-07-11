@@ -5,6 +5,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { Pressable, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import TaskDetailScreen from '../screens/TaskDetailScreen';
 import TaskListScreen from '../screens/TaskListScreen';
@@ -13,6 +14,7 @@ import { useTheme } from '../context/ThemeContext';
 const Stack = createNativeStackNavigator();
 
 export default function TasksStackNavigator() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
 
   return (
@@ -45,7 +47,7 @@ export default function TasksStackNavigator() {
         component={TaskDetailScreen}
         options={({ navigation }) => ({
           headerShown: true,
-          title: 'Görev detayı',
+          title: t('taskDetail.title'),
           // Liste satırındaki sağ ok ile uyum: geri ok solda, başlık hemen yanında (sonda değil).
           headerBackTitleVisible: false,
           headerTitleAlign: 'left',
@@ -55,7 +57,7 @@ export default function TasksStackNavigator() {
               hitSlop={{ top: 12, bottom: 12, left: 8, right: 8 }}
               style={{ paddingLeft: 4, paddingVertical: 6, paddingRight: 6 }}
               accessibilityRole="button"
-              accessibilityLabel="Görevlere dön"
+              accessibilityLabel={t('taskDetail.back')}
             >
               <Ionicons name="chevron-back" size={24} color={colors.primary} />
             </Pressable>

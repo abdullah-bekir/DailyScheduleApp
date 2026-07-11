@@ -30,6 +30,9 @@ export function normalizeStoredTasks(data) {
             .map((x) => String(x ?? '').trim())
             .filter((x) => x.length > 0)
         : [],
+      ...(typeof t.updatedAt === 'string' && Number.isFinite(Date.parse(t.updatedAt))
+        ? { updatedAt: t.updatedAt }
+        : {}),
     });
   }
   return out.length ? out : null;

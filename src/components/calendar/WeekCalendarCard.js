@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
+import { useLocale } from '../../context/LocaleContext';
 import { useTheme } from '../../context/ThemeContext';
 import { cardShadow } from '../../theme/shadows';
 import {
@@ -76,6 +78,8 @@ function createStyles(colors) {
  * `selectedDateKey` dışarıda tutulur; görünür hafta seçili güne göre senkronlanır.
  */
 export default function WeekCalendarCard({ selectedDateKey, onSelectDateKey }) {
+  const { t } = useTranslation();
+  const { dateLocale } = useLocale();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
@@ -105,7 +109,7 @@ export default function WeekCalendarCard({ selectedDateKey, onSelectDateKey }) {
     setWeekMonday(mondayOf(new Date(y, m - 1, d)));
   }, [selectedDateKey, containsSelected]);
 
-  const monthTitle = weekDays[0].toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' });
+  const monthTitle = weekDays[0].toLocaleDateString(dateLocale, { month: 'long', year: 'numeric' });
 
   const goPrevDay = () => {
     onSelectDateKey(addDaysToDateKey(selectedDateKey, -1));
@@ -125,8 +129,13 @@ export default function WeekCalendarCard({ selectedDateKey, onSelectDateKey }) {
     <View style={styles.calendarCard}>
       <View style={styles.monthRow}>
         <Text style={styles.monthTitle}>{monthTitle}</Text>
-        <Pressable style={styles.todayBtn} onPress={jumpToday} accessibilityRole="button">
-          <Text style={styles.todayBtnText}>Bugüne dön</Text>
+        <Pressable
+          style={styles.todayBtn}
+          onPress={jumpToday}
+          accessibilityRole="button"
+          accessibilityLabel={t('tasks.backToToday')}
+        >
+          <Text style={styles.todayBtnText}>{t('tasks.backToToday')}</Text>
         </Pressable>
       </View>
 
@@ -139,7 +148,7 @@ export default function WeekCalendarCard({ selectedDateKey, onSelectDateKey }) {
       />
 
       <View style={styles.selectedBadge}>
-        <Text style={styles.selectedBadgeText}>{formatDateKeyForDisplay(selectedDateKey)}</Text>
+        <Text style={styles.selectedBadgeText}>{formatDateKeyForDisplay(selectedDateKey, dateLocale)}</Text>
       </View>
     </View>
   );

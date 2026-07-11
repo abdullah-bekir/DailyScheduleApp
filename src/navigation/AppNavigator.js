@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
 import { Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import TabBarIcon from '../components/common/TabBarIcon';
@@ -18,31 +19,40 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 function MainTabs() {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const tabBarScreenOptions = useMemo(() => {
-    const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 10 : 8);
-    const row = 52;
+    const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 12 : 10);
+    const row = 58;
     return {
       headerShown: false,
       tabBarShowLabel: false,
-      tabBarHideOnKeyboard: true,
+      tabBarHideOnKeyboard: false,
       tabBarStyle: {
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        bottom: 0,
         borderTopWidth: 0,
         borderTopColor: 'transparent',
+        borderWidth: 0,
         elevation: 0,
         shadowOpacity: 0,
         shadowOffset: { width: 0, height: 0 },
         shadowRadius: 0,
         shadowColor: 'transparent',
         backgroundColor: colors.surface,
-        paddingTop: 10,
+        paddingTop: 12,
         paddingBottom: bottomInset,
-        paddingHorizontal: 2,
-        height: row + 10 + bottomInset,
+        paddingHorizontal: 4,
+        height: row + 12 + bottomInset,
+      },
+      sceneContainerStyle: {
+        backgroundColor: colors.background,
       },
     };
-  }, [colors.surface, insets.bottom]);
+  }, [colors.surface, colors.background, insets.bottom]);
 
   return (
     <Tab.Navigator screenOptions={tabBarScreenOptions}>
@@ -55,7 +65,7 @@ function MainTabs() {
               outline="home-outline"
               filled="home"
               focused={focused}
-              label="Ana sayfa"
+              label={t('tabs.home')}
             />
           ),
         }}
@@ -69,7 +79,7 @@ function MainTabs() {
               outline="checkbox-outline"
               filled="checkbox"
               focused={focused}
-              label="Görevler"
+              label={t('tabs.tasks')}
             />
           ),
         }}
@@ -83,7 +93,7 @@ function MainTabs() {
               outline="stats-chart-outline"
               filled="stats-chart"
               focused={focused}
-              label="İstatistikler"
+              label={t('tabs.stats')}
             />
           ),
         }}
@@ -97,7 +107,7 @@ function MainTabs() {
               outline="settings-outline"
               filled="settings"
               focused={focused}
-              label="Ayarlar"
+              label={t('tabs.settings')}
             />
           ),
         }}

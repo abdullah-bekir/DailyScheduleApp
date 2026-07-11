@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
+import { useLocale } from '../../context/LocaleContext';
 import { useTheme } from '../../context/ThemeContext';
 import { cardShadow } from '../../theme/shadows';
 import { getTodayDateKey } from '../../utils/dateKey';
@@ -93,6 +95,8 @@ function createStyles(colors) {
 }
 
 export default function WeekStrip({ weekDays, selectedDateKey, onSelectDateKey, onPrevDay, onNextDay }) {
+  const { t } = useTranslation();
+  const { dateLocale } = useLocale();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const todayKey = getTodayDateKey();
@@ -105,7 +109,7 @@ export default function WeekStrip({ weekDays, selectedDateKey, onSelectDateKey, 
           onPress={onPrevDay}
           hitSlop={{ top: 14, bottom: 14, left: 10, right: 10 }}
           accessibilityRole="button"
-          accessibilityLabel="Önceki gün"
+          accessibilityLabel={t('tasks.prevDay')}
         >
           <Text style={styles.navBtnText}>‹</Text>
         </Pressable>
@@ -114,7 +118,7 @@ export default function WeekStrip({ weekDays, selectedDateKey, onSelectDateKey, 
             const key = getTodayDateKey(d);
             const selected = key === selectedDateKey;
             const isToday = key === todayKey;
-            const dow = d.toLocaleDateString('tr-TR', { weekday: 'short' });
+            const dow = d.toLocaleDateString(dateLocale, { weekday: 'short' });
             const dom = String(d.getDate());
             return (
               <Pressable
@@ -127,6 +131,7 @@ export default function WeekStrip({ weekDays, selectedDateKey, onSelectDateKey, 
                 ]}
                 accessibilityRole="button"
                 accessibilityState={{ selected: Boolean(selected) }}
+                accessibilityLabel={d.toLocaleDateString(dateLocale)}
               >
                 <Text style={[styles.dow, selected && styles.dowSelected]}>{dow}</Text>
                 <Text style={[styles.dom, selected && styles.domSelected]}>{dom}</Text>
@@ -139,7 +144,7 @@ export default function WeekStrip({ weekDays, selectedDateKey, onSelectDateKey, 
           onPress={onNextDay}
           hitSlop={{ top: 14, bottom: 14, left: 10, right: 10 }}
           accessibilityRole="button"
-          accessibilityLabel="Sonraki gün"
+          accessibilityLabel={t('tasks.nextDay')}
         >
           <Text style={styles.navBtnText}>›</Text>
         </Pressable>

@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Purchases from 'react-native-purchases';
+import { useTranslation } from 'react-i18next';
 
 import PrimaryButton from '../components/common/PrimaryButton';
 import ScreenHero from '../components/layout/ScreenHero';
@@ -107,6 +108,7 @@ function createStyles(colors) {
 }
 
 export default function PaywallScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -132,8 +134,8 @@ export default function PaywallScreen() {
       setBusyId(pkg.identifier);
       try {
         await purchasePackage(pkg);
-        Alert.alert('Premium', 'Satın alma tamamlandı. Teşekkürler!', [
-          { text: 'Tamam', onPress: () => navigation.goBack() },
+        Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'), [
+          { text: t('common.ok'), onPress: () => navigation.goBack() },
         ]);
       } catch (e) {
         if (
@@ -142,12 +144,12 @@ export default function PaywallScreen() {
         ) {
           return;
         }
-        Alert.alert('Satın alma', e?.message ?? 'İşlem tamamlanamadı.');
+        Alert.alert(t('paywall.purchaseErrorTitle'), e?.message ?? t('paywall.purchaseErrorBody'));
       } finally {
         setBusyId(null);
       }
     },
-    [navigation, purchasePackage],
+    [navigation, purchasePackage, t],
   );
 
   const onRestore = useCallback(async () => {
@@ -156,15 +158,15 @@ export default function PaywallScreen() {
       const info = await restorePurchases();
       const active = Boolean(info?.entitlements?.active?.[entitlementId]);
       Alert.alert(
-        'Geri yükleme',
-        active ? 'Premium aktif görünüyor.' : 'Bu hesapta aktif abonelik bulunamadı.',
+        t('paywall.restoreTitle'),
+        active ? t('paywall.restoreActive') : t('paywall.restoreNoActive'),
       );
     } catch (e) {
-      Alert.alert('Geri yükleme', e?.message ?? 'İşlem tamamlanamadı.');
+      Alert.alert(t('paywall.restoreTitle'), e?.message ?? t('paywall.purchaseErrorBody'));
     } finally {
       setBusyId(null);
     }
-  }, [entitlementId, restorePurchases]);
+  }, [entitlementId, restorePurchases, t]);
 
   const missingProducts = ready && packages.length === 0;
 
@@ -172,24 +174,24 @@ export default function PaywallScreen() {
     <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
       <View style={{ paddingTop: Math.max(insets.top, 12), paddingHorizontal: 16 }}>
         <Pressable style={styles.closeBtn} onPress={() => navigation.goBack()} hitSlop={12}>
-          <Text style={styles.closeLabel}>Kapat</Text>
+          <Text style={styles.closeLabel}>{t('common.close')}</Text>
         </Pressable>
       </View>
 
       <ScreenHero
-        eyebrow="Premium"
-        title="Reklamsız ve daha fazlası"
-        subtitle="RevenueCat üzerinden abonelik; ürünleri App Store / Play Console ve RevenueCat panelinde tanımlamanız gerekir."
+        eyebrow={t('paywall.eyebrow')}
+        title={t('paywall.title')}
+        subtitle={t('paywall.subtitle')}
         titleSize={28}
       />
 
       <View style={[styles.body, { paddingBottom: Math.max(insets.bottom, 24) }]}>
-        <SectionHeader title="Neler dahil" subtitle="Örnek avantaj listesi — paneldeki entitlement ile eşleşir." />
+        <SectionHeader title={t('paywall.benefitsTitle')} subtitle={t('paywall.benefitsSubtitle')} />
         <View>
           {[
-            'Uygulama içi reklamların kapatılması (banner + ara ekran)',
-            'Öncelikli tema ve görünüm güncellemeleri (yol haritasına bağlı)',
-            'Veri ve gizlilik yaklaşımı aynı kalır; satın alma mağaza hesabınıza bağlıdır',
+            t('paywall.benefitNoAds'),
+            t('paywall.benefitUpdates'),
+            t('paywall.benefitPrivacy'),
           ].map((line) => (
             <View key={line} style={styles.benefitRow}>
               <Text style={styles.benefitBullet}>✓</Text>
@@ -198,24 +200,23 @@ export default function PaywallScreen() {
           ))}
         </View>
 
-        <SectionHeader title="Planlar" subtitle="Aylık ve yıllık paketler RevenueCat offerings üzerinden gelir." />
+        <SectionHeader title={t('paywall.plansTitle')} subtitle={t('paywall.plansSubtitle')} />
 
         {missingProducts ? (
           <View style={styles.warnBox}>
             <Text style={styles.warnText}>
-              Henüz paket bulunamadı. `.env` içine RevenueCat API anahtarlarını ekleyin; RevenueCat’te Offering ve
-              App Store / Play ürünlerini bağlayın. Ardından development build ile yeniden deneyin.
+              {t('paywall.missingProducts')}
             </Text>
           </View>
         ) : null}
 
         {monthly ? (
           <View style={styles.planCard}>
-            <Text style={styles.planTitle}>Aylık</Text>
+            <Text style={styles.planTitle}>{t('paywall.monthly')}</Text>
             <Text style={styles.planPrice}>{monthly.product.priceString}</Text>
             <Text style={styles.planHint}>{monthly.product.title}</Text>
             <PrimaryButton
-              title={busyId === monthly.identifier ? 'İşleniyor…' : 'Aylık planı seç'}
+              title={busyId === monthly.identifier ? t('common.processing') : t('paywall.monthlySelect')}
               onPress={() => onPurchase(monthly)}
               disabled={Boolean(busyId)}
             />
@@ -224,11 +225,11 @@ export default function PaywallScreen() {
 
         {annual ? (
           <View style={styles.planCard}>
-            <Text style={styles.planTitle}>Yıllık</Text>
+            <Text style={styles.planTitle}>{t('paywall.annual')}</Text>
             <Text style={styles.planPrice}>{annual.product.priceString}</Text>
             <Text style={styles.planHint}>{annual.product.title}</Text>
             <PrimaryButton
-              title={busyId === annual.identifier ? 'İşleniyor…' : 'Yıllık planı seç'}
+              title={busyId === annual.identifier ? t('common.processing') : t('paywall.annualSelect')}
               onPress={() => onPurchase(annual)}
               disabled={Boolean(busyId)}
             />
@@ -236,7 +237,7 @@ export default function PaywallScreen() {
         ) : null}
 
         <View style={styles.footer}>
-          <TextLink title="Satın alımları geri yükle" onPress={() => !busyId && onRestore()} />
+          <TextLink title={t('paywall.restore')} onPress={() => !busyId && onRestore()} />
           {busyId === 'restore' ? <ActivityIndicator color={colors.primary} /> : null}
         </View>
       </View>

@@ -1,8 +1,7 @@
-import {
-  motivationWhenAllDone,
-  motivationWhenEmpty,
-  motivationWhenInProgress,
-} from '../data/dailyMotivationQuotes';
+import { MOTIVATION_QUOTES_BY_LANGUAGE } from '../data/dailyMotivationQuotes';
+
+const FALLBACK_LANGUAGE = 'en';
+const SAFE_FALLBACK_LANGUAGE = 'tr';
 
 function hashString(s) {
   let h = 2166136261;
@@ -18,11 +17,14 @@ export function getDailyQuoteIndex(dateKey, poolLength) {
   return hashString(dateKey) % poolLength;
 }
 
-export function getMotivationQuotesForStats(stats) {
+export function getMotivationQuotesForStats(stats, language = SAFE_FALLBACK_LANGUAGE) {
   const { total, remaining } = stats;
-  if (total === 0) return motivationWhenEmpty;
-  if (remaining === 0) return motivationWhenAllDone;
-  return motivationWhenInProgress;
+  const languageQuotes = MOTIVATION_QUOTES_BY_LANGUAGE[language]
+    ?? MOTIVATION_QUOTES_BY_LANGUAGE[FALLBACK_LANGUAGE]
+    ?? MOTIVATION_QUOTES_BY_LANGUAGE[SAFE_FALLBACK_LANGUAGE];
+  if (total === 0) return languageQuotes.empty;
+  if (remaining === 0) return languageQuotes.allDone;
+  return languageQuotes.inProgress;
 }
 
 /**
@@ -30,9 +32,10 @@ export function getMotivationQuotesForStats(stats) {
  *
  * @param {string} dateKey YYYY-MM-DD
  * @param {{ total: number; remaining: number }} stats
+ * @param {string} [language] App language code
  */
-export function pickDailyMotivationQuote(dateKey, stats) {
-  const pool = getMotivationQuotesForStats(stats);
+export function pickDailyMotivationQuote(dateKey, stats, language = SAFE_FALLBACK_LANGUAGE) {
+  const pool = getMotivationQuotesForStats(stats, language);
   const idx = getDailyQuoteIndex(dateKey, pool.length);
   return pool[idx];
 }

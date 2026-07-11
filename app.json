@@ -2,31 +2,33 @@
   "expo": {
     "name": "Planly",
     "slug": "DailyscheduleApp",
-    "version": "1.0.0",
-    "updates": {
-      "url": "https://u.expo.dev/9ae0995c-b1d2-4f6c-af66-7ac85640513c"
-    },
+    "version": "1.0.4",
+    "runtimeVersion": "1.0.4",
     "orientation": "default",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "scheme": "planly",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
+      "backgroundColor": "#F2F2F4"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9ae0995c-b1d2-4f6c-af66-7ac85640513c"
     },
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "1",
+      "buildNumber": "6",
       "bundleIdentifier": "com.abdullahbekir.DailyscheduleApp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "versionCode": 1,
+      "versionCode": 6,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#3E3F44"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.abdullahbekir.DailyscheduleApp"
@@ -35,25 +37,6 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "supabaseUrl": "",
-      "supabaseAnonKey": "",
-      "admobBannerUnitId": "ca-app-pub-3940256099942544/6300978111",
-      "admobBannerUnitIdAndroid": "ca-app-pub-3940256099942544/6300978111",
-      "admobBannerUnitIdIOS": "ca-app-pub-3940256099942544/2934735716",
-      "admobInterstitialUnitId": "ca-app-pub-3940256099942544/1033173712",
-      "admobInterstitialUnitIdAndroid": "ca-app-pub-3940256099942544/1033173712",
-      "admobInterstitialUnitIdIOS": "ca-app-pub-3940256099942544/4411468910",
-      "admobRewardedUnitId": "ca-app-pub-3940256099942544/5224354917",
-      "admobRewardedUnitIdAndroid": "ca-app-pub-3940256099942544/5224354917",
-      "admobRewardedUnitIdIOS": "ca-app-pub-3940256099942544/1712485313",
-      "adsUiEnabled": false,
-      "admobAppOpenUnitIdAndroid": "ca-app-pub-3940256099942544/9257395921",
-      "admobAppOpenUnitIdIOS": "ca-app-pub-3940256099942544/5575463023",
-      "admobRewardedInterstitialUnitIdAndroid": "ca-app-pub-3940256099942544/5354046379",
-      "admobRewardedInterstitialUnitIdIOS": "ca-app-pub-3940256099942544/6978759866",
-      "revenueCatApiKeyAndroid": "",
-      "revenueCatApiKeyIOS": "",
-      "revenueCatEntitlementId": "premium",
       "eas": {
         "projectId": "9ae0995c-b1d2-4f6c-af66-7ac85640513c"
       }

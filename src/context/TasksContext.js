@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useR
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import AddTaskModal from '../components/tasks/AddTaskModal';
+import i18n from '../i18n';
 import { getSupabase } from '../lib/supabaseClient';
 import { pushProfilePatch } from '../lib/profileRemote';
 import { mergeTasksWithRemote, normalizeTaskRecord, sanitizeTask, taskToRemoteRow } from '../lib/taskRemote';
@@ -17,11 +18,16 @@ function newTaskId() {
   return `t_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
+function withUpdatedAt(task) {
+  return { ...task, updatedAt: new Date().toISOString() };
+}
+
 export function TasksProvider({ children }) {
   const { authReady, userId, supabaseConfigured } = useSupabaseSession();
   const [tasks, setTasksState] = useState([]);
   const [tasksHydrated, setTasksHydrated] = useState(false);
   const [tasksDataReady, setTasksDataReady] = useState(false);
+  const [tasksSyncError, setTasksSyncError] = useState(null);
   const [completionTally, setCompletionTally] = useState(0);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [addModalDateKey, setAddModalDateKey] = useState(() => getTodayDateKey());
@@ -78,21 +84,6 @@ export function TasksProvider({ children }) {
     [persistTasks],
   );
 
-  const runInitialCloudSync = useCallback(async () => {
-    const sb = getSupabase();
-    if (!sb || !userId) {
-      setTasksDataReady(true);
-      return;
-    }
-    const { data, error } = await sb.from('tasks').select('*').eq('user_id', userId);
-    if (error) {
-      setTasksDataReady(true);
-      return;
-    }
-    setTasksState((prev) => mergeRemoteRows(prev, data ?? []));
-    setTasksDataReady(true);
-  }, [userId, mergeRemoteRows]);
-
   useEffect(() => {
     if (!tasksHydrated) return;
     if (!supabaseConfigured) {
@@ -108,16 +99,7 @@ export function TasksProvider({ children }) {
       return;
     }
     setTasksDataReady(false);
-    runInitialCloudSync();
-  }, [tasksHydrated, supabaseConfigured, authReady, userId, runInitialCloudSync]);
-
-  const refreshTasksFromSupabase = useCallback(async () => {
-    const sb = getSupabase();
-    if (!sb || !userId) return;
-    const { data, error } = await sb.from('tasks').select('*').eq('user_id', userId);
-    if (error || data == null) return;
-    setTasksState((prev) => mergeRemoteRows(prev, data));
-  }, [userId, mergeRemoteRows]);
+  }, [tasksHydrated, supabaseConfigured, authReady, userId]);
 
   const upsertRemoteTask = useCallback(
     async (task) => {
@@ -128,6 +110,57 @@ export function TasksProvider({ children }) {
     },
     [userId],
   );
+
+  const runInitialCloudSync = useCallback(async () => {
+    const sb = getSupabase();
+    if (!sb || !userId) {
+      setTasksSyncError(null);
+      setTasksDataReady(true);
+      return;
+    }
+    setTasksSyncError(null);
+    const { data, error } = await sb.from('tasks').select('*').eq('user_id', userId);
+    if (error) {
+      setTasksSyncError(error.message || i18n.t('settings.syncError'));
+      setTasksDataReady(true);
+      return;
+    }
+    const remoteRows = data ?? [];
+    const remoteIds = new Set(remoteRows.map((r) => String(r.id)));
+    setTasksState((prev) => mergeRemoteRows(prev, remoteRows));
+    const localOnly = tasksRef.current.filter((t) => t?.id && !remoteIds.has(String(t.id)));
+    if (localOnly.length > 0) {
+      await Promise.all(localOnly.map((t) => upsertRemoteTask(t)));
+    }
+    setTasksDataReady(true);
+  }, [userId, mergeRemoteRows, upsertRemoteTask]);
+
+  useEffect(() => {
+    if (!tasksHydrated || !supabaseConfigured || !authReady || !userId) return;
+    runInitialCloudSync();
+  }, [tasksHydrated, supabaseConfigured, authReady, userId, runInitialCloudSync]);
+
+  const refreshTasksFromSupabase = useCallback(async () => {
+    const sb = getSupabase();
+    if (!sb || !userId) return false;
+    const { data, error } = await sb.from('tasks').select('*').eq('user_id', userId);
+    if (error) {
+      setTasksSyncError(error.message || i18n.t('settings.syncError'));
+      return false;
+    }
+    if (data == null) return false;
+    setTasksSyncError(null);
+    setTasksState((prev) => mergeRemoteRows(prev, data));
+    return true;
+  }, [userId, mergeRemoteRows]);
+
+  const retryCloudSync = useCallback(async () => {
+    if (!supabaseConfigured || !authReady || !userId) return false;
+    setTasksDataReady(false);
+    setTasksSyncError(null);
+    await runInitialCloudSync();
+    return true;
+  }, [supabaseConfigured, authReady, userId, runInitialCloudSync]);
 
   const deleteRemoteTask = useCallback(
     async (taskId) => {
@@ -186,7 +219,7 @@ export function TasksProvider({ children }) {
         let delta = 0;
         if (!cur.done && done) delta = w;
         if (cur.done && !done) delta = -w;
-        const nextTask = { ...cur, done };
+        const nextTask = withUpdatedAt({ ...cur, done });
         sync = { nextTask, delta };
         const next = [...prev];
         next[idx] = nextTask;
@@ -199,6 +232,9 @@ export function TasksProvider({ children }) {
         setCompletionTally((t) => {
           const n = Math.max(0, t + delta);
           saveCompletionTally(n);
+          queueMicrotask(() => {
+            pushProfilePatch({ completion_tally: n }).catch(() => {});
+          });
           return n;
         });
       }
@@ -230,7 +266,7 @@ export function TasksProvider({ children }) {
         const idx = prev.findIndex((t) => String(t.id) === id);
         if (idx < 0) return prev;
         const cur = sanitizeTask(prev[idx]);
-        const nextRow = { ...cur, ...patch };
+        const nextRow = withUpdatedAt({ ...cur, ...patch });
         toSync = nextRow;
         const next = [...prev];
         next[idx] = nextRow;
@@ -254,10 +290,12 @@ export function TasksProvider({ children }) {
     const sb = getSupabase();
     if (sb && userId) {
       await sb.from('tasks').delete().eq('user_id', userId);
+      await pushProfilePatch({ completion_tally: 0 });
     }
     setTasksState([]);
     await persistTasks([]);
     persistTally(0);
+    setTasksSyncError(null);
   }, [userId, persistTasks, persistTally]);
 
   const grantAdRewardBonus = useCallback((delta) => {
@@ -277,8 +315,10 @@ export function TasksProvider({ children }) {
       tasks,
       tasksHydrated,
       tasksDataReady,
+      tasksSyncError,
       completionTally,
       refreshTasksFromSupabase,
+      retryCloudSync,
       openAddTaskModal,
       openAddTaskModalForDate,
       toggleTaskDone,
@@ -292,8 +332,10 @@ export function TasksProvider({ children }) {
       tasks,
       tasksHydrated,
       tasksDataReady,
+      tasksSyncError,
       completionTally,
       refreshTasksFromSupabase,
+      retryCloudSync,
       openAddTaskModal,
       openAddTaskModalForDate,
       toggleTaskDone,

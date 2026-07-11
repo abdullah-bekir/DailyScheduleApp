@@ -1,6 +1,7 @@
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect, useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner';
@@ -9,11 +10,13 @@ import DashboardPreviewCard from '../components/dashboard/DashboardPreviewCard';
 import ScreenHero from '../components/layout/ScreenHero';
 import SectionHeader from '../components/layout/SectionHeader';
 import PrimaryButton from '../components/common/PrimaryButton';
+import PlanCompletionCelebrationCard from '../components/dashboard/PlanCompletionCelebrationCard';
 import ProgressBar from '../components/dashboard/ProgressBar';
 import MotivationQuoteBrowser from '../components/dashboard/MotivationQuoteBrowser';
 import StatCard from '../components/dashboard/StatCard';
 import TaskItem from '../components/dashboard/TaskItem';
 import TextLink from '../components/common/TextLink';
+import { useLocale } from '../context/LocaleContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useTasks } from '../context/TasksContext';
 import { getAdsRewardBonusPoints, isAdsUiEnabled } from '../lib/ads/adsConfig';
@@ -25,26 +28,10 @@ import {
   DEFAULT_DAILY_PLAN_GOAL,
   loadDailyPlanGoal,
 } from '../utils/appSettingsStorage';
+import { getCombinedDailyProgress, isDailyPlanProgressComplete } from '../utils/dailyPlanProgress';
 import { formatTodayHeaderCapsLine, getTodayDateKey } from '../utils/dateKey';
 
 const DASHBOARD_TASK_PREVIEW = 5;
-
-/**
- * Tek çubukta iki bileşen (%50 + %50):
- * - Plan: bugün kaç görev ekledin (hedefe göre ölçeklenir; silince düşer).
- * - Tamamlama: tik oranı (tik atınca yükselir).
- * Hepsi bitince her zaman %100.
- */
-function getCombinedDailyProgress(taskList, planGoal) {
-  const n = taskList.length;
-  if (n === 0) return 0;
-  const done = taskList.filter((t) => t.done).length;
-  if (done === n) return 100;
-  const goal = Math.max(1, planGoal);
-  const planFraction = Math.min(1, n / goal);
-  const completeFraction = done / n;
-  return Math.round(planFraction * 50 + completeFraction * 50);
-}
 
 function createStyles(colors) {
   return StyleSheet.create({
@@ -65,7 +52,7 @@ function createStyles(colors) {
       borderWidth: 1,
       borderColor: colors.border,
       ...cardShadow(colors),
-      gap: 4,
+      gap: 14,
     },
     summaryHeading: {
       fontSize: 13,
@@ -135,13 +122,16 @@ export default function HomeScreen() {
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
   const tabBarHeight = useBottomTabBarHeight();
+  const { t } = useTranslation();
+  const { dateLocale } = useLocale();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { isPro } = useSubscription();
-  const { tasks, openAddTaskModal, refreshTasksFromSupabase, tasksHydrated, tasksDataReady, grantAdRewardBonus } =
+  const { tasks, openAddTaskModal, refreshTasksFromSupabase, tasksHydrated, tasksDataReady, tasksSyncError, retryCloudSync, completionTally, grantAdRewardBonus } =
     useTasks();
   const navTapCountRef = useRef(0);
   const [rewardBusy, setRewardBusy] = useState(false);
+  const [syncRetryBusy, setSyncRetryBusy] = useState(false);
   const [dailyPlanGoal, setDailyPlanGoal] = useState(DEFAULT_DAILY_PLAN_GOAL);
   const bonusPoints = useMemo(() => getAdsRewardBonusPoints(), []);
 
@@ -164,25 +154,25 @@ export default function HomeScreen() {
       const r = await showRewardedAd();
       if (r.reason === 'disabled' || r.reason === 'expo-go') {
         Alert.alert(
-          'Şu an kullanılamıyor',
+          t('ads.unavailable'),
           r.reason === 'expo-go'
-            ? 'Bu özellik için yüklü uygulama gerekir.'
-            : 'Reklamlar yapılandırılmamış.',
+            ? t('ads.needBuild')
+            : t('ads.notConfigured'),
         );
         return;
       }
       if (r.earned) {
         grantAdRewardBonus(bonusPoints);
-        Alert.alert('Teşekkürler', `+${bonusPoints} tamamlama puanı eklendi.`);
+        Alert.alert(t('common.thanks'), t('ads.pointsAdded', { points: bonusPoints }));
       } else if (r.shown) {
-        Alert.alert('Bilgi', 'Reklam kapandı; ödül onayı gelmezse puan eklenmez.');
+        Alert.alert(t('common.info'), t('ads.closedNoReward'));
       } else {
-        Alert.alert('Reklam', 'Yüklenemedi; daha sonra deneyin.');
+        Alert.alert(t('tabs.home'), t('ads.loadFailed'));
       }
     } finally {
       setRewardBusy(false);
     }
-  }, [isPro, bonusPoints, grantAdRewardBonus]);
+  }, [isPro, bonusPoints, grantAdRewardBonus, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -192,43 +182,61 @@ export default function HomeScreen() {
     }, [tasksDataReady, refreshTasksFromSupabase]),
   );
 
+  const onRetrySync = useCallback(async () => {
+    setSyncRetryBusy(true);
+    try {
+      await retryCloudSync();
+    } finally {
+      setSyncRetryBusy(false);
+    }
+  }, [retryCloudSync]);
+
   const todayKey = getTodayDateKey();
   const tasksToday = useMemo(() => tasks.filter((t) => t.dateKey === todayKey), [tasks, todayKey]);
 
   const progress = getCombinedDailyProgress(tasksToday, dailyPlanGoal);
+  const planComplete = isDailyPlanProgressComplete(tasksToday, dailyPlanGoal);
   const completed = tasksToday.filter((t) => t.done).length;
   const remaining = tasksToday.length - completed;
+  const allTasksDone = tasksToday.length > 0 && remaining === 0;
   const previewTasks = tasksToday.slice(0, DASHBOARD_TASK_PREVIEW);
 
   const stats = [
-    { id: 'st1', label: 'Toplam görev', value: tasksToday.length, accent: 'primary' },
-    { id: 'st2', label: 'Tamamlanan', value: completed, accent: 'success' },
-    { id: 'st3', label: 'Kalan', value: remaining, accent: 'warning' },
+    { id: 'st1', label: t('common.total'), value: tasksToday.length, accent: 'primary' },
+    { id: 'st2', label: t('common.remaining'), value: remaining, accent: 'warning' },
+    { id: 'st3', label: t('common.completed'), value: completed, accent: 'success' },
   ];
 
   const { progressCaption, progressFootnote } = useMemo(() => {
-    if (tasksToday.length === 0) {
+    const goal = dailyPlanGoal;
+    const n = tasksToday.length;
+    if (n === 0) {
       return {
-        progressCaption: 'Bugün için henüz görev yok.',
-        progressFootnote: `Görev ekledikçe çubuk yükselir (plan ölçüsü: Ayarlar’dan seçtiğin günlük ${dailyPlanGoal} görev). Tik ve silme yüzdeyi adım adım değiştirir.`,
+        progressCaption: t('home.progressEmpty'),
+        progressFootnote: t('home.progressEmptyFoot', { goal }),
       };
     }
-    if (remaining === 0) {
+
+    if (planComplete) {
       return {
         progressCaption:
-          tasksToday.length === 1
-            ? 'Tek görevini de bitirdin — bugün tamamdır.'
-            : `${tasksToday.length} görevin hepsi tamam. Böyle devam.`,
-        progressFootnote: '%100 — yarın yeni liste ile sıfırdan başlarsın.',
+          n === goal
+            ? t('home.progressCompleteExact', { goal })
+            : t('home.progressCompleteOver', { goal, count: n }),
+        progressFootnote:
+          remaining === 0
+            ? t('home.progressCompleteFootDone')
+            : t('home.progressCompleteFootPending', { completed, remaining }),
       };
     }
-    return {
-      progressCaption: `Bugün ${tasksToday.length} görev planlı · ${completed} tamamlandı · ${remaining} sırada`,
-      progressFootnote: `Yüzde: yaklaşık yarısı plan (günlük ${dailyPlanGoal} göreve kadar), yarısı tik oranı. Görev silince plan tarafı düşer.`,
-    };
-  }, [tasksToday.length, completed, remaining, dailyPlanGoal]);
 
-  const heroDateCaps = formatTodayHeaderCapsLine();
+    return {
+      progressCaption: t('home.progressActive', { count: n, goal, completed, remaining }),
+      progressFootnote: t('home.progressActiveFoot', { percent: progress, goal }),
+    };
+  }, [tasksToday, tasksToday.length, completed, remaining, dailyPlanGoal, progress, planComplete, t]);
+
+  const heroDateCaps = formatTodayHeaderCapsLine(undefined, dateLocale);
 
   const navigateWithInterstitial = useCallback(
     async (routeName) => {
@@ -249,22 +257,38 @@ export default function HomeScreen() {
       style={styles.screen}
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
-      contentContainerStyle={{ paddingBottom: tabBarHeight + 12 }}
+      contentContainerStyle={{ paddingBottom: tabBarHeight + 20 }}
     >
-      <ScreenHero variant="greeting" dateLine={heroDateCaps} title="Merhaba!" titleSize={34} />
+      <ScreenHero
+        variant="greeting"
+        showBrandMark
+        dateLine={heroDateCaps}
+        title={t('home.greeting')}
+        subtitle={t('home.subtitle')}
+        titleSize={34}
+      />
 
       <View style={styles.body}>
-        <TasksCloudLoadingBanner colors={colors} visible={tasksHydrated && !tasksDataReady} />
+        <TasksCloudLoadingBanner
+          colors={colors}
+          visible={tasksHydrated && !tasksDataReady}
+          error={tasksDataReady ? tasksSyncError : null}
+          onRetry={onRetrySync}
+          retryBusy={syncRetryBusy}
+        />
 
         <View style={styles.summaryCard}>
-          <Text style={styles.summaryHeading}>Bugünün Özeti</Text>
+          <Text style={styles.summaryHeading}>{t('home.summaryTitle')}</Text>
           <ProgressBar
             variant="featured"
-            headerTitle="Bugünün ilerlemesi"
+            headerTitle={t('home.progressTitle')}
             progress={progress}
             caption={progressCaption}
             footnote={progressFootnote}
           />
+          {planComplete ? (
+            <PlanCompletionCelebrationCard planGoal={dailyPlanGoal} allTasksDone={allTasksDone} />
+          ) : null}
         </View>
 
         <View style={styles.statsRow}>
@@ -273,16 +297,20 @@ export default function HomeScreen() {
           ))}
         </View>
 
-        <SectionHeader title="Modüller" />
+        <SectionHeader title={t('home.modulesTitle')} subtitle={t('home.modulesSubtitle')} />
 
         <View style={styles.gridRow}>
           <View style={styles.gridCell}>
             <DashboardPreviewCard
               variant="rich"
               compact
-              icon="✅"
-              title="Yapılacaklar"
-              subtitle={tasksToday.length ? `${remaining} bekleyen` : 'Liste boş'}
+              iconName="checkbox-outline"
+              title={t('home.todoCard')}
+              subtitle={
+                tasksToday.length
+                  ? t('home.todoProgress', { completed, total: tasksToday.length })
+                  : t('home.todoEmpty')
+              }
               onPress={() => navigateWithInterstitial('Gorevler')}
             />
           </View>
@@ -290,9 +318,9 @@ export default function HomeScreen() {
             <DashboardPreviewCard
               variant="rich"
               compact
-              icon="📅"
-              title="Görev planı"
-              subtitle="Haftalık şerit · Görevler"
+              iconName="calendar-outline"
+              title={t('home.planCard')}
+              subtitle={t('home.planCardSub')}
               onPress={() => navigateWithInterstitial('Gorevler')}
             />
           </View>
@@ -303,9 +331,9 @@ export default function HomeScreen() {
             <DashboardPreviewCard
               variant="rich"
               compact
-              icon="📊"
-              title="İstatistikler"
-              subtitle="Tamamlama özeti"
+              iconName="stats-chart-outline"
+              title={t('home.statsCard')}
+              subtitle={t('home.statsCardSub', { points: completionTally })}
               onPress={() => navigateWithInterstitial('Istatistikler')}
             />
           </View>
@@ -313,17 +341,17 @@ export default function HomeScreen() {
             <DashboardPreviewCard
               variant="rich"
               compact
-              icon="🔔"
-              title="Hatırlatıcılar"
-              subtitle="Bildirim tercihleri"
+              iconName="notifications-outline"
+              title={t('home.remindersCard')}
+              subtitle={t('home.remindersCardSub')}
               onPress={() => navigateWithInterstitial('Ayarlar')}
             />
           </View>
         </View>
 
         <SectionHeader
-          title="Bugünün görevleri"
-          subtitle={tasksDataReady && tasksToday.length === 0 ? 'Bugün için henüz görev yok.' : undefined}
+          title={t('home.todayTasks')}
+          subtitle={tasksDataReady && tasksToday.length === 0 ? t('home.todayEmpty') : undefined}
         />
 
         <MotivationQuoteBrowser totalToday={tasksToday.length} remainingToday={remaining} />
@@ -336,26 +364,24 @@ export default function HomeScreen() {
           </View>
         ) : tasksDataReady ? (
           <View style={styles.emptyTasksWrap}>
-            <Text style={styles.emptyTasksTitle}>Gününü planla</Text>
-            <Text style={styles.emptyTasks}>
-              Hızlıca başlamak için alttaki &quot;+ Görev ekle&quot; ile bugüne ilk görevini ekleyebilirsin.
-            </Text>
+            <Text style={styles.emptyTasksTitle}>{t('home.emptyTitle')}</Text>
+            <Text style={styles.emptyTasks}>{t('home.emptyBody')}</Text>
           </View>
         ) : null}
 
         {tasksToday.length > DASHBOARD_TASK_PREVIEW ? (
           <View style={styles.inlineLink}>
-            <TextLink title={`Tümünü gör (${tasksToday.length})`} onPress={() => navigation.navigate('Gorevler')} />
+            <TextLink title={t('home.seeAll', { count: tasksToday.length })} onPress={() => navigation.navigate('Gorevler')} />
           </View>
         ) : null}
 
-        <PrimaryButton title="+ Görev ekle" onPress={openAddTaskModal} mutedCta />
-        <Text style={styles.fabHint}>Görevler varsayılan olarak bugünün tarihine eklenir.</Text>
+        <PrimaryButton title={t('home.addTask')} onPress={openAddTaskModal} mutedCta />
+        <Text style={styles.fabHint}>{t('home.addTaskHint')}</Text>
 
         {!isPro && isAdsUiEnabled() ? (
           <View style={styles.inlineLink}>
             <TextLink
-              title={rewardBusy ? 'Reklam açılıyor…' : `Bonus puan: kısa reklam izle (+${bonusPoints})`}
+              title={rewardBusy ? t('home.adOpening') : t('home.adReward', { points: bonusPoints })}
               onPress={() => !rewardBusy && onOptionalAdReward()}
             />
           </View>

@@ -1,13 +1,8 @@
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTheme } from '../../context/ThemeContext';
-
-const OPTIONS = [
-  { id: 'high', label: 'Yüksek' },
-  { id: 'medium', label: 'Orta' },
-  { id: 'low', label: 'Düşük' },
-];
 
 function createStyles(colors) {
   return StyleSheet.create({
@@ -41,12 +36,21 @@ function createStyles(colors) {
 }
 
 export default function PriorityChips({ value, onChange }) {
+  const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
+  const options = useMemo(
+    () => [
+      { id: 'high', label: t('priority.high') },
+      { id: 'medium', label: t('priority.medium') },
+      { id: 'low', label: t('priority.low') },
+    ],
+    [t],
+  );
 
   return (
     <View style={styles.row}>
-      {OPTIONS.map((opt) => {
+      {options.map((opt) => {
         const selected = opt.id === value;
         return (
           <Pressable

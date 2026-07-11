@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import AppOpenAdController from './src/components/ads/AppOpenAdController';
 import RemoteProfileSync from './src/components/sync/RemoteProfileSync';
+import { LocaleProvider } from './src/context/LocaleContext';
 import { SupabaseProvider } from './src/context/SupabaseContext';
 import { TasksProvider } from './src/context/TasksContext';
 import { registerAllAdFormatsInOrder } from './src/lib/ads/registerAdFormats';
@@ -38,17 +39,19 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <SupabaseProvider>
-          <ThemeProvider>
-            <SubscriptionProvider>
-              <TasksProvider>
-                <AppOpenAdController />
-                <RemoteProfileSync />
-                <ThemedShell />
-              </TasksProvider>
-            </SubscriptionProvider>
-          </ThemeProvider>
-        </SupabaseProvider>
+        <LocaleProvider>
+          <SupabaseProvider>
+            <ThemeProvider>
+              <SubscriptionProvider>
+                <TasksProvider>
+                  <AppOpenAdController />
+                  <RemoteProfileSync />
+                  <ThemedShell />
+                </TasksProvider>
+              </SubscriptionProvider>
+            </ThemeProvider>
+          </SupabaseProvider>
+        </LocaleProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

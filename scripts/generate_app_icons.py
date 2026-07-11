@@ -1,6 +1,6 @@
 """
-Tek seferlik / tekrar kullanılabilir: beyaz zemin, gri P, çember yok.
-Çalıştır: python scripts/generate_app_icons.py
+Eski basit P ikonu. Güncel marka için:
+  python scripts/generate_planly_professional_logo.py
 """
 from __future__ import annotations
 

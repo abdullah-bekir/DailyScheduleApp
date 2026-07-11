@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const SETTINGS_THEME_KEY = '@dailyschedule/settings_theme';
 export const SETTINGS_NOTIFY_KEY = '@dailyschedule/settings_notify';
+export const SETTINGS_LANGUAGE_KEY = '@dailyschedule/settings_language';
 export const SETTINGS_DAILY_PLAN_GOAL_KEY = '@dailyschedule/settings_daily_plan_goal';
 
 /** Ana sayfa «Bugünün özeti» çubuğunda plan yarısı için günlük görev ölçeği — kullanıcı seçer. */
@@ -65,6 +66,31 @@ export async function loadNotificationsEnabled() {
 export async function saveNotificationsEnabled(enabled) {
   try {
     await AsyncStorage.setItem(SETTINGS_NOTIFY_KEY, enabled ? '1' : '0');
+  } catch {
+    /* ignore */
+  }
+}
+
+function isAllowedLanguage(code, allowedCodes) {
+  return Array.isArray(allowedCodes) && allowedCodes.includes(code);
+}
+
+export async function loadLanguage(allowedCodes) {
+  try {
+    const v = await AsyncStorage.getItem(SETTINGS_LANGUAGE_KEY);
+    const code = typeof v === 'string' ? v.trim() : '';
+    if (code && isAllowedLanguage(code, allowedCodes)) return code;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+export async function saveLanguage(code, allowedCodes) {
+  try {
+    if (isAllowedLanguage(code, allowedCodes)) {
+      await AsyncStorage.setItem(SETTINGS_LANGUAGE_KEY, code);
+    }
   } catch {
     /* ignore */
   }
