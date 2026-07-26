@@ -1,12 +1,11 @@
 """
-Planly v7 — onayli P monogram logosu (beyaz + koyu gri, sade).
-Alt cizgi yok. Arka plan biraz daha acik gri ton.
+Planly v8 — görev tamamlama detaylı P monogram logosu.
+Yalnızca simge kullanılır; PLANLY kelime işareti içermez.
 
 Calistir: python scripts/generate_planly_p_monogram_logo.py
 """
 from __future__ import annotations
 
-import math
 import os
 import sys
 from pathlib import Path
@@ -14,12 +13,14 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 SIZE = 1024
-# Biraz daha gri (onceki neredeyse siyah yerine belirgin koyu gri)
-BG_TOP = (82, 83, 88)
-BG_BOTTOM = (62, 63, 68)
+# Kömür gri zemin, beyaz P ve küçük mavi vurgu
+BG_TOP = (37, 40, 47)
+BG_BOTTOM = (24, 27, 33)
 WHITE = (255, 255, 255)
+INK = (28, 31, 37)
+BLUE = (79, 140, 255)
 SPLASH_BG = (242, 242, 244)
-ADAPTIVE_BG_HEX = "#3E3F44"
+ADAPTIVE_BG_HEX = "#1F2228"
 
 
 def _lerp(a: int, b: int, t: float) -> int:
@@ -40,47 +41,19 @@ def gray_background(size: int) -> Image.Image:
     return img
 
 
-def pick_font_path() -> str:
-    windir = os.environ.get("WINDIR", "C:/Windows")
-    for name in ("segoeuib.ttf", "arialbd.ttf", "calibrib.ttf"):
-        path = os.path.join(windir, "Fonts", name)
-        if os.path.isfile(path):
-            return path
-    return ""
-
-
-def fit_font(draw: ImageDraw.ImageDraw, letter: str, font_path: str, target_frac: float = 0.52) -> ImageFont.FreeTypeFont:
-    max_side = int(SIZE * target_frac)
-    if not font_path:
-        return ImageFont.load_default()
-    lo, hi = 100, 900
-    best = None
-    while lo <= hi:
-        mid = (lo + hi) // 2
-        try:
-            font = ImageFont.truetype(font_path, mid)
-        except OSError:
-            return ImageFont.load_default()
-        bbox = draw.textbbox((0, 0), letter, font=font)
-        w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-        if w <= max_side and h <= max_side:
-            best = font
-            lo = mid + 1
-        else:
-            hi = mid - 1
-    return best or ImageFont.truetype(font_path, 420)
-
-
 def compose_icon() -> Image.Image:
     img = gray_background(SIZE)
     draw = ImageDraw.Draw(img)
-    font_path = pick_font_path()
-    font = fit_font(draw, "P", font_path)
-    bbox = draw.textbbox((0, 0), "P", font=font)
-    w, h = bbox[2] - bbox[0], bbox[3] - bbox[1]
-    x = (SIZE - w) // 2 - bbox[0]
-    y = (SIZE - h) // 2 - bbox[1] - int(SIZE * 0.015)
-    draw.text((x, y), "P", font=font, fill=WHITE)
+
+    # Geometrik, uygulama ikonu için okunaklı P gövdesi.
+    draw.rounded_rectangle((286, 218, 698, 585), radius=94, fill=WHITE)
+    draw.rounded_rectangle((286, 218, 445, 760), radius=58, fill=WHITE)
+    # P'nin iç boşluğu.
+    draw.rounded_rectangle((442, 345, 590, 470), radius=28, fill=INK)
+    # Tamamlanan planı çağrıştıran negatif alan onay işareti.
+    draw.polygon([(350, 444), (456, 551), (651, 313), (690, 353), (457, 630), (310, 482)], fill=INK)
+    # Küçük mavi vurgu; simgeyi kalabalıklaştırmadan marka ayrımı sağlar.
+    draw.polygon([(630, 282), (698, 350), (621, 350)], fill=BLUE)
     return img
 
 
@@ -169,7 +142,7 @@ def main() -> None:
 
     sync_android_native(root, icon_rgb, splash_rgb)
 
-    print("OK — Planly v7 P monogram (gri zemin, cizgi yok):")
+    print("OK — Planly v8 P + onay işareti monogrami:")
     print(" ", assets / "icon.png")
     print(" ", assets / "adaptive-icon.png")
     print(" ", assets / "splash-icon.png")

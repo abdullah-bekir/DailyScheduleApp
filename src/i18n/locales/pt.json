@@ -160,7 +160,16 @@
     "supportBody": "Anúncio recompensado opcional: +{{points}} pontos de conclusão. Intersticiais são exibidos com moderação.",
     "watchAd": "Assistir anúncio (+{{points}} pts)",
     "chartCaption": "Acima: concluídas / total de tarefas · Abaixo: taxa de conclusão · Período atual destacado",
-    "chartYearSecondary": "ano"
+    "chartYearSecondary": "ano",
+    "premiumTitle": "Assinatura Premium",
+    "premiumBody": "Remova anúncios e desbloqueie o Premium. Os preços vêm da Google Play / App Store.",
+    "premiumPriceMonthly": "Mensal · {{price}}",
+    "premiumPriceAnnual": "Anual · {{price}}",
+    "premiumPricePending": "Os preços aparecem após vincular produtos na RevenueCat.",
+    "premiumBuy": "Comprar Premium",
+    "premiumSeePlans": "Ver todos os planos",
+    "premiumActiveTitle": "Premium ativo",
+    "premiumActiveBody": "Obrigado — os anúncios ficam desativados enquanto a assinatura estiver ativa."
   },
   "settings": {
     "eyebrow": "Planly",

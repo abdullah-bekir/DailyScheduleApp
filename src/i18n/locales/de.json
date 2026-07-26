@@ -160,7 +160,16 @@
     "supportBody": "Optionale belohnte Werbung: +{{points}} Abschlusspunkte. Interstitials werden sparsam angezeigt.",
     "watchAd": "Werbung ansehen (+{{points}} Pkt.)",
     "chartCaption": "Oben: erledigt / Aufgaben gesamt · Unten: Abschlussrate · Aktueller Zeitraum hervorgehoben",
-    "chartYearSecondary": "Jahr"
+    "chartYearSecondary": "Jahr",
+    "premiumTitle": "Premium-Mitgliedschaft",
+    "premiumBody": "Werbefrei und Premium-Vorteile. Preise kommen von Google Play / App Store.",
+    "premiumPriceMonthly": "Monatlich · {{price}}",
+    "premiumPriceAnnual": "Jährlich · {{price}}",
+    "premiumPricePending": "Preise erscheinen, sobald Store-Produkte in RevenueCat verknüpft sind.",
+    "premiumBuy": "Premium kaufen",
+    "premiumSeePlans": "Alle Pläne ansehen",
+    "premiumActiveTitle": "Premium aktiv",
+    "premiumActiveBody": "Danke — Werbung bleibt aus, solange dein Abo aktiv ist."
   },
   "settings": {
     "eyebrow": "Planly",

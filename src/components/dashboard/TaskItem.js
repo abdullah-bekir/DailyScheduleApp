@@ -116,7 +116,7 @@ export default function TaskItem({ task }) {
   const { t } = useTranslation();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { toggleTaskDone, deleteTask } = useTasks();
+  const { toggleTaskDone, deleteTask, tasksMutationReady } = useTasks();
 
   const taskId = task?.id != null ? String(task.id).trim() : '';
   const titlePreview = task?.title?.trim() ? task.title.trim() : t('common.thisTask');
@@ -162,6 +162,7 @@ export default function TaskItem({ task }) {
           style={styles.actionColumn}
           hitSlop={hintHitSlop}
           onPress={onToggle}
+          disabled={!tasksMutationReady}
           accessibilityRole="button"
           accessibilityLabel={task.done ? t('tasks.undo') : t('tasks.complete')}
         >
@@ -190,6 +191,7 @@ export default function TaskItem({ task }) {
           style={styles.actionColumn}
           hitSlop={hintHitSlop}
           onPress={confirmDelete}
+          disabled={!tasksMutationReady}
           accessibilityRole="button"
           accessibilityLabel={t('common.delete')}
         >

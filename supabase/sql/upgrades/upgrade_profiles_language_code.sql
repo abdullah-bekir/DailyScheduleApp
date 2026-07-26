@@ -13,7 +13,7 @@ alter table public.profiles
   alter column language_code set default 'tr',
   alter column language_code set not null;
 
-alter table public.profiles
+alter table public.profiles 
   drop constraint if exists profiles_language_code_check;
 
 alter table public.profiles

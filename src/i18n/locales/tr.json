@@ -160,7 +160,16 @@
     "supportBody": "İsteğe bağlı ödüllü reklam: izlersen +{{points}} tamamlama puanı kazanırsın. Tam ekran geçiş reklamları ise en az birkaç dakika arayla ve yalnızca bazı geçişlerde gösterilir; sık sık çıkmaz.",
     "watchAd": "Reklam izle (+{{points}} puan)",
     "chartCaption": "Üst: tamamlanan / toplam görev · Alt: tamamlama oranı · Geçerli dönem vurgulu",
-    "chartYearSecondary": "yılı"
+    "chartYearSecondary": "yılı",
+    "premiumTitle": "Premium üyelik",
+    "premiumBody": "Reklamları kaldırın ve Premium avantajlarını açın. Fiyatlar Google Play / App Store üzerinden gelir.",
+    "premiumPriceMonthly": "Aylık · {{price}}",
+    "premiumPriceAnnual": "Yıllık · {{price}}",
+    "premiumPricePending": "Fiyatlar, RevenueCat’te Play / App Store ürünleri bağlandıktan sonra görünür.",
+    "premiumBuy": "Premium satın al",
+    "premiumSeePlans": "Tüm planları gör",
+    "premiumActiveTitle": "Premium aktif",
+    "premiumActiveBody": "Teşekkürler — aboneliğiniz aktifken reklamlar kapalı kalır."
   },
   "settings": {
     "eyebrow": "Planly",

@@ -18,6 +18,7 @@ import TaskItem from '../components/dashboard/TaskItem';
 import TextLink from '../components/common/TextLink';
 import { useLocale } from '../context/LocaleContext';
 import { useSubscription } from '../context/SubscriptionContext';
+import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTasks } from '../context/TasksContext';
 import { getAdsRewardBonusPoints, isAdsUiEnabled } from '../lib/ads/adsConfig';
 import { showInterstitialIfReady } from '../lib/ads/interstitialAd';
@@ -127,24 +128,25 @@ export default function HomeScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { isPro } = useSubscription();
-  const { tasks, openAddTaskModal, refreshTasksFromSupabase, tasksHydrated, tasksDataReady, tasksSyncError, retryCloudSync, completionTally, grantAdRewardBonus } =
+  const { supabaseConfigured, userId } = useSupabaseSession();
+  const storageUserId = supabaseConfigured ? userId : null;
+  const { tasks, openAddTaskModal, refreshTasksFromSupabase, tasksHydrated, tasksDataReady, tasksMutationReady, completionTally, grantAdRewardBonus } =
     useTasks();
   const navTapCountRef = useRef(0);
   const [rewardBusy, setRewardBusy] = useState(false);
-  const [syncRetryBusy, setSyncRetryBusy] = useState(false);
   const [dailyPlanGoal, setDailyPlanGoal] = useState(DEFAULT_DAILY_PLAN_GOAL);
   const bonusPoints = useMemo(() => getAdsRewardBonusPoints(), []);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      loadDailyPlanGoal().then((g) => {
+      loadDailyPlanGoal(storageUserId).then((g) => {
         if (active) setDailyPlanGoal(g);
       });
       return () => {
         active = false;
       };
-    }, []),
+    }, [storageUserId]),
   );
 
   const onOptionalAdReward = useCallback(async () => {
@@ -181,15 +183,6 @@ export default function HomeScreen() {
       return undefined;
     }, [tasksDataReady, refreshTasksFromSupabase]),
   );
-
-  const onRetrySync = useCallback(async () => {
-    setSyncRetryBusy(true);
-    try {
-      await retryCloudSync();
-    } finally {
-      setSyncRetryBusy(false);
-    }
-  }, [retryCloudSync]);
 
   const todayKey = getTodayDateKey();
   const tasksToday = useMemo(() => tasks.filter((t) => t.dateKey === todayKey), [tasks, todayKey]);
@@ -272,9 +265,6 @@ export default function HomeScreen() {
         <TasksCloudLoadingBanner
           colors={colors}
           visible={tasksHydrated && !tasksDataReady}
-          error={tasksDataReady ? tasksSyncError : null}
-          onRetry={onRetrySync}
-          retryBusy={syncRetryBusy}
         />
 
         <View style={styles.summaryCard}>
@@ -375,7 +365,7 @@ export default function HomeScreen() {
           </View>
         ) : null}
 
-        <PrimaryButton title={t('home.addTask')} onPress={openAddTaskModal} mutedCta />
+        <PrimaryButton title={t('home.addTask')} onPress={openAddTaskModal} disabled={!tasksMutationReady} mutedCta />
         <Text style={styles.fabHint}>{t('home.addTaskHint')}</Text>
 
         {!isPro && isAdsUiEnabled() ? (

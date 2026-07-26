@@ -160,7 +160,16 @@
     "supportBody": "Pub récompensée optionnelle : +{{points}} points d'achèvement. Les interstitiels s'affichent avec modération.",
     "watchAd": "Regarder la pub (+{{points}} pts)",
     "chartCaption": "Haut : terminées / total des tâches · Bas : taux de réalisation · Période en cours mise en évidence",
-    "chartYearSecondary": "année"
+    "chartYearSecondary": "année",
+    "premiumTitle": "Abonnement Premium",
+    "premiumBody": "Supprimez les pubs et débloquez Premium. Les prix viennent de Google Play / App Store.",
+    "premiumPriceMonthly": "Mensuel · {{price}}",
+    "premiumPriceAnnual": "Annuel · {{price}}",
+    "premiumPricePending": "Les prix apparaissent une fois les produits liés dans RevenueCat.",
+    "premiumBuy": "Acheter Premium",
+    "premiumSeePlans": "Voir tous les forfaits",
+    "premiumActiveTitle": "Premium actif",
+    "premiumActiveBody": "Merci — les pubs restent désactivées pendant l’abonnement."
   },
   "settings": {
     "eyebrow": "Planly",

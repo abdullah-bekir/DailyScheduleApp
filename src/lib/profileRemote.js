@@ -3,13 +3,14 @@ import { getSupabase } from './supabaseClient';
 
 export async function fetchProfile() {
   const sb = getSupabase();
-  if (!sb) return null;
-  const { data: sessionData } = await sb.auth.getSession();
+  if (!sb) return { ok: false, data: null, error: 'no_client' };
+  const { data: sessionData, error: sessionError } = await sb.auth.getSession();
+  if (sessionError) return { ok: false, data: null, error: sessionError.message };
   const uid = sessionData?.session?.user?.id;
-  if (!uid) return null;
+  if (!uid) return { ok: false, data: null, error: 'no_session' };
   const { data, error } = await sb.from('profiles').select('*').eq('id', uid).maybeSingle();
-  if (error || !data) return null;
-  return data;
+  if (error) return { ok: false, data: null, error: error.message };
+  return { ok: true, data: data ?? null, error: null };
 }
 
 export async function pushProfilePatch(patch) {

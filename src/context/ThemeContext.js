@@ -4,6 +4,8 @@ import { pushProfilePatch } from '../lib/profileRemote';
 import { darkPalette, lightPalette } from '../theme/palettes';
 import { loadThemeMode, saveThemeMode } from '../utils/appSettingsStorage';
 
+import { useSupabaseSession } from './SupabaseContext';
+
 const ThemeContext = createContext(null);
 
 function normalizeRemoteMode(mode) {
@@ -12,12 +14,18 @@ function normalizeRemoteMode(mode) {
 }
 
 export function ThemeProvider({ children }) {
+  const { authReady, userId, supabaseConfigured } = useSupabaseSession();
   const [themeMode, setThemeModeState] = useState('light');
   const [hydrated, setHydrated] = useState(false);
+  const storageUserId = supabaseConfigured ? userId : null;
 
   useEffect(() => {
     let active = true;
-    loadThemeMode().then((m) => {
+    setHydrated(false);
+    if (supabaseConfigured && !authReady) return () => {
+      active = false;
+    };
+    loadThemeMode(storageUserId).then((m) => {
       if (active) {
         setThemeModeState(normalizeRemoteMode(m));
         setHydrated(true);
@@ -26,23 +34,24 @@ export function ThemeProvider({ children }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [supabaseConfigured, authReady, storageUserId]);
 
   const isDark = themeMode === 'dark';
   const colors = useMemo(() => (isDark ? darkPalette : lightPalette), [isDark]);
 
-  const setThemeMode = useCallback((mode) => {
+  const setThemeMode = useCallback(async (mode) => {
     const next = normalizeRemoteMode(mode);
     setThemeModeState(next);
-    saveThemeMode(next);
-    pushProfilePatch({ theme_mode: next });
-  }, []);
+    saveThemeMode(next, storageUserId);
+    if (!supabaseConfigured) return;
+    await pushProfilePatch({ theme_mode: next });
+  }, [storageUserId, supabaseConfigured]);
 
   const applyRemoteTheme = useCallback((mode) => {
     if (mode !== 'dark' && mode !== 'light') return;
     setThemeModeState(mode);
-    saveThemeMode(mode);
-  }, []);
+    saveThemeMode(mode, storageUserId);
+  }, [storageUserId]);
 
   const value = useMemo(
     () => ({

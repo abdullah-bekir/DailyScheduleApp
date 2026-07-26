@@ -14,6 +14,7 @@ import ScreenHero from '../components/layout/ScreenHero';
 import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner';
 import { useLocale } from '../context/LocaleContext';
 import { useSubscription } from '../context/SubscriptionContext';
+import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
 import { isAdsUiEnabled } from '../lib/ads/adsConfig';
@@ -198,6 +199,8 @@ export default function TaskListScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors, isRtl), [colors, isRtl]);
   const { isPro } = useSubscription();
+  const { supabaseConfigured, userId } = useSupabaseSession();
+  const storageUserId = supabaseConfigured ? userId : null;
 
   const scrollBottomPad = useMemo(() => {
     const tab = tabBarHeight + 12;
@@ -209,6 +212,7 @@ export default function TaskListScreen() {
     openAddTaskModalForDate,
     tasksHydrated,
     tasksDataReady,
+    tasksMutationReady,
     tasksSyncError,
     retryCloudSync,
     refreshTasksFromSupabase,
@@ -223,13 +227,13 @@ export default function TaskListScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      loadDailyPlanGoal().then((g) => {
+      loadDailyPlanGoal(storageUserId).then((g) => {
         if (active) setDailyPlanGoal(g);
       });
       return () => {
         active = false;
       };
-    }, []),
+    }, [storageUserId]),
   );
 
   useFocusEffect(
@@ -363,6 +367,7 @@ export default function TaskListScreen() {
           <PrimaryButton
             title={t('tasks.addPlanBtn')}
             onPress={() => openAddTaskModalForDate(selectedDateKey)}
+            disabled={!tasksMutationReady}
             mutedCta
           />
         </View>

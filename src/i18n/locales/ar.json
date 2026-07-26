@@ -160,7 +160,16 @@
     "supportBody": "إعلان بمكافأة اختياري: +{{points}} نقطة إنجاز. تُعرض الإعلانات البينية باعتدال.",
     "watchAd": "مشاهدة إعلان (+{{points}} نقطة)",
     "chartCaption": "الأعلى: المكتمل / إجمالي المهام · الأسفل: نسبة الإكمال · الفترة الحالية مميزة",
-    "chartYearSecondary": "سنة"
+    "chartYearSecondary": "سنة",
+    "premiumTitle": "عضوية Premium",
+    "premiumBody": "أزل الإعلانات وافتح مزايا Premium. الأسعار تأتي من Google Play / App Store.",
+    "premiumPriceMonthly": "شهري · {{price}}",
+    "premiumPriceAnnual": "سنوي · {{price}}",
+    "premiumPricePending": "تظهر الأسعار بعد ربط منتجات المتجر في RevenueCat.",
+    "premiumBuy": "اشترِ Premium",
+    "premiumSeePlans": "عرض كل الخطط",
+    "premiumActiveTitle": "Premium مفعّل",
+    "premiumActiveBody": "شكرًا — تبقى الإعلانات متوقفة أثناء الاشتراك النشط."
   },
   "settings": {
     "eyebrow": "Planly",

@@ -39,8 +39,8 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <LocaleProvider>
-          <SupabaseProvider>
+        <SupabaseProvider>
+          <LocaleProvider>
             <ThemeProvider>
               <SubscriptionProvider>
                 <TasksProvider>
@@ -50,8 +50,8 @@ export default function App() {
                 </TasksProvider>
               </SubscriptionProvider>
             </ThemeProvider>
-          </SupabaseProvider>
-        </LocaleProvider>
+          </LocaleProvider>
+        </SupabaseProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

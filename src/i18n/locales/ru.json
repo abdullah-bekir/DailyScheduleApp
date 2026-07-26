@@ -160,7 +160,16 @@
     "supportBody": "Необязательная реклама с наградой: +{{points}} очков выполнения. Межстраничная реклама показывается умеренно.",
     "watchAd": "Смотреть рекламу (+{{points}} очк.)",
     "chartCaption": "Сверху: выполнено / всего задач · Снизу: процент выполнения · Текущий период выделен",
-    "chartYearSecondary": "год"
+    "chartYearSecondary": "год",
+    "premiumTitle": "Подписка Premium",
+    "premiumBody": "Уберите рекламу и откройте Premium. Цены берутся из Google Play / App Store.",
+    "premiumPriceMonthly": "Ежемесячно · {{price}}",
+    "premiumPriceAnnual": "Ежегодно · {{price}}",
+    "premiumPricePending": "Цены появятся после привязки продуктов магазина в RevenueCat.",
+    "premiumBuy": "Купить Premium",
+    "premiumSeePlans": "Все тарифы",
+    "premiumActiveTitle": "Premium активен",
+    "premiumActiveBody": "Спасибо — реклама отключена, пока подписка активна."
   },
   "settings": {
     "eyebrow": "Planly",

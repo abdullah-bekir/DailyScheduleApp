@@ -7,6 +7,8 @@ import i18n, { applyRtlLayout, getDateLocale, isRtlLanguage, SUPPORTED_LANGUAGES
 import { pushProfilePatch } from '../lib/profileRemote';
 import { loadLanguage, saveLanguage } from '../utils/appSettingsStorage';
 
+import { useSupabaseSession } from './SupabaseContext';
+
 const LocaleContext = createContext(null);
 const SUPPORTED_LANGUAGE_CODES = SUPPORTED_LANGUAGES.map((language) => language.code);
 
@@ -19,14 +21,18 @@ function normalizeLanguage(code) {
 }
 
 export function LocaleProvider({ children }) {
+  const { authReady, userId, supabaseConfigured } = useSupabaseSession();
   const [ready, setReady] = useState(false);
   const [language, setLanguageState] = useState(() => normalizeLanguage(i18n.language));
   const languageRef = useRef(language);
+  const storageUserId = supabaseConfigured ? userId : null;
 
   useEffect(() => {
     let active = true;
     (async () => {
-      const saved = await loadLanguage(SUPPORTED_LANGUAGE_CODES);
+      setReady(false);
+      if (supabaseConfigured && !authReady) return;
+      const saved = await loadLanguage(SUPPORTED_LANGUAGE_CODES, storageUserId);
       const code = saved ?? normalizeLanguage(i18n.resolvedLanguage || i18n.language);
       if (!active) return;
       applyRtlLayout(code);
@@ -39,12 +45,12 @@ export function LocaleProvider({ children }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [supabaseConfigured, authReady, storageUserId]);
 
   const applyLanguage = useCallback(async (next, { persist, reloadOnDirectionChange }) => {
     const prevRtl = isRtlLanguage(languageRef.current);
     const nextRtl = isRtlLanguage(next);
-    if (persist) await saveLanguage(next, SUPPORTED_LANGUAGE_CODES);
+    if (persist) await saveLanguage(next, SUPPORTED_LANGUAGE_CODES, storageUserId);
     await i18n.changeLanguage(next);
     applyRtlLayout(next);
     languageRef.current = next;
@@ -67,13 +73,17 @@ export function LocaleProvider({ children }) {
         ],
       );
     }
-  }, []);
+  }, [storageUserId]);
 
   const setLanguage = useCallback(async (code) => {
     const next = normalizeLanguage(code);
     await applyLanguage(next, { persist: true, reloadOnDirectionChange: true });
-    pushProfilePatch({ language_code: next }).catch(() => {});
-  }, [applyLanguage]);
+    if (!supabaseConfigured) return;
+    const result = await pushProfilePatch({ language_code: next });
+    if (!result?.ok) {
+      console.warn('[supabase] language preference sync', result?.error || 'unknown_error');
+    }
+  }, [applyLanguage, supabaseConfigured]);
 
   const applyRemoteLanguage = useCallback(async (code) => {
     if (!isSupportedLanguage(code)) return false;

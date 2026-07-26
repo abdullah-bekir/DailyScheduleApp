@@ -160,7 +160,16 @@
     "supportBody": "Optional rewarded ad: +{{points}} completion points. Interstitials show sparingly.",
     "watchAd": "Watch ad (+{{points}} pts)",
     "chartCaption": "Top: completed / total tasks · Bottom: completion rate · Current period highlighted",
-    "chartYearSecondary": "year"
+    "chartYearSecondary": "year",
+    "premiumTitle": "Premium membership",
+    "premiumBody": "Remove ads and unlock Premium. Prices come from Google Play / App Store.",
+    "premiumPriceMonthly": "Monthly · {{price}}",
+    "premiumPriceAnnual": "Annual · {{price}}",
+    "premiumPricePending": "Prices appear after Play / App Store products are linked in RevenueCat.",
+    "premiumBuy": "Buy Premium",
+    "premiumSeePlans": "See all plans",
+    "premiumActiveTitle": "Premium is active",
+    "premiumActiveBody": "Thanks — ads stay off while your subscription is active."
   },
   "settings": {
     "eyebrow": "Planly",

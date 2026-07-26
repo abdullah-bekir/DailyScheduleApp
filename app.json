@@ -25,10 +25,10 @@
       }
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 7,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#3E3F44"
+        "backgroundColor": "#1F2228"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.abdullahbekir.DailyscheduleApp"

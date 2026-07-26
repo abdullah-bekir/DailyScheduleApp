@@ -130,7 +130,7 @@ export default function TaskDetailScreen({ route }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { tasks, updateTaskDetails, toggleTaskDone } = useTasks();
+  const { tasks, updateTaskDetails, toggleTaskDone, tasksMutationReady } = useTasks();
   const taskId = route?.params?.taskId ? String(route.params.taskId) : '';
   const task = useMemo(() => tasks.find((t) => String(t.id) === taskId), [tasks, taskId]);
   const [attachmentDraft, setAttachmentDraft] = useState('');
@@ -216,6 +216,7 @@ export default function TaskDetailScreen({ route }) {
             title={task.done ? t('taskDetail.markUndone') : t('taskDetail.markDone')}
             variant="outline"
             onPress={() => toggleTaskDone(taskId)}
+            disabled={!tasksMutationReady}
             mutedCta
           />
         </View>
@@ -229,6 +230,7 @@ export default function TaskDetailScreen({ route }) {
             placeholder={t('taskDetail.notesPlaceholder')}
             placeholderTextColor={colors.textTertiary}
             multiline
+            editable={tasksMutationReady}
             numberOfLines={4}
             textAlignVertical="top"
             onBlur={() => {
@@ -251,6 +253,7 @@ export default function TaskDetailScreen({ route }) {
               onChangeText={setAttachmentDraft}
               placeholder={t('taskDetail.attachmentPlaceholder')}
               placeholderTextColor={colors.textTertiary}
+            editable={tasksMutationReady}
             />
             <Pressable
               style={styles.attachmentBtn}
@@ -261,6 +264,7 @@ export default function TaskDetailScreen({ route }) {
                 updateTaskDetails(taskId, { attachments: [...current, next] });
                 setAttachmentDraft('');
               }}
+              disabled={!tasksMutationReady}
             >
               <Text style={styles.attachmentBtnText}>{t('common.add')}</Text>
             </Pressable>
@@ -281,6 +285,7 @@ export default function TaskDetailScreen({ route }) {
                       attachments: current.filter((_, i) => i !== idx),
                     });
                   }}
+                  disabled={!tasksMutationReady}
                 >
                   <Text style={styles.attachmentRemove}>{t('common.remove')}</Text>
                 </Pressable>

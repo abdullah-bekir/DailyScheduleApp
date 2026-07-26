@@ -1,14 +1,15 @@
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Purchases from 'react-native-purchases';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AdMobBannerCard from '../components/ads/AdMobBannerCard';
 import PrimaryButton from '../components/common/PrimaryButton';
+import TextLink from '../components/common/TextLink';
 import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import ScreenHero from '../components/layout/ScreenHero';
 import TaskFilterChips from '../components/tasks/TaskFilterChips';
 import { useLocale } from '../context/LocaleContext';
@@ -419,6 +420,53 @@ function createStyles(colors, chartUi) {
       textAlign: 'center',
       lineHeight: 21,
     },
+    premiumCard: {
+      backgroundColor: colors.primaryLight,
+      borderRadius: 22,
+      borderWidth: 1,
+      borderColor: colors.primary,
+      padding: 16,
+      ...cardShadow(colors, 'sm'),
+      gap: 12,
+    },
+    premiumTitle: {
+      fontSize: 11,
+      fontWeight: '800',
+      color: colors.primary,
+      letterSpacing: 0.6,
+      textTransform: 'uppercase',
+    },
+    premiumHeadline: {
+      fontSize: 18,
+      fontWeight: '800',
+      color: colors.textPrimary,
+      letterSpacing: -0.3,
+    },
+    premiumBody: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: colors.textSecondary,
+      lineHeight: 20,
+    },
+    premiumPriceRow: {
+      gap: 6,
+    },
+    premiumPrice: {
+      fontSize: 15,
+      fontWeight: '800',
+      color: colors.textPrimary,
+      letterSpacing: -0.2,
+    },
+    premiumPriceMuted: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      lineHeight: 19,
+    },
+    premiumActions: {
+      gap: 10,
+      marginTop: 2,
+    },
   });
 }
 
@@ -445,12 +493,14 @@ const CHART_GRANULARITY_KEY = {
 
 export default function StatsScreen() {
   const { t } = useTranslation();
+  const navigation = useNavigation();
   const { dateLocale } = useLocale();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
-  const { isPro } = useSubscription();
+  const { isPro, offerings, purchasePackage, ready } = useSubscription();
+  const [purchaseBusy, setPurchaseBusy] = useState(false);
   const { colors, isDark } = useTheme();
   const chartUi = useMemo(
     () =>
@@ -479,10 +529,9 @@ export default function StatsScreen() {
     [colors.border, colors.primary, colors.textSecondary, colors.textTertiary, isDark],
   );
   const styles = useMemo(() => createStyles(colors, chartUi), [colors, chartUi]);
-  const { tasks, completionTally, tasksHydrated, tasksDataReady, tasksSyncError, refreshTasksFromSupabase, retryCloudSync, grantAdRewardBonus } =
+  const { tasks, completionTally, tasksHydrated, tasksDataReady, refreshTasksFromSupabase, grantAdRewardBonus } =
     useTasks();
   const [rewardBusy, setRewardBusy] = useState(false);
-  const [syncRetryBusy, setSyncRetryBusy] = useState(false);
   const bonusPoints = useMemo(() => getAdsRewardBonusPoints(), []);
 
   const onAdRewardPress = useCallback(async () => {
@@ -511,14 +560,38 @@ export default function StatsScreen() {
     }
   }, [isPro, bonusPoints, grantAdRewardBonus, t]);
 
-  const onRetrySync = useCallback(async () => {
-    setSyncRetryBusy(true);
-    try {
-      await retryCloudSync();
-    } finally {
-      setSyncRetryBusy(false);
+  const monthlyPkg = useMemo(() => {
+    const pkgs = offerings?.current?.availablePackages ?? [];
+    return pkgs.find((p) => p.packageType === Purchases.PACKAGE_TYPE.MONTHLY) ?? null;
+  }, [offerings]);
+  const annualPkg = useMemo(() => {
+    const pkgs = offerings?.current?.availablePackages ?? [];
+    return pkgs.find((p) => p.packageType === Purchases.PACKAGE_TYPE.ANNUAL) ?? null;
+  }, [offerings]);
+
+  const openPaywall = useCallback(() => {
+    navigation.navigate('Paywall');
+  }, [navigation]);
+
+  const onPremiumPurchase = useCallback(async () => {
+    if (purchaseBusy) return;
+    if (!monthlyPkg) {
+      openPaywall();
+      return;
     }
-  }, [retryCloudSync]);
+    setPurchaseBusy(true);
+    try {
+      await purchasePackage(monthlyPkg);
+      Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'));
+    } catch (e) {
+      if (e?.userCancelled || e?.code === Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
+        return;
+      }
+      Alert.alert(t('paywall.purchaseErrorTitle'), e?.message ?? t('paywall.purchaseErrorBody'));
+    } finally {
+      setPurchaseBusy(false);
+    }
+  }, [monthlyPkg, openPaywall, purchaseBusy, purchasePackage, t]);
 
   const statsTasks = useMemo(() => (tasksDataReady ? tasks : []), [tasksDataReady, tasks]);
 
@@ -608,10 +681,52 @@ export default function StatsScreen() {
         <TasksCloudLoadingBanner
           colors={colors}
           visible={tasksHydrated && !tasksDataReady}
-          error={tasksDataReady ? tasksSyncError : null}
-          onRetry={onRetrySync}
-          retryBusy={syncRetryBusy}
         />
+
+        {isPro ? (
+          <View style={styles.premiumCard}>
+            <Text style={styles.premiumTitle}>{t('paywall.eyebrow')}</Text>
+            <Text style={styles.premiumHeadline}>{t('stats.premiumActiveTitle')}</Text>
+            <Text style={styles.premiumBody}>{t('stats.premiumActiveBody')}</Text>
+          </View>
+        ) : (
+          <View style={styles.premiumCard}>
+            <Text style={styles.premiumTitle}>{t('paywall.eyebrow')}</Text>
+            <Text style={styles.premiumHeadline}>{t('stats.premiumTitle')}</Text>
+            <Text style={styles.premiumBody}>{t('stats.premiumBody')}</Text>
+            <View style={styles.premiumPriceRow}>
+              {monthlyPkg ? (
+                <Text style={styles.premiumPrice}>
+                  {t('stats.premiumPriceMonthly', { price: monthlyPkg.product.priceString })}
+                </Text>
+              ) : null}
+              {annualPkg ? (
+                <Text style={styles.premiumPrice}>
+                  {t('stats.premiumPriceAnnual', { price: annualPkg.product.priceString })}
+                </Text>
+              ) : null}
+              {ready && !monthlyPkg && !annualPkg ? (
+                <Text style={styles.premiumPriceMuted}>{t('stats.premiumPricePending')}</Text>
+              ) : null}
+            </View>
+            <View style={styles.premiumActions}>
+              <PrimaryButton
+                title={
+                  purchaseBusy
+                    ? t('common.processing')
+                    : monthlyPkg
+                      ? t('stats.premiumBuy')
+                      : t('stats.premiumSeePlans')
+                }
+                onPress={onPremiumPurchase}
+                disabled={purchaseBusy}
+              />
+              {monthlyPkg ? (
+                <TextLink title={t('stats.premiumSeePlans')} onPress={openPaywall} />
+              ) : null}
+            </View>
+          </View>
+        )}
 
         {tasksDataReady && s.total === 0 ? (
           <View style={styles.emptyBox}>

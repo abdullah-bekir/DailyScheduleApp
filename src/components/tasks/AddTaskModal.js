@@ -238,7 +238,7 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
     });
   }, []);
 
-  function handleSave() {
+  async function handleSave() {
     if (!title.trim()) {
       setError(t('addTask.titleRequired'));
       scrollTitleIntoView();
@@ -246,8 +246,12 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
       return;
     }
     Keyboard.dismiss();
-    onSave({ title, time: dateToTimeString(time), priority, dateKey });
-    onClose();
+    const saved = await onSave({ title, time: dateToTimeString(time), priority, dateKey });
+    if (saved) {
+      onClose();
+    } else {
+      setError(t('settings.syncError'));
+    }
   }
 
   const dateLabel = formatDateKeyForDisplay(dateKey, dateLocale);

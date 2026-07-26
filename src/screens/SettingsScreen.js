@@ -128,6 +128,51 @@ function createStyles(colors, isDark) {
     goalChipTextSelected: {
       color: isDark ? colors.primary : colors.onPrimary,
     },
+    languageList: {
+      gap: 8,
+    },
+    languageOption: {
+      minHeight: 52,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surfaceSubtle,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    languageOptionSelected: {
+      borderColor: colors.primary,
+      backgroundColor: colors.primaryLight,
+    },
+    languageOptionText: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
+    languageOptionTextSelected: {
+      color: colors.primary,
+    },
+    languageSelector: {
+      minHeight: 54,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.borderStrong,
+      backgroundColor: colors.surfaceSubtle,
+      paddingHorizontal: 14,
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+    },
+    languageSelectorText: {
+      flex: 1,
+      fontSize: 15,
+      fontWeight: '700',
+      color: colors.textPrimary,
+    },
     dangerNote: {
       fontSize: 13,
       fontWeight: '500',
@@ -189,11 +234,13 @@ export default function SettingsScreen() {
   const { colors, isDark, setThemeMode } = useTheme();
   const { language, setLanguage, supportedLanguages } = useLocale();
   const { supabaseConfigured, authReady, userId } = useSupabaseSession();
-  const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData } = useTasks();
+  const storageUserId = supabaseConfigured ? userId : null;
+  const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData, reportTasksSyncError } = useTasks();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const [notificationsOn, setNotificationsOn] = useState(true);
   const [dailyPlanGoal, setDailyPlanGoal] = useState(DEFAULT_DAILY_PLAN_GOAL);
   const [syncBusy, setSyncBusy] = useState(false);
+  const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
 
   const appVersion = Constants.expoConfig?.version ?? Constants.manifest?.version ?? '—';
 
@@ -249,27 +296,29 @@ export default function SettingsScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
-      loadNotificationsEnabled().then((v) => {
+      loadNotificationsEnabled(storageUserId).then((v) => {
         if (active) setNotificationsOn(v);
       });
-      loadDailyPlanGoal().then((g) => {
+      loadDailyPlanGoal(storageUserId).then((g) => {
         if (active) setDailyPlanGoal(g);
       });
       return () => {
         active = false;
       };
-    }, []),
+    }, [storageUserId]),
   );
 
   const onNotificationsChange = async (value) => {
     setNotificationsOn(value);
-    await saveNotificationsEnabled(value);
-    pushProfilePatch({ notifications_enabled: value });
+    await saveNotificationsEnabled(value, storageUserId);
+    if (!supabaseConfigured) return;
+    const result = await pushProfilePatch({ notifications_enabled: value });
+    if (!result?.ok) reportTasksSyncError(result?.error);
   };
 
   const onSelectGoal = async (n) => {
     setDailyPlanGoal(n);
-    await saveDailyPlanGoal(n);
+    await saveDailyPlanGoal(n, storageUserId);
   };
 
   const onManualSync = useCallback(async () => {
@@ -430,32 +479,53 @@ export default function SettingsScreen() {
           subtitle={t('settings.languageSub')}
         >
           <Text style={styles.goalHint}>{t('settings.languageHint')}</Text>
-          <View style={styles.goalChipRow}>
-            {supportedLanguages.map(({ code }) => {
-              const selected = language === code;
-              return (
-                <Pressable
-                  key={code}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={t(`languages.${code}`)}
-                  style={[styles.goalChip, selected && styles.goalChipSelected]}
-                  onPress={() => setLanguage(code)}
-                >
-                  {selected ? (
+          <Pressable
+            style={styles.languageSelector}
+            onPress={() => setLanguagePickerOpen((open) => !open)}
+            accessibilityRole="button"
+            accessibilityState={{ expanded: languagePickerOpen }}
+            accessibilityLabel={t('settings.languageTitle')}
+          >
+            <Ionicons name="language-outline" size={22} color={colors.primary} />
+            <Text style={styles.languageSelectorText} numberOfLines={1}>
+              {t(`languages.${language}`)}
+            </Text>
+            <Ionicons
+              name={languagePickerOpen ? 'chevron-up' : 'chevron-down'}
+              size={20}
+              color={colors.textSecondary}
+            />
+          </Pressable>
+
+          {languagePickerOpen ? (
+            <View style={styles.languageList} accessibilityRole="radiogroup">
+              {supportedLanguages.map(({ code }) => {
+                const selected = language === code;
+                return (
+                  <Pressable
+                    key={code}
+                    accessibilityRole="radio"
+                    accessibilityState={{ checked: selected }}
+                    accessibilityLabel={t(`languages.${code}`)}
+                    style={[styles.languageOption, selected && styles.languageOptionSelected]}
+                    onPress={() => {
+                      setLanguagePickerOpen(false);
+                      setLanguage(code);
+                    }}
+                  >
                     <Ionicons
-                      name="checkmark-circle"
-                      size={18}
-                      color={isDark ? colors.primary : colors.onPrimary}
+                      name={selected ? 'checkmark-circle' : 'ellipse-outline'}
+                      size={22}
+                      color={selected ? colors.primary : colors.textTertiary}
                     />
-                  ) : null}
-                  <Text style={[styles.goalChipText, selected && styles.goalChipTextSelected]} numberOfLines={1}>
-                    {t(`languages.${code}`)}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
+                    <Text style={[styles.languageOptionText, selected && styles.languageOptionTextSelected]} numberOfLines={1}>
+                      {t(`languages.${code}`)}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ) : null}
         </SettingsSectionCard>
 
         <SettingsSectionCard

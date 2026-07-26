@@ -29,6 +29,8 @@ create table public.profiles (
   completion_tally integer not null default 0 check (completion_tally >= 0),
   theme_mode text not null default 'light' check (theme_mode in ('light', 'dark')),
   notifications_enabled boolean not null default true,
+  language_code text not null default 'tr'
+    check (language_code in ('tr', 'en', 'es', 'de', 'fr', 'ar', 'pt', 'ru', 'zh', 'ja', 'ko', 'hi', 'it')),
   premium_enrolled boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -99,6 +101,10 @@ create policy "profiles_select_own"
   on public.profiles for select
   using (auth.uid() = id);
 
+create policy "profiles_insert_own"
+  on public.profiles for insert
+  with check (auth.uid() = id);
+
 create policy "profiles_update_own"
   on public.profiles for update
   using (auth.uid() = id)
@@ -127,6 +133,7 @@ comment on column public.profiles.id is 'auth.users.id ile aynı; RLS: auth.uid(
 comment on column public.profiles.completion_tally is 'İstatistikler: tamamlama puanı; görev tamamlanınca istemci günceller.';
 comment on column public.profiles.theme_mode is 'Ayarlar → Koyu tema: light | dark.';
 comment on column public.profiles.notifications_enabled is 'Ayarlar → Hatırlatıcı bildirimleri tercihi.';
+comment on column public.profiles.language_code is 'Seçilen uygulama dili: tr, en, es, de, fr, ar, pt, ru, zh, ja, ko, hi veya it.';
 comment on column public.profiles.premium_enrolled is 'Ayarlar Premium kartı için yer tutucu; uygulama sürümüne göre kullanılır.';
 comment on column public.profiles.created_at is 'Oluşturulma zamanı.';
 comment on column public.profiles.updated_at is 'Son güncelleme; tetikleyici ile otomatik.';

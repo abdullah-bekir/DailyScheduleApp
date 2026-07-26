@@ -18,6 +18,8 @@ create table if not exists public.profiles (
   completion_tally integer not null default 0 check (completion_tally >= 0),
   theme_mode text not null default 'light' check (theme_mode in ('light', 'dark')),
   notifications_enabled boolean not null default true,
+  language_code text not null default 'tr'
+    check (language_code in ('tr', 'en', 'es', 'de', 'fr', 'ar', 'pt', 'ru', 'zh', 'ja', 'ko', 'hi', 'it')),
   premium_enrolled boolean not null default false,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -28,6 +30,7 @@ alter table public.profiles
   add column if not exists completion_tally integer not null default 0,
   add column if not exists theme_mode text not null default 'light',
   add column if not exists notifications_enabled boolean not null default true,
+  add column if not exists language_code text not null default 'tr',
   add column if not exists premium_enrolled boolean not null default false,
   add column if not exists created_at timestamptz not null default now(),
   add column if not exists updated_at timestamptz not null default now();
@@ -43,6 +46,21 @@ begin
     alter table public.profiles
       add constraint profiles_theme_mode_check
       check (theme_mode in ('light', 'dark'));
+  end if;
+end
+$$;
+
+-- language_code check kısıtı yoksa eklemek için güvenli blok
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conname = 'profiles_language_code_check'
+  ) then
+    alter table public.profiles
+      add constraint profiles_language_code_check
+      check (language_code in ('tr', 'en', 'es', 'de', 'fr', 'ar', 'pt', 'ru', 'zh', 'ja', 'ko', 'hi', 'it'));
   end if;
 end
 $$;

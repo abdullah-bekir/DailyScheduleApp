@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 
 /**
- * v7 mağaza ikonu ile uyumlu mini P monogram (beyaz + koyu gri).
+ * v8 mağaza ikonu ile uyumlu P + onay işareti monogramı.
  */
 export default function AppBrandMark({ size = 40 }) {
   const styles = useMemo(
@@ -11,19 +11,11 @@ export default function AppBrandMark({ size = 40 }) {
         wrap: {
           width: size,
           height: size,
-          borderRadius: size * 0.22,
-          backgroundColor: '#525358',
-          alignItems: 'center',
-          justifyContent: 'center',
-          overflow: 'hidden',
         },
-        letter: {
-          color: '#FFFFFF',
-          fontSize: size * 0.52,
-          fontWeight: '800',
-          lineHeight: size * 0.56,
-          marginTop: -size * 0.02,
-          letterSpacing: -0.5,
+        image: {
+          width: size,
+          height: size,
+          borderRadius: size * 0.22,
         },
       }),
     [size],
@@ -31,7 +23,7 @@ export default function AppBrandMark({ size = 40 }) {
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.letter}>P</Text>
+      <Image source={require('../../../assets/brand-logo-source.png')} style={styles.image} resizeMode="cover" />
     </View>
   );
 }
