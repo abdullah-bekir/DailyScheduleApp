@@ -13,7 +13,8 @@
         "image": "sdk-54"
       },
       "ios": {
-        "simulator": true
+        "simulator": true,
+        "image": "sdk-54"
       }
     },
     "preview": {
@@ -21,6 +22,9 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk",
+        "image": "sdk-54"
+      },
+      "ios": {
         "image": "sdk-54"
       }
     },

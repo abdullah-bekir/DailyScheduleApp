@@ -1,4 +1,4 @@
-# EAS'e gönderilen arşivi sadeleştirir (Windows/IDE çöplüğü, tar hataları riskini azaltır)
+# Planly — EAS arşivini sadeleştirir (IDE/Windows çöplüğü, tar hataları riskini azaltır)
 .expo/
 android/.gradle/
 android/app/build/
@@ -11,6 +11,9 @@ android/build/
 **/*:Zone.Identifier
 eas-build-log.txt
 .expo-export-test/
+.expo-export-test-eas/
 .expo-export-verify/
 .expo-healthcheck-export/
 .expo-verify-export/
+exp-test-export/
+exp-verify-export/
