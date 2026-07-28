@@ -17,4 +17,8 @@ Supabase SQL Editor — çalıştırma sırası (DailyscheduleApp)
 5) Ayarlar ekranı ile ilgili ek SQL (gerekirse)
    → sql/settings/settings_screen_sql.sql
 
+6) Canlı projede istemci updated_at koruması (LWW senkron — bir kez)
+   → sql/patches/preserve_client_updated_at.sql
+   (schema.sql zaten bu fonksiyonu içerir; eski canlı DB için patch şart)
+
 Not: "relation already exists" alırsan ilgili CREATE satırını atlayın veya upgrade dosyası kullanın.
