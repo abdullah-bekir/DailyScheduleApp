@@ -49,7 +49,7 @@ Bu klasördeki `.sql` dosyaları **uygulama paketinden çalıştırılmaz**; Sup
 
 ### `src/navigation/`
 
-React Navigation: **sekme**, **stack**, giriş akışı. Ekranlar buradan bağlanır.
+Tek giriş: `AppNavigator.js` — alt sekmeler + kök stack (`TaskDetail`, `Paywall`).
 
 ### `src/screens/`
 

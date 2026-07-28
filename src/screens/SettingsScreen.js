@@ -311,6 +311,9 @@ export default function SettingsScreen() {
   const onNotificationsChange = async (value) => {
     setNotificationsOn(value);
     await saveNotificationsEnabled(value, storageUserId);
+    if (value) {
+      Alert.alert(t('settings.notifyComingSoonTitle'), t('settings.notifyComingSoonBody'));
+    }
     if (!supabaseConfigured) return;
     const result = await pushProfilePatch({ notifications_enabled: value });
     if (!result?.ok) reportTasksSyncError(result?.error);

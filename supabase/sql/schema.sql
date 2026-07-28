@@ -55,12 +55,18 @@ create index tasks_user_date_key_idx on public.tasks (user_id, date_key);
 create index tasks_user_done_idx on public.tasks (user_id, done);
 
 -- 4.2 updated_at
+-- İstemci updated_at gönderdiyse koru (görev LWW senkronu);
+-- göndermediyse (kolon değişmedi / null) sunucu zamanını yaz.
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
 as $$
 begin
-  new.updated_at = now();
+  if new.updated_at is null then
+    new.updated_at = now();
+  elsif tg_op = 'UPDATE' and new.updated_at is not distinct from old.updated_at then
+    new.updated_at = now();
+  end if;
   return new;
 end;
 $$;

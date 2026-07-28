@@ -52,6 +52,7 @@ export function taskToRemoteRow(task, userId) {
   const attachments = Array.isArray(task.attachments)
     ? task.attachments.map((x) => String(x ?? '').trim()).filter((x) => x.length > 0)
     : [];
+  const updatedAt = normalizeUpdatedAt(task.updatedAt ?? task.updated_at) || new Date().toISOString();
   return {
     user_id: userId,
     id: task.id,
@@ -62,6 +63,8 @@ export function taskToRemoteRow(task, userId) {
     priority: ['high', 'medium', 'low'].includes(task.priority) ? task.priority : 'medium',
     notes: String(task.notes ?? ''),
     attachments,
+    // İstemci LWW için; DB tetikleyicisi client değerini korumalı (schema.sql).
+    updated_at: updatedAt,
   };
 }
 

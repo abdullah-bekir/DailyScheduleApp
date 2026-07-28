@@ -416,17 +416,41 @@ export function TasksProvider({ children }) {
       if (!tasksMutationReady) return false;
       const id = String(taskId ?? '').trim();
       if (!id) return false;
+      let tallyDelta = 0;
       setTasksState((prev) => {
+        const idx = prev.findIndex((t) => String(t.id) === id);
+        if (idx < 0) return prev;
+        const cur = sanitizeTask(prev[idx]);
+        if (cur.done) {
+          tallyDelta = -completionWeightForPriority(cur.priority);
+        }
         const next = prev.filter((t) => String(t.id) !== id);
         persistTasks(next);
         return next;
       });
+      if (tallyDelta !== 0) {
+        setCompletionTally((t) => {
+          const n = Math.max(0, t + tallyDelta);
+          saveCompletionTally(n, storageUserId);
+          queueMicrotask(() => {
+            syncProfilePatch({ completion_tally: n });
+          });
+          return n;
+        });
+      }
       if (!(await deleteRemoteTask(id))) {
         await queueTaskOperation({ type: 'delete', taskId: id });
       }
       return true;
     },
-    [tasksMutationReady, persistTasks, deleteRemoteTask, queueTaskOperation],
+    [
+      tasksMutationReady,
+      persistTasks,
+      deleteRemoteTask,
+      queueTaskOperation,
+      storageUserId,
+      syncProfilePatch,
+    ],
   );
 
   const updateTaskDetails = useCallback(

@@ -30,7 +30,7 @@ export function LocaleProvider({ children }) {
   useEffect(() => {
     let active = true;
     (async () => {
-      setReady(false);
+      // ready'yi false yapma: children unmount olmasın; oturum/dil yenilenirken mevcut dili göster.
       if (supabaseConfigured && !authReady) return;
       const saved = await loadLanguage(SUPPORTED_LANGUAGE_CODES, storageUserId);
       const code = saved ?? normalizeLanguage(i18n.resolvedLanguage || i18n.language);
@@ -106,24 +106,6 @@ export function LocaleProvider({ children }) {
     }),
     [ready, language, dateLocale, isRtl, setLanguage, applyRemoteLanguage],
   );
-
-  if (!ready) {
-    return (
-      <I18nextProvider i18n={i18n}>
-        <LocaleContext.Provider
-          value={{
-            ready: false,
-            language: 'tr',
-            dateLocale: 'tr-TR',
-            isRtl: false,
-            setLanguage: async () => {},
-            applyRemoteLanguage: async () => false,
-            supportedLanguages: SUPPORTED_LANGUAGES,
-          }}
-        />
-      </I18nextProvider>
-    );
-  }
 
   return (
     <I18nextProvider i18n={i18n}>

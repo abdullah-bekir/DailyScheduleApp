@@ -90,7 +90,12 @@ returns trigger
 language plpgsql
 as $$
 begin
-  new.updated_at = now();
+  -- İstemci updated_at gönderdiyse koru; aksi halde now().
+  if new.updated_at is null then
+    new.updated_at = now();
+  elsif tg_op = 'UPDATE' and new.updated_at is not distinct from old.updated_at then
+    new.updated_at = now();
+  end if;
   return new;
 end;
 $$;
