@@ -285,7 +285,8 @@
     "purchaseErrorBody": "L'opération n'a pas pu être effectuée.",
     "restoreTitle": "Restaurer les achats",
     "restoreActive": "Premium semble actif.",
-    "restoreNoActive": "Aucun abonnement actif n'a été trouvé pour ce compte."
+    "restoreNoActive": "Aucun abonnement actif n'a été trouvé pour ce compte.",
+    "billingNotConfigured": "Les achats in-app ne sont pas encore configurés. Ajoutez les clés API RevenueCat, liez les produits Play / App Store, puis recompilez."
   },
   "languages": {
     "tr": "Türkçe",

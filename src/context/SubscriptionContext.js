@@ -5,6 +5,12 @@ import Purchases from 'react-native-purchases';
 
 const SubscriptionContext = createContext(null);
 
+function createBillingError(code = 'BILLING_NOT_CONFIGURED') {
+  const err = new Error(code);
+  err.code = code;
+  return err;
+}
+
 export function SubscriptionProvider({ children }) {
   const extra = Constants.expoConfig?.extra ?? {};
   const entitlementId = extra.revenueCatEntitlementId || 'premium';
@@ -12,19 +18,15 @@ export function SubscriptionProvider({ children }) {
     Platform.OS === 'ios'
       ? String(extra.revenueCatApiKeyIOS ?? '').trim()
       : String(extra.revenueCatApiKeyAndroid ?? '').trim();
+  const billingConfigured =
+    Boolean(apiKey) && Constants.appOwnership !== 'expo';
 
   const [ready, setReady] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [offerings, setOfferings] = useState(null);
 
   useEffect(() => {
-    if (Constants.appOwnership === 'expo') {
-      setReady(true);
-      setIsPro(false);
-      setOfferings(null);
-      return undefined;
-    }
-    if (!apiKey) {
+    if (!billingConfigured) {
       setReady(true);
       setIsPro(false);
       setOfferings(null);
@@ -67,22 +69,28 @@ export function SubscriptionProvider({ children }) {
       cancelled = true;
       Purchases.removeCustomerInfoUpdateListener(listener);
     };
-  }, [apiKey, entitlementId]);
+  }, [apiKey, billingConfigured, entitlementId]);
 
   const purchasePackage = useCallback(
     async (pkg) => {
+      if (!billingConfigured) {
+        throw createBillingError();
+      }
       const { customerInfo } = await Purchases.purchasePackage(pkg);
       setIsPro(Boolean(customerInfo?.entitlements?.active?.[entitlementId]));
       return customerInfo;
     },
-    [entitlementId],
+    [billingConfigured, entitlementId],
   );
 
   const restorePurchases = useCallback(async () => {
+    if (!billingConfigured) {
+      throw createBillingError();
+    }
     const info = await Purchases.restorePurchases();
     setIsPro(Boolean(info?.entitlements?.active?.[entitlementId]));
     return info;
-  }, [entitlementId]);
+  }, [billingConfigured, entitlementId]);
 
   const value = useMemo(
     () => ({
@@ -92,8 +100,9 @@ export function SubscriptionProvider({ children }) {
       purchasePackage,
       restorePurchases,
       entitlementId,
+      billingConfigured,
     }),
-    [ready, isPro, offerings, purchasePackage, restorePurchases, entitlementId],
+    [ready, isPro, offerings, purchasePackage, restorePurchases, entitlementId, billingConfigured],
   );
 
   return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;

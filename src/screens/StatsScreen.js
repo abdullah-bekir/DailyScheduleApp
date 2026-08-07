@@ -499,7 +499,8 @@ export default function StatsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
-  const { isPro, offerings, purchasePackage, ready } = useSubscription();
+  const { isPro, offerings, purchasePackage, ready, entitlementId, billingConfigured } = useSubscription();
+  const showAds = ready && !isPro && isAdsUiEnabled();
   const [purchaseBusy, setPurchaseBusy] = useState(false);
   const { colors, isDark } = useTheme();
   const chartUi = useMemo(
@@ -535,7 +536,7 @@ export default function StatsScreen() {
   const bonusPoints = useMemo(() => getAdsRewardBonusPoints(), []);
 
   const onAdRewardPress = useCallback(async () => {
-    if (!isAdsUiEnabled() || isPro) return;
+    if (!showAds) return;
     setRewardBusy(true);
     try {
       const r = await showRewardedAd();
@@ -558,7 +559,7 @@ export default function StatsScreen() {
     } finally {
       setRewardBusy(false);
     }
-  }, [isPro, bonusPoints, grantAdRewardBonus, t]);
+  }, [showAds, bonusPoints, grantAdRewardBonus, t]);
 
   const monthlyPkg = useMemo(() => {
     const pkgs = offerings?.current?.availablePackages ?? [];
@@ -575,23 +576,32 @@ export default function StatsScreen() {
 
   const onPremiumPurchase = useCallback(async () => {
     if (purchaseBusy) return;
-    if (!monthlyPkg) {
+    if (!billingConfigured || !monthlyPkg) {
       openPaywall();
       return;
     }
     setPurchaseBusy(true);
     try {
-      await purchasePackage(monthlyPkg);
-      Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'));
+      const info = await purchasePackage(monthlyPkg);
+      const active = Boolean(info?.entitlements?.active?.[entitlementId]);
+      if (active) {
+        Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'));
+      } else {
+        Alert.alert(t('paywall.purchaseErrorTitle'), t('paywall.restoreNoActive'));
+      }
     } catch (e) {
       if (e?.userCancelled || e?.code === Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
         return;
       }
-      Alert.alert(t('paywall.purchaseErrorTitle'), e?.message ?? t('paywall.purchaseErrorBody'));
+      const msg =
+        e?.code === 'BILLING_NOT_CONFIGURED'
+          ? t('paywall.billingNotConfigured')
+          : e?.message ?? t('paywall.purchaseErrorBody');
+      Alert.alert(t('paywall.purchaseErrorTitle'), msg);
     } finally {
       setPurchaseBusy(false);
     }
-  }, [monthlyPkg, openPaywall, purchaseBusy, purchasePackage, t]);
+  }, [billingConfigured, entitlementId, monthlyPkg, openPaywall, purchaseBusy, purchasePackage, t]);
 
   const statsTasks = useMemo(() => (tasksDataReady ? tasks : []), [tasksDataReady, tasks]);
 
@@ -658,9 +668,9 @@ export default function StatsScreen() {
 
   const scrollBottomPad = useMemo(() => {
     const base = Math.max(insets.bottom + tabBarHeight + 40, tabBarHeight + 56);
-    if (isPro) return base;
+    if (!showAds) return base;
     return Math.max(insets.bottom + tabBarHeight + 40 + 88, tabBarHeight + 144);
-  }, [insets.bottom, isPro, tabBarHeight]);
+  }, [insets.bottom, showAds, tabBarHeight]);
 
   return (
     <ScrollView
@@ -705,8 +715,10 @@ export default function StatsScreen() {
                   {t('stats.premiumPriceAnnual', { price: annualPkg.product.priceString })}
                 </Text>
               ) : null}
-              {ready && !monthlyPkg && !annualPkg ? (
-                <Text style={styles.premiumPriceMuted}>{t('stats.premiumPricePending')}</Text>
+              {ready && (!billingConfigured || (!monthlyPkg && !annualPkg)) ? (
+                <Text style={styles.premiumPriceMuted}>
+                  {billingConfigured ? t('stats.premiumPricePending') : t('paywall.billingNotConfigured')}
+                </Text>
               ) : null}
             </View>
             <View style={styles.premiumActions}>
@@ -714,14 +726,14 @@ export default function StatsScreen() {
                 title={
                   purchaseBusy
                     ? t('common.processing')
-                    : monthlyPkg
+                    : billingConfigured && monthlyPkg
                       ? t('stats.premiumBuy')
                       : t('stats.premiumSeePlans')
                 }
                 onPress={onPremiumPurchase}
                 disabled={purchaseBusy}
               />
-              {monthlyPkg ? (
+              {billingConfigured && monthlyPkg ? (
                 <TextLink title={t('stats.premiumSeePlans')} onPress={openPaywall} />
               ) : null}
             </View>
@@ -979,7 +991,7 @@ export default function StatsScreen() {
           </>
         ) : null}
 
-        {tasksDataReady && !isPro && isAdsUiEnabled() ? (
+        {tasksDataReady && showAds ? (
           <View style={[styles.card, { marginTop: 14 }]}>
             <Text style={styles.cardTitle}>{t('stats.supportTitle')}</Text>
             <Text style={styles.hint}>{t('stats.supportBody', { points: bonusPoints })}</Text>
@@ -995,7 +1007,7 @@ export default function StatsScreen() {
           </View>
         ) : null}
 
-        {tasksDataReady && !isPro && isAdsUiEnabled() ? (
+        {tasksDataReady && showAds ? (
           <View style={{ marginTop: 16 }}>
             <AdMobBannerCard />
           </View>

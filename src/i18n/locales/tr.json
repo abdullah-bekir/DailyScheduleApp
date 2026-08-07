@@ -285,7 +285,8 @@
     "purchaseErrorBody": "İşlem tamamlanamadı.",
     "restoreTitle": "Geri yükleme",
     "restoreActive": "Premium aktif görünüyor.",
-    "restoreNoActive": "Bu hesapta aktif abonelik bulunamadı."
+    "restoreNoActive": "Bu hesapta aktif abonelik bulunamadı.",
+    "billingNotConfigured": "Uygulama içi satın alma henüz yapılandırılmadı. RevenueCat API anahtarlarını ekleyip Play / App Store ürünlerini bağlayın, ardından yeniden derleyin."
   },
   "languages": {
     "tr": "Türkçe",

@@ -285,7 +285,8 @@
     "purchaseErrorBody": "Não foi possível concluir a operação.",
     "restoreTitle": "Restaurar compras",
     "restoreActive": "O Premium parece estar ativo.",
-    "restoreNoActive": "Nenhuma assinatura ativa foi encontrada para esta conta."
+    "restoreNoActive": "Nenhuma assinatura ativa foi encontrada para esta conta.",
+    "billingNotConfigured": "As compras no app ainda não estão configuradas. Adicione as chaves da RevenueCat, vincule os produtos da Play / App Store e recompile."
   },
   "languages": {
     "tr": "Türkçe",

@@ -113,7 +113,8 @@ export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { offerings, purchasePackage, restorePurchases, ready, entitlementId } = useSubscription();
+  const { offerings, purchasePackage, restorePurchases, ready, entitlementId, billingConfigured } =
+    useSubscription();
   const [busyId, setBusyId] = useState(null);
 
   const current = offerings?.current;
@@ -133,10 +134,15 @@ export default function PaywallScreen() {
       if (!pkg) return;
       setBusyId(pkg.identifier);
       try {
-        await purchasePackage(pkg);
-        Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'), [
-          { text: t('common.ok'), onPress: () => navigation.goBack() },
-        ]);
+        const info = await purchasePackage(pkg);
+        const active = Boolean(info?.entitlements?.active?.[entitlementId]);
+        if (active) {
+          Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'), [
+            { text: t('common.ok'), onPress: () => navigation.goBack() },
+          ]);
+        } else {
+          Alert.alert(t('paywall.purchaseErrorTitle'), t('paywall.restoreNoActive'));
+        }
       } catch (e) {
         if (
           e?.userCancelled ||
@@ -144,15 +150,23 @@ export default function PaywallScreen() {
         ) {
           return;
         }
-        Alert.alert(t('paywall.purchaseErrorTitle'), e?.message ?? t('paywall.purchaseErrorBody'));
+        const msg =
+          e?.code === 'BILLING_NOT_CONFIGURED'
+            ? t('paywall.billingNotConfigured')
+            : e?.message ?? t('paywall.purchaseErrorBody');
+        Alert.alert(t('paywall.purchaseErrorTitle'), msg);
       } finally {
         setBusyId(null);
       }
     },
-    [navigation, purchasePackage, t],
+    [entitlementId, navigation, purchasePackage, t],
   );
 
   const onRestore = useCallback(async () => {
+    if (!billingConfigured) {
+      Alert.alert(t('paywall.restoreTitle'), t('paywall.billingNotConfigured'));
+      return;
+    }
     setBusyId('restore');
     try {
       const info = await restorePurchases();
@@ -162,13 +176,17 @@ export default function PaywallScreen() {
         active ? t('paywall.restoreActive') : t('paywall.restoreNoActive'),
       );
     } catch (e) {
-      Alert.alert(t('paywall.restoreTitle'), e?.message ?? t('paywall.purchaseErrorBody'));
+      const msg =
+        e?.code === 'BILLING_NOT_CONFIGURED'
+          ? t('paywall.billingNotConfigured')
+          : e?.message ?? t('paywall.purchaseErrorBody');
+      Alert.alert(t('paywall.restoreTitle'), msg);
     } finally {
       setBusyId(null);
     }
-  }, [entitlementId, restorePurchases, t]);
+  }, [billingConfigured, entitlementId, restorePurchases, t]);
 
-  const missingProducts = ready && packages.length === 0;
+  const missingProducts = ready && (!billingConfigured || (!monthly && !annual));
 
   return (
     <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
@@ -205,7 +223,7 @@ export default function PaywallScreen() {
         {missingProducts ? (
           <View style={styles.warnBox}>
             <Text style={styles.warnText}>
-              {t('paywall.missingProducts')}
+              {billingConfigured ? t('paywall.missingProducts') : t('paywall.billingNotConfigured')}
             </Text>
           </View>
         ) : null}
@@ -237,7 +255,9 @@ export default function PaywallScreen() {
         ) : null}
 
         <View style={styles.footer}>
-          <TextLink title={t('paywall.restore')} onPress={() => !busyId && onRestore()} />
+          {billingConfigured ? (
+            <TextLink title={t('paywall.restore')} onPress={() => !busyId && onRestore()} />
+          ) : null}
           {busyId === 'restore' ? <ActivityIndicator color={colors.primary} /> : null}
         </View>
       </View>

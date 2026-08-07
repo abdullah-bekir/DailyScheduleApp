@@ -285,7 +285,8 @@
     "purchaseErrorBody": "تعذر إكمال العملية.",
     "restoreTitle": "استعادة المشتريات",
     "restoreActive": "يبدو أن Premium نشط.",
-    "restoreNoActive": "لم يتم العثور على اشتراك نشط لهذا الحساب."
+    "restoreNoActive": "لم يتم العثور على اشتراك نشط لهذا الحساب.",
+    "billingNotConfigured": "عمليات الشراء داخل التطبيق غير مُعدّة بعد. أضف مفاتيح RevenueCat واربط منتجات Play / App Store ثم أعد البناء."
   },
   "languages": {
     "tr": "Türkçe",

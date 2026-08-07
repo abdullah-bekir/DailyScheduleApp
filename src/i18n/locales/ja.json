@@ -285,7 +285,8 @@
     "purchaseErrorBody": "処理を完了できませんでした。",
     "restoreTitle": "購入を復元",
     "restoreActive": "Premium は有効のようです。",
-    "restoreNoActive": "このアカウントに有効なサブスクリプションは見つかりませんでした。"
+    "restoreNoActive": "このアカウントに有効なサブスクリプションは見つかりませんでした。",
+    "billingNotConfigured": "アプリ内課金はまだ設定されていません。RevenueCat の API キーを追加し、Play / App Store の商品を連携してから再ビルドしてください。"
   },
   "languages": {
     "tr": "Türkçe",

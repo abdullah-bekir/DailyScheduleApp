@@ -127,7 +127,8 @@ export default function HomeScreen() {
   const { dateLocale } = useLocale();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { isPro } = useSubscription();
+  const { isPro, ready: subscriptionReady } = useSubscription();
+  const showAds = subscriptionReady && !isPro && isAdsUiEnabled();
   const { supabaseConfigured, userId } = useSupabaseSession();
   const storageUserId = supabaseConfigured ? userId : null;
   const { tasks, openAddTaskModal, refreshTasksFromSupabase, tasksHydrated, tasksDataReady, tasksMutationReady, completionTally, grantAdRewardBonus } =
@@ -150,7 +151,7 @@ export default function HomeScreen() {
   );
 
   const onOptionalAdReward = useCallback(async () => {
-    if (!isAdsUiEnabled() || isPro) return;
+    if (!showAds) return;
     setRewardBusy(true);
     try {
       const r = await showRewardedAd();
@@ -174,7 +175,7 @@ export default function HomeScreen() {
     } finally {
       setRewardBusy(false);
     }
-  }, [isPro, bonusPoints, grantAdRewardBonus, t]);
+  }, [showAds, bonusPoints, grantAdRewardBonus, t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -233,7 +234,7 @@ export default function HomeScreen() {
 
   const navigateWithInterstitial = useCallback(
     async (routeName) => {
-      if (!isPro) {
+      if (showAds) {
         navTapCountRef.current += 1;
         if (navTapCountRef.current % 7 === 0) {
           await showInterstitialIfReady();
@@ -241,7 +242,7 @@ export default function HomeScreen() {
       }
       navigation.navigate(routeName);
     },
-    [navigation, isPro],
+    [navigation, showAds],
   );
 
   return (
@@ -368,7 +369,7 @@ export default function HomeScreen() {
         <PrimaryButton title={t('home.addTask')} onPress={openAddTaskModal} disabled={!tasksMutationReady} mutedCta />
         <Text style={styles.fabHint}>{t('home.addTaskHint')}</Text>
 
-        {!isPro && isAdsUiEnabled() ? (
+        {showAds ? (
           <View style={styles.inlineLink}>
             <TextLink
               title={rewardBusy ? t('home.adOpening') : t('home.adReward', { points: bonusPoints })}

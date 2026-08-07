@@ -285,7 +285,8 @@
     "purchaseErrorBody": "Не удалось завершить операцию.",
     "restoreTitle": "Восстановить покупки",
     "restoreActive": "Premium, похоже, активен.",
-    "restoreNoActive": "Для этой учётной записи не найдена активная подписка."
+    "restoreNoActive": "Для этой учётной записи не найдена активная подписка.",
+    "billingNotConfigured": "Внутренние покупки ещё не настроены. Добавьте ключи RevenueCat, привяжите продукты Play / App Store и пересоберите приложение."
   },
   "languages": {
     "tr": "Türkçe",

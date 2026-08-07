@@ -285,7 +285,8 @@
     "purchaseErrorBody": "प्रक्रिया पूरी नहीं हो सकी।",
     "restoreTitle": "खरीदारी पुनर्स्थापित करें",
     "restoreActive": "Premium सक्रिय दिखाई देता है।",
-    "restoreNoActive": "इस खाते के लिए कोई सक्रिय सदस्यता नहीं मिली।"
+    "restoreNoActive": "इस खाते के लिए कोई सक्रिय सदस्यता नहीं मिली।",
+    "billingNotConfigured": "इन-ऐप खरीदारी अभी कॉन्फ़िगर नहीं है। RevenueCat API कुंजियाँ जोड़ें, Play / App Store उत्पाद लिंक करें, फिर फिर से बिल्ड करें।"
   },
   "languages": {
     "tr": "Türkçe",

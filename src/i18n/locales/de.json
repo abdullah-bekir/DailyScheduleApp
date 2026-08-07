@@ -285,7 +285,8 @@
     "purchaseErrorBody": "Der Vorgang konnte nicht abgeschlossen werden.",
     "restoreTitle": "Käufe wiederherstellen",
     "restoreActive": "Premium scheint aktiv zu sein.",
-    "restoreNoActive": "Für dieses Konto wurde kein aktives Abonnement gefunden."
+    "restoreNoActive": "Für dieses Konto wurde kein aktives Abonnement gefunden.",
+    "billingNotConfigured": "In-App-Käufe sind noch nicht konfiguriert. RevenueCat-API-Schlüssel hinzufügen, Play-/App-Store-Produkte verknüpfen und neu bauen."
   },
   "languages": {
     "tr": "Türkçe",

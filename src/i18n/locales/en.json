@@ -285,7 +285,8 @@
     "purchaseErrorBody": "The transaction could not be completed.",
     "restoreTitle": "Restore purchases",
     "restoreActive": "Premium appears to be active.",
-    "restoreNoActive": "No active subscription was found for this account."
+    "restoreNoActive": "No active subscription was found for this account.",
+    "billingNotConfigured": "In-app purchases are not configured yet. Add RevenueCat API keys and link Play / App Store products, then rebuild."
   },
   "languages": {
     "tr": "Türkçe",

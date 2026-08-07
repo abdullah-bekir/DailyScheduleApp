@@ -285,7 +285,8 @@
     "purchaseErrorBody": "无法完成操作。",
     "restoreTitle": "恢复购买",
     "restoreActive": "Premium 似乎已激活。",
-    "restoreNoActive": "未找到此账户的有效订阅。"
+    "restoreNoActive": "未找到此账户的有效订阅。",
+    "billingNotConfigured": "应用内购买尚未配置。请添加 RevenueCat API 密钥并关联 Play / App Store 产品，然后重新构建。"
   },
   "languages": {
     "tr": "Türkçe",

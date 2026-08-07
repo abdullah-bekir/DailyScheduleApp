@@ -198,7 +198,8 @@ export default function TaskListScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors, isRtl), [colors, isRtl]);
-  const { isPro } = useSubscription();
+  const { isPro, ready: subscriptionReady } = useSubscription();
+  const showAds = subscriptionReady && !isPro && isAdsUiEnabled();
   const { supabaseConfigured, userId } = useSupabaseSession();
   const storageUserId = supabaseConfigured ? userId : null;
 
@@ -396,7 +397,7 @@ export default function TaskListScreen() {
           )}
         </View>
 
-        {!isPro && isAdsUiEnabled() ? (
+        {showAds ? (
           <View style={{ marginTop: 8, marginBottom: 8 }}>
             <AdMobBannerCard />
           </View>

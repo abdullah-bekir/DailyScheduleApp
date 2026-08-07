@@ -285,7 +285,8 @@
     "purchaseErrorBody": "Impossibile completare l'operazione.",
     "restoreTitle": "Ripristina acquisti",
     "restoreActive": "Premium sembra attivo.",
-    "restoreNoActive": "Nessun abbonamento attivo trovato per questo account."
+    "restoreNoActive": "Nessun abbonamento attivo trovato per questo account.",
+    "billingNotConfigured": "Gli acquisti in-app non sono ancora configurati. Aggiungi le chiavi API RevenueCat, collega i prodotti Play / App Store e ricompila."
   },
   "languages": {
     "tr": "Türkçe",
