@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
-import { useFocusEffect, useScrollToTop } from '@react-navigation/native';
+import { useScrollToTop } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,20 +11,13 @@ import PrimaryButton from '../components/common/PrimaryButton';
 import ScreenHero from '../components/layout/ScreenHero';
 import SettingsSectionCard from '../components/settings/SettingsSectionCard';
 import SettingsToggleRow from '../components/settings/SettingsToggleRow';
+import { useAppSettings } from '../context/AppSettingsContext';
 import { useLocale } from '../context/LocaleContext';
 import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
-import { pushProfilePatch } from '../lib/profileRemote';
 import { cardShadow } from '../theme/shadows';
-import {
-  DAILY_PLAN_GOAL_OPTIONS,
-  DEFAULT_DAILY_PLAN_GOAL,
-  loadDailyPlanGoal,
-  loadNotificationsEnabled,
-  saveDailyPlanGoal,
-  saveNotificationsEnabled,
-} from '../utils/appSettingsStorage';
+import { DAILY_PLAN_GOAL_OPTIONS } from '../utils/appSettingsStorage';
 
 function createStyles(colors, isDark) {
   return StyleSheet.create({
@@ -234,11 +227,14 @@ export default function SettingsScreen() {
   const { colors, isDark, setThemeMode } = useTheme();
   const { language, setLanguage, supportedLanguages } = useLocale();
   const { supabaseConfigured, authReady, userId } = useSupabaseSession();
-  const storageUserId = supabaseConfigured ? userId : null;
+  const {
+    dailyPlanGoal,
+    notificationsEnabled: notificationsOn,
+    setDailyPlanGoal,
+    setNotificationsEnabled,
+  } = useAppSettings();
   const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData, reportTasksSyncError } = useTasks();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
-  const [notificationsOn, setNotificationsOn] = useState(true);
-  const [dailyPlanGoal, setDailyPlanGoal] = useState(DEFAULT_DAILY_PLAN_GOAL);
   const [syncBusy, setSyncBusy] = useState(false);
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
 
@@ -293,35 +289,13 @@ export default function SettingsScreen() {
     };
   }, [supabaseConfigured, authReady, userId, tasksDataReady, tasksSyncError, colors, t]);
 
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      loadNotificationsEnabled(storageUserId).then((v) => {
-        if (active) setNotificationsOn(v);
-      });
-      loadDailyPlanGoal(storageUserId).then((g) => {
-        if (active) setDailyPlanGoal(g);
-      });
-      return () => {
-        active = false;
-      };
-    }, [storageUserId]),
-  );
-
   const onNotificationsChange = async (value) => {
-    setNotificationsOn(value);
-    await saveNotificationsEnabled(value, storageUserId);
-    if (value) {
-      Alert.alert(t('settings.notifyComingSoonTitle'), t('settings.notifyComingSoonBody'));
-    }
-    if (!supabaseConfigured) return;
-    const result = await pushProfilePatch({ notifications_enabled: value });
-    if (!result?.ok) reportTasksSyncError(result?.error);
+    const result = await setNotificationsEnabled(value);
+    if (result?.ok === false) reportTasksSyncError(result?.error);
   };
 
-  const onSelectGoal = async (n) => {
+  const onSelectGoal = (n) => {
     setDailyPlanGoal(n);
-    await saveDailyPlanGoal(n, storageUserId);
   };
 
   const onManualSync = useCallback(async () => {
@@ -343,8 +317,11 @@ export default function SettingsScreen() {
         {
           text: t('settings.resetConfirm'),
           style: 'destructive',
-          onPress: () => {
-            resetAllTaskData();
+          onPress: async () => {
+            const ok = await resetAllTaskData();
+            if (!ok) {
+              Alert.alert(t('settings.syncError'), t('settings.resetBody'));
+            }
           },
         },
       ],

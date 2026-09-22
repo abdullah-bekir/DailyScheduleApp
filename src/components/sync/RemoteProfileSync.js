@@ -3,10 +3,10 @@ import { useEffect, useRef } from 'react';
 import { useSupabaseSession } from '../../context/SupabaseContext';
 import { useTasks } from '../../context/TasksContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useAppSettings } from '../../context/AppSettingsContext';
 import { useLocale } from '../../context/LocaleContext';
 import { coerceBoolean } from '../../lib/taskRemote';
 import { fetchProfile } from '../../lib/profileRemote';
-import { saveNotificationsEnabled } from '../../utils/appSettingsStorage';
 
 /**
  * Oturum ve görev bulutu hazır olduğunda profil (tema, bildirim, tamamlama puanı) sunucudan okunur;
@@ -14,15 +14,20 @@ import { saveNotificationsEnabled } from '../../utils/appSettingsStorage';
  */
 export default function RemoteProfileSync() {
   const { authReady, userId, supabaseConfigured } = useSupabaseSession();
+  const { applyRemoteNotificationsEnabled } = useAppSettings();
   const { language, applyRemoteLanguage } = useLocale();
   const { themeMode, applyRemoteTheme } = useTheme();
-  const { tasksDataReady, completionTally, applyRemoteCompletionTally, reportTasksSyncError } = useTasks();
+  const { tasksDataReady, completionTally, applyRemoteCompletionTally } = useTasks();
   const preferencesRef = useRef({ language, themeMode, completionTally });
   const syncedUserRef = useRef(null);
   const userIdRef = useRef(userId);
 
   preferencesRef.current = { language, themeMode, completionTally };
   userIdRef.current = userId;
+
+  useEffect(() => {
+    syncedUserRef.current = null;
+  }, [userId]);
 
   useEffect(() => {
     if (!supabaseConfigured || !authReady || !userId || !tasksDataReady) return;
@@ -38,7 +43,7 @@ export default function RemoteProfileSync() {
       }
       if (cancelled || userIdRef.current !== userId) return;
       if (!profileResult.ok) {
-        reportTasksSyncError(profileResult.error);
+        console.warn('[supabase] profile sync', profileResult.error || 'unknown_error');
         return;
       }
       syncedUserRef.current = userId;
@@ -55,7 +60,7 @@ export default function RemoteProfileSync() {
       if (profile.language_code && currentPreferences.language === initialPreferences.language) {
         await applyRemoteLanguage(profile.language_code);
       }
-      await saveNotificationsEnabled(coerceBoolean(profile.notifications_enabled, true), userId);
+      await applyRemoteNotificationsEnabled(coerceBoolean(profile.notifications_enabled, true));
     })();
     return () => {
       cancelled = true;
@@ -68,7 +73,7 @@ export default function RemoteProfileSync() {
     applyRemoteTheme,
     applyRemoteCompletionTally,
     applyRemoteLanguage,
-    reportTasksSyncError,
+    applyRemoteNotificationsEnabled,
     language,
     themeMode,
     completionTally,

@@ -3,6 +3,9 @@ import { Platform } from 'react-native';
 
 import { isAdsUiEnabled } from './adsConfig';
 
+/** AdMob event gelmezse UI'nin sonsuza asılı kalmasını önler. */
+const REWARDED_INTERSTITIAL_TIMEOUT_MS = 45000;
+
 function getRewardedInterstitialUnitId() {
   const extra = Constants.expoConfig?.extra || {};
   if (Platform.OS === 'android') {
@@ -50,10 +53,12 @@ export async function showRewardedInterstitialAd() {
     return await new Promise((resolve) => {
       let earned = false;
       let finished = false;
+      let timeoutId = null;
 
       const finish = (payload) => {
         if (finished) return;
         finished = true;
+        if (timeoutId != null) clearTimeout(timeoutId);
         detach();
         resolve(payload);
       };
@@ -71,6 +76,10 @@ export async function showRewardedInterstitialAd() {
         subs.length = 0;
       };
 
+      timeoutId = setTimeout(() => {
+        finish({ shown: false, earned: false, reason: 'timeout' });
+      }, REWARDED_INTERSTITIAL_TIMEOUT_MS);
+
       subs.push(
         ri.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
           earned = true;
@@ -83,7 +92,7 @@ export async function showRewardedInterstitialAd() {
       );
       subs.push(
         ri.addAdEventListener(AdEventType.ERROR, () => {
-          finish({ shown: false, earned: false });
+          finish({ shown: false, earned: false, reason: 'error' });
         }),
       );
       subs.push(

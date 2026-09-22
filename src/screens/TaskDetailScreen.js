@@ -1,7 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PrimaryButton from '../components/common/PrimaryButton';
@@ -130,7 +130,7 @@ export default function TaskDetailScreen({ route }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { tasks, updateTaskDetails, toggleTaskDone, tasksMutationReady } = useTasks();
+  const { tasks, updateTaskDetails, toggleTaskDone, deleteTask, tasksMutationReady } = useTasks();
   const taskId = route?.params?.taskId ? String(route.params.taskId) : '';
   const task = useMemo(() => tasks.find((t) => String(t.id) === taskId), [tasks, taskId]);
   const [attachmentDraft, setAttachmentDraft] = useState('');
@@ -139,6 +139,38 @@ export default function TaskDetailScreen({ route }) {
   useEffect(() => {
     setNotesDraft(typeof task?.notes === 'string' ? task.notes : '');
   }, [taskId, task?.notes]);
+
+  const flushNotesIfChanged = useCallback(() => {
+    if (!taskId || !task || !tasksMutationReady) return;
+    const next = String(notesDraft ?? '');
+    const current = String(task.notes ?? '');
+    if (next !== current) {
+      updateTaskDetails(taskId, { notes: next });
+    }
+  }, [notesDraft, task, taskId, tasksMutationReady, updateTaskDetails]);
+
+  useEffect(() => {
+    const unsub = navigation.addListener('beforeRemove', () => {
+      flushNotesIfChanged();
+    });
+    return unsub;
+  }, [navigation, flushNotesIfChanged]);
+
+  const confirmDelete = useCallback(() => {
+    if (!taskId || !task) return;
+    const titlePreview = task.title?.trim() ? task.title.trim() : t('common.thisTask');
+    Alert.alert(t('tasks.deleteTitle'), t('tasks.deleteBody', { title: titlePreview }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          const ok = await deleteTask(taskId);
+          if (ok) navigation.goBack();
+        },
+      },
+    ]);
+  }, [deleteTask, navigation, task, taskId, t]);
 
   /** Yığın kökü değilken useScrollToTop devreye girmez; sekme tekrarında yine yukarı kaydır */
   useEffect(() => {
@@ -233,13 +265,7 @@ export default function TaskDetailScreen({ route }) {
             editable={tasksMutationReady}
             numberOfLines={4}
             textAlignVertical="top"
-            onBlur={() => {
-              const next = String(notesDraft ?? '');
-              const current = String(task.notes ?? '');
-              if (next !== current) {
-                updateTaskDetails(taskId, { notes: next });
-              }
-            }}
+            onBlur={flushNotesIfChanged}
           />
           <Text style={styles.muted}>{t('taskDetail.notesHint')}</Text>
         </View>
@@ -293,6 +319,13 @@ export default function TaskDetailScreen({ route }) {
             ))
           )}
         </View>
+
+        <PrimaryButton
+          title={t('common.delete')}
+          variant="outline"
+          onPress={confirmDelete}
+          disabled={!tasksMutationReady}
+        />
       </ScrollView>
     </View>
   );

@@ -86,8 +86,9 @@ export function LocaleProvider({ children }) {
   }, [applyLanguage, supabaseConfigured]);
 
   const applyRemoteLanguage = useCallback(async (code) => {
-    if (!isSupportedLanguage(code)) return false;
-    await applyLanguage(code, { persist: true, reloadOnDirectionChange: true });
+    const trimmed = typeof code === 'string' ? code.trim() : '';
+    if (!isSupportedLanguage(trimmed)) return false;
+    await applyLanguage(trimmed, { persist: true, reloadOnDirectionChange: false });
     return true;
   }, [applyLanguage]);
 

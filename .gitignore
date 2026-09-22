@@ -12,6 +12,7 @@ exp-verify-export/
 expo-env.d.ts
 
 # Native
+android/local.properties
 .kotlin/
 *.orig.*
 *.jks
@@ -39,14 +40,29 @@ Thumbs.db
 # local env files
 .env
 .env*.local
+.env.production.eas
+
+# Play Store upload assets (local; not required in app bundle)
+store-assets/
+
+# Local secrets (Play/EAS service account JSON — never commit)
+secrets/
 
 # typescript
 *.tsbuildinfo
 
 # local export / build noise
 eas-build-log.txt
+eas-build-log-decoded.txt
+eas-build-log-url.txt
+eas-build-view.json
 .expo-export-test/
 .expo-export-test-eas/
 .expo-export-verify/
 .expo-healthcheck-export/
 .expo-verify-export/
+.expo-export-healthcheck/
+.expo-export-quick/
+.expo-export-verify2/
+.expo-export-check/
+.expo-export-temp/

@@ -16,19 +16,15 @@ import MotivationQuoteBrowser from '../components/dashboard/MotivationQuoteBrows
 import StatCard from '../components/dashboard/StatCard';
 import TaskItem from '../components/dashboard/TaskItem';
 import TextLink from '../components/common/TextLink';
+import { useAppSettings } from '../context/AppSettingsContext';
 import { useLocale } from '../context/LocaleContext';
 import { useSubscription } from '../context/SubscriptionContext';
-import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTasks } from '../context/TasksContext';
 import { getAdsRewardBonusPoints, isAdsUiEnabled } from '../lib/ads/adsConfig';
 import { showInterstitialIfReady } from '../lib/ads/interstitialAd';
 import { showRewardedAd } from '../lib/ads/rewardedAd';
 import { useTheme } from '../context/ThemeContext';
 import { cardShadow } from '../theme/shadows';
-import {
-  DEFAULT_DAILY_PLAN_GOAL,
-  loadDailyPlanGoal,
-} from '../utils/appSettingsStorage';
 import { getCombinedDailyProgress, isDailyPlanProgressComplete } from '../utils/dailyPlanProgress';
 import { formatTodayHeaderCapsLine, getTodayDateKey } from '../utils/dateKey';
 
@@ -129,26 +125,12 @@ export default function HomeScreen() {
   const styles = useMemo(() => createStyles(colors), [colors]);
   const { isPro, ready: subscriptionReady } = useSubscription();
   const showAds = subscriptionReady && !isPro && isAdsUiEnabled();
-  const { supabaseConfigured, userId } = useSupabaseSession();
-  const storageUserId = supabaseConfigured ? userId : null;
+  const { dailyPlanGoal } = useAppSettings();
   const { tasks, openAddTaskModal, refreshTasksFromSupabase, tasksHydrated, tasksDataReady, tasksMutationReady, completionTally, grantAdRewardBonus } =
     useTasks();
   const navTapCountRef = useRef(0);
   const [rewardBusy, setRewardBusy] = useState(false);
-  const [dailyPlanGoal, setDailyPlanGoal] = useState(DEFAULT_DAILY_PLAN_GOAL);
   const bonusPoints = useMemo(() => getAdsRewardBonusPoints(), []);
-
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      loadDailyPlanGoal(storageUserId).then((g) => {
-        if (active) setDailyPlanGoal(g);
-      });
-      return () => {
-        active = false;
-      };
-    }, [storageUserId]),
-  );
 
   const onOptionalAdReward = useCallback(async () => {
     if (!showAds) return;

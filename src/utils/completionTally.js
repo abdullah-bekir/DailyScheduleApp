@@ -8,22 +8,28 @@ function userScopedTallyKey(userId) {
   return id ? `${COMPLETION_TALLY_KEY}:${id}` : COMPLETION_TALLY_KEY;
 }
 
+function tallyMigrationMarker(userId) {
+  const id = typeof userId === 'string' ? userId.trim() : '';
+  return id ? `${COMPLETION_TALLY_MIGRATION_KEY}:${id}` : null;
+}
+
 async function migrateLegacyTallyForUser(userId) {
   const id = typeof userId === 'string' ? userId.trim() : '';
   if (!id) return;
 
+  const markerKey = tallyMigrationMarker(id);
   const targetKey = userScopedTallyKey(id);
-  const [migrationOwner, target, legacy] = await Promise.all([
-    AsyncStorage.getItem(COMPLETION_TALLY_MIGRATION_KEY),
+  const [migrated, target, legacy] = await Promise.all([
+    AsyncStorage.getItem(markerKey),
     AsyncStorage.getItem(targetKey),
     AsyncStorage.getItem(COMPLETION_TALLY_KEY),
   ]);
 
-  if (!migrationOwner && target == null && legacy != null) {
+  if (migrated !== '1' && target == null && legacy != null) {
     await AsyncStorage.setItem(targetKey, legacy);
   }
-  if (!migrationOwner) {
-    await AsyncStorage.setItem(COMPLETION_TALLY_MIGRATION_KEY, id);
+  if (migrated !== '1') {
+    await AsyncStorage.setItem(markerKey, '1');
   }
 }
 

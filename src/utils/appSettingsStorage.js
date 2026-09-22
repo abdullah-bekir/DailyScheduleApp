@@ -15,22 +15,28 @@ function migrationKey(key) {
   return `${SETTINGS_MIGRATION_PREFIX}:${key}`;
 }
 
+function userMigrationMarker(key, userId) {
+  const id = typeof userId === 'string' ? userId.trim() : '';
+  return id ? `${migrationKey(key)}:${id}` : null;
+}
+
 async function migrateLegacySetting(key, userId) {
   const id = typeof userId === 'string' ? userId.trim() : '';
   if (!id) return;
 
+  const markerKey = userMigrationMarker(key, id);
   const targetKey = userScopedKey(key, id);
-  const [migrationOwner, target, legacy] = await Promise.all([
-    AsyncStorage.getItem(migrationKey(key)),
+  const [migrated, target, legacy] = await Promise.all([
+    AsyncStorage.getItem(markerKey),
     AsyncStorage.getItem(targetKey),
     AsyncStorage.getItem(key),
   ]);
 
-  if (!migrationOwner && target == null && legacy != null) {
+  if (migrated !== '1' && target == null && legacy != null) {
     await AsyncStorage.setItem(targetKey, legacy);
   }
-  if (!migrationOwner) {
-    await AsyncStorage.setItem(migrationKey(key), id);
+  if (migrated !== '1') {
+    await AsyncStorage.setItem(markerKey, '1');
   }
 }
 

@@ -12,17 +12,13 @@ import ProgressBar from '../components/dashboard/ProgressBar';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ScreenHero from '../components/layout/ScreenHero';
 import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner';
+import { useAppSettings } from '../context/AppSettingsContext';
 import { useLocale } from '../context/LocaleContext';
 import { useSubscription } from '../context/SubscriptionContext';
-import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
 import { isAdsUiEnabled } from '../lib/ads/adsConfig';
 import { cardShadow } from '../theme/shadows';
-import {
-  DEFAULT_DAILY_PLAN_GOAL,
-  loadDailyPlanGoal,
-} from '../utils/appSettingsStorage';
 import { getCombinedDailyProgress } from '../utils/dailyPlanProgress';
 import { addDaysToDateKey, formatDateKeyForDisplay, getTodayDateKey } from '../utils/dateKey';
 import { sortTasksByTime } from '../utils/sortTasks';
@@ -200,8 +196,7 @@ export default function TaskListScreen() {
   const styles = useMemo(() => createStyles(colors, isRtl), [colors, isRtl]);
   const { isPro, ready: subscriptionReady } = useSubscription();
   const showAds = subscriptionReady && !isPro && isAdsUiEnabled();
-  const { supabaseConfigured, userId } = useSupabaseSession();
-  const storageUserId = supabaseConfigured ? userId : null;
+  const { dailyPlanGoal } = useAppSettings();
 
   const scrollBottomPad = useMemo(() => {
     const tab = tabBarHeight + 12;
@@ -219,23 +214,10 @@ export default function TaskListScreen() {
     refreshTasksFromSupabase,
   } = useTasks();
   const [selectedDateKey, setSelectedDateKey] = useState(getTodayDateKey());
-  const [dailyPlanGoal, setDailyPlanGoal] = useState(DEFAULT_DAILY_PLAN_GOAL);
   const [retryBusy, setRetryBusy] = useState(false);
 
   const todayKey = getTodayDateKey();
   const isToday = selectedDateKey === todayKey;
-
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      loadDailyPlanGoal(storageUserId).then((g) => {
-        if (active) setDailyPlanGoal(g);
-      });
-      return () => {
-        active = false;
-      };
-    }, [storageUserId]),
-  );
 
   useFocusEffect(
     useCallback(() => {

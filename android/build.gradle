@@ -18,6 +18,15 @@ allprojects {
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
   }
+
+  // Expo SDK 54 ships Kotlin 2.1.x. play-services-ads 25.x ships Kotlin 2.3
+  // metadata and breaks :react-native-google-mobile-ads:compileReleaseKotlin.
+  // Keep Ads SDK on 24.9.0 (matches react-native-google-mobile-ads@16.0.3).
+  configurations.all {
+    resolutionStrategy {
+      force 'com.google.android.gms:play-services-ads:24.9.0'
+    }
+  }
 }
 
 apply plugin: "expo-root-project"

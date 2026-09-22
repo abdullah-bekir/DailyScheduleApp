@@ -24,27 +24,28 @@ function normalizeUpdatedAt(value) {
 }
 
 export function mapRowToTask(row) {
-  const dk =
+  const rawDk =
     typeof row.date_key === 'string'
       ? row.date_key
       : row.date_key instanceof Date
         ? row.date_key.toISOString().slice(0, 10)
-        : String(row.date_key);
-  const updatedAt = normalizeUpdatedAt(row.updated_at);
+        : String(row.date_key ?? '');
+  const dateKey = isValidDateKey(rawDk) ? rawDk : getTodayDateKey();
+  const updatedAt = normalizeUpdatedAt(row.updated_at) || new Date(0).toISOString();
   return {
     id: String(row.id),
     title: String(row.title ?? ''),
     time: String(row.time ?? ''),
     done: coerceBoolean(row.done, false),
     priority: ['high', 'medium', 'low'].includes(row.priority) ? row.priority : 'medium',
-    dateKey: dk,
+    dateKey,
     notes: String(row.notes ?? ''),
     attachments: Array.isArray(row.attachments)
       ? row.attachments
           .map((x) => String(x ?? '').trim())
           .filter((x) => x.length > 0)
       : [],
-    ...(updatedAt ? { updatedAt } : {}),
+    updatedAt,
   };
 }
 
@@ -148,11 +149,14 @@ export function mergeTasksWithRemote(localTasks, remoteRows) {
       merged.push({
         ...base,
         notes: String(base.notes ?? other.notes ?? ''),
-        attachments: localAttachments.length > 0 ? localAttachments : remoteAttachments,
+        attachments: localWins ? localAttachments : remoteAttachments,
         updatedAt: base.updatedAt || other.updatedAt || new Date().toISOString(),
       });
     }
-    else merged.push(r || sanitizeTask(l));
+    else {
+      const row = r || normalizeTaskRecord(sanitizeTask(l));
+      if (row) merged.push(row);
+    }
   }
   return merged;
 }

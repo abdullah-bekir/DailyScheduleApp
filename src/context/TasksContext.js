@@ -56,7 +56,9 @@ export function TasksProvider({ children }) {
   }, [userId]);
 
   const persistTasks = useCallback(async (list) => {
-    await saveStoredTasks(storageUserId, list);
+    const ok = await saveStoredTasks(storageUserId, list);
+    if (!ok) setTasksSyncError(i18n.t('settings.syncError'));
+    return ok;
   }, [storageUserId]);
 
   const persistTally = useCallback((n) => {
@@ -98,14 +100,8 @@ export function TasksProvider({ children }) {
       setTasksState([]);
       setCompletionTally(0);
 
+      // Auth henüz bitmediyse bekle; oturum yoksa da yerel veriyi göster (boş listeye düşme).
       if (supabaseConfigured && !authReady) return;
-      if (supabaseConfigured && !userId) {
-        if (!cancelled && loadId === storageLoadRef.current) {
-          setTasksHydrated(true);
-          setTasksDataReady(true);
-        }
-        return;
-      }
 
       const [raw, tally] = await Promise.all([loadStoredTasks(storageUserId), loadCompletionTally(storageUserId)]);
       if (cancelled || loadId !== storageLoadRef.current) return;
@@ -177,7 +173,9 @@ export function TasksProvider({ children }) {
     async (ownerId = userId) => {
       const sb = getSupabase();
       const sessionVersion = sessionVersionRef.current;
-      if (!sb || !ownerId || outboxDrainRef.current || userIdRef.current !== ownerId) return true;
+      if (!sb || !ownerId || userIdRef.current !== ownerId) return true;
+      // Zaten boşaltılıyorsa başarı iddia etme — çağıran sync hatasını temizlemesin.
+      if (outboxDrainRef.current) return false;
 
       outboxDrainRef.current = true;
       try {
@@ -198,7 +196,11 @@ export function TasksProvider({ children }) {
             return false;
           }
           remaining = operations.slice(index + 1);
-          await saveTaskOutbox(ownerId, remaining);
+          const saved = await saveTaskOutbox(ownerId, remaining);
+          if (!saved) {
+            setTasksSyncError(i18n.t('settings.syncError'));
+            return false;
+          }
         }
         return true;
       } finally {
@@ -235,8 +237,10 @@ export function TasksProvider({ children }) {
     );
     const remoteRows = (data ?? []).filter((row) => !pendingDeleteIds.has(String(row.id)));
     const remoteById = new Map(remoteRows.map((row) => [String(row.id), row]));
-    setTasksState((prev) => mergeRemoteRows(prev, remoteRows));
-    const localChanges = tasksRef.current.filter((task) => {
+    const merged = mergeRemoteRows(tasksRef.current, remoteRows);
+    tasksRef.current = merged;
+    setTasksState(merged);
+    const localChanges = merged.filter((task) => {
       if (!task?.id) return false;
       const remote = remoteById.get(String(task.id));
       if (!remote) return true;
@@ -298,7 +302,12 @@ export function TasksProvider({ children }) {
       pendingOperations.filter((operation) => operation.type === 'delete').map((operation) => operation.taskId),
     );
     if (outboxSynced) setTasksSyncError(null);
-    setTasksState((prev) => mergeRemoteRows(prev, data.filter((row) => !pendingDeleteIds.has(String(row.id)))));
+    const merged = mergeRemoteRows(
+      tasksRef.current,
+      data.filter((row) => !pendingDeleteIds.has(String(row.id))),
+    );
+    tasksRef.current = merged;
+    setTasksState(merged);
     return true;
   }, [userId, mergeRemoteRows, drainTaskOutbox]);
 
@@ -356,11 +365,10 @@ export function TasksProvider({ children }) {
         attachments: [],
       });
       if (!record) return false;
-      setTasksState((prev) => {
-        const next = [...prev, record];
-        persistTasks(next);
-        return next;
-      });
+      const next = [...tasksRef.current, record];
+      tasksRef.current = next;
+      setTasksState(next);
+      await persistTasks(next);
       if (!(await upsertRemoteTask(record))) {
         await queueTaskOperation({ type: 'upsert', taskId: record.id, task: record });
       }
@@ -374,25 +382,21 @@ export function TasksProvider({ children }) {
       if (!tasksMutationReady) return false;
       const id = String(taskId ?? '').trim();
       if (!id) return false;
-      let sync = null;
-      setTasksState((prev) => {
-        const idx = prev.findIndex((t) => String(t.id) === id);
-        if (idx < 0) return prev;
-        const cur = sanitizeTask(prev[idx]);
-        const done = !cur.done;
-        const w = completionWeightForPriority(cur.priority);
-        let delta = 0;
-        if (!cur.done && done) delta = w;
-        if (cur.done && !done) delta = -w;
-        const nextTask = withUpdatedAt({ ...cur, done });
-        sync = { nextTask, delta };
-        const next = [...prev];
-        next[idx] = nextTask;
-        persistTasks(next);
-        return next;
-      });
-      if (!sync?.nextTask) return false;
-      const { nextTask, delta } = sync;
+      const prev = tasksRef.current;
+      const idx = prev.findIndex((t) => String(t.id) === id);
+      if (idx < 0) return false;
+      const cur = sanitizeTask(prev[idx]);
+      const done = !cur.done;
+      const w = completionWeightForPriority(cur.priority);
+      let delta = 0;
+      if (!cur.done && done) delta = w;
+      if (cur.done && !done) delta = -w;
+      const nextTask = withUpdatedAt({ ...cur, done });
+      const next = [...prev];
+      next[idx] = nextTask;
+      tasksRef.current = next;
+      setTasksState(next);
+      await persistTasks(next);
       if (delta !== 0) {
         setCompletionTally((t) => {
           const n = Math.max(0, t + delta);
@@ -416,18 +420,18 @@ export function TasksProvider({ children }) {
       if (!tasksMutationReady) return false;
       const id = String(taskId ?? '').trim();
       if (!id) return false;
+      const prev = tasksRef.current;
+      const idx = prev.findIndex((t) => String(t.id) === id);
+      if (idx < 0) return false;
+      const cur = sanitizeTask(prev[idx]);
       let tallyDelta = 0;
-      setTasksState((prev) => {
-        const idx = prev.findIndex((t) => String(t.id) === id);
-        if (idx < 0) return prev;
-        const cur = sanitizeTask(prev[idx]);
-        if (cur.done) {
-          tallyDelta = -completionWeightForPriority(cur.priority);
-        }
-        const next = prev.filter((t) => String(t.id) !== id);
-        persistTasks(next);
-        return next;
-      });
+      if (cur.done) {
+        tallyDelta = -completionWeightForPriority(cur.priority);
+      }
+      const next = prev.filter((t) => String(t.id) !== id);
+      tasksRef.current = next;
+      setTasksState(next);
+      await persistTasks(next);
       if (tallyDelta !== 0) {
         setCompletionTally((t) => {
           const n = Math.max(0, t + tallyDelta);
@@ -458,24 +462,20 @@ export function TasksProvider({ children }) {
       if (!tasksMutationReady) return false;
       const id = String(taskId ?? '').trim();
       if (!id) return false;
-      let toSync = null;
-      setTasksState((prev) => {
-        const idx = prev.findIndex((t) => String(t.id) === id);
-        if (idx < 0) return prev;
-        const cur = sanitizeTask(prev[idx]);
-        const nextRow = withUpdatedAt({ ...cur, ...patch });
-        toSync = nextRow;
-        const next = [...prev];
-        next[idx] = nextRow;
-        persistTasks(next);
-        return next;
-      });
-      if (toSync) {
-        if (!(await upsertRemoteTask(toSync))) {
-          await queueTaskOperation({ type: 'upsert', taskId: toSync.id, task: toSync });
-        }
+      const prev = tasksRef.current;
+      const idx = prev.findIndex((t) => String(t.id) === id);
+      if (idx < 0) return false;
+      const cur = sanitizeTask(prev[idx]);
+      const toSync = withUpdatedAt({ ...cur, ...patch });
+      const next = [...prev];
+      next[idx] = toSync;
+      tasksRef.current = next;
+      setTasksState(next);
+      await persistTasks(next);
+      if (!(await upsertRemoteTask(toSync))) {
+        await queueTaskOperation({ type: 'upsert', taskId: toSync.id, task: toSync });
       }
-      return Boolean(toSync);
+      return true;
     },
     [tasksMutationReady, persistTasks, upsertRemoteTask, queueTaskOperation],
   );
@@ -488,20 +488,28 @@ export function TasksProvider({ children }) {
 
   const resetAllTaskData = useCallback(async () => {
     const sb = getSupabase();
-    if (sb && userId) {
-      const { error } = await sb.from('tasks').delete().eq('user_id', userId);
+    const ownerId = userId;
+    if (sb && ownerId) {
+      const { error } = await sb.from('tasks').delete().eq('user_id', ownerId);
       if (error) {
         setTasksSyncError(error.message || i18n.t('settings.syncError'));
         return false;
       }
       if (!(await syncProfilePatch({ completion_tally: 0 }))) return false;
     }
+    // Outbox temizlenmezse drain silinen görevleri sunucuya geri yazabilir.
+    const outboxCleared = await saveTaskOutbox(storageUserId, []);
+    if (!outboxCleared) {
+      setTasksSyncError(i18n.t('settings.syncError'));
+      return false;
+    }
+    tasksRef.current = [];
     setTasksState([]);
     await persistTasks([]);
     persistTally(0);
     setTasksSyncError(null);
     return true;
-  }, [userId, persistTasks, persistTally, syncProfilePatch]);
+  }, [userId, storageUserId, persistTasks, persistTally, syncProfilePatch]);
 
   const grantAdRewardBonus = useCallback((delta) => {
     const d = Math.max(1, Math.min(50, Math.floor(Number(delta)) || 5));

@@ -12,22 +12,28 @@ function userScopedTasksKey(userId) {
   return id ? `${TASKS_STORAGE_KEY}:${id}` : TASKS_STORAGE_KEY;
 }
 
+function tasksMigrationMarker(userId) {
+  const id = typeof userId === 'string' ? userId.trim() : '';
+  return id ? `${TASKS_STORAGE_MIGRATION_KEY}:${id}` : null;
+}
+
 async function migrateLegacyTasksForUser(userId) {
   const id = typeof userId === 'string' ? userId.trim() : '';
   if (!id) return;
 
+  const markerKey = tasksMigrationMarker(id);
   const targetKey = userScopedTasksKey(id);
-  const [migrationOwner, target, legacy] = await Promise.all([
-    AsyncStorage.getItem(TASKS_STORAGE_MIGRATION_KEY),
+  const [migrated, target, legacy] = await Promise.all([
+    AsyncStorage.getItem(markerKey),
     AsyncStorage.getItem(targetKey),
     AsyncStorage.getItem(TASKS_STORAGE_KEY),
   ]);
 
-  if (!migrationOwner && target == null && legacy != null) {
+  if (migrated !== '1' && target == null && legacy != null) {
     await AsyncStorage.setItem(targetKey, legacy);
   }
-  if (!migrationOwner) {
-    await AsyncStorage.setItem(TASKS_STORAGE_MIGRATION_KEY, id);
+  if (migrated !== '1') {
+    await AsyncStorage.setItem(markerKey, '1');
   }
 }
 
@@ -40,11 +46,13 @@ export async function loadStoredTasks(userId) {
   }
 }
 
+/** @returns {Promise<boolean>} */
 export async function saveStoredTasks(userId, tasks) {
   try {
     await AsyncStorage.setItem(userScopedTasksKey(userId), JSON.stringify(tasks));
+    return true;
   } catch {
-    /* ignore */
+    return false;
   }
 }
 
@@ -74,12 +82,14 @@ export async function loadTaskOutbox(userId) {
   }
 }
 
+/** @returns {Promise<boolean>} */
 export async function saveTaskOutbox(userId, operations) {
   try {
     const safe = Array.isArray(operations) ? operations.map(normalizeOutboxOperation).filter(Boolean) : [];
     await AsyncStorage.setItem(taskOutboxKey(userId), JSON.stringify(safe));
+    return true;
   } catch {
-    /* keep local task data usable when the outbox cannot be persisted */
+    return false;
   }
 }
 
@@ -89,8 +99,8 @@ export async function enqueueTaskOutboxOperation(userId, operation) {
   const current = await loadTaskOutbox(userId);
   const withoutSameTask = current.filter((item) => item.taskId !== nextOperation.taskId);
   const next = [...withoutSameTask, nextOperation];
-  await saveTaskOutbox(userId, next);
-  return next;
+  const saved = await saveTaskOutbox(userId, next);
+  return saved ? next : current;
 }
 
 export function normalizeStoredTasks(data) {

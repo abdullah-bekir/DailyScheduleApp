@@ -6,6 +6,7 @@
   "build": {
     "development": {
       "channel": "development",
+      "environment": "development",
       "developmentClient": true,
       "distribution": "internal",
       "android": {
@@ -19,6 +20,7 @@
     },
     "preview": {
       "channel": "preview",
+      "environment": "preview",
       "distribution": "internal",
       "android": {
         "buildType": "apk",
@@ -30,16 +32,27 @@
     },
     "production": {
       "channel": "production",
+      "environment": "production",
+      "autoIncrement": false,
       "android": {
         "buildType": "app-bundle",
         "image": "sdk-54"
       },
       "ios": {
-        "image": "sdk-54"
+        "image": "sdk-54",
+        "resourceClass": "m-medium"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "android": {
+        "serviceAccountKeyPath": "./secrets/google-play-service-account.json",
+        "track": "internal",
+        "releaseStatus": "draft",
+        "changesNotSentForReview": true
+      },
+      "ios": {}
+    }
   }
 }

@@ -10,6 +10,12 @@ const ThemeContext = createContext(null);
 
 function normalizeRemoteMode(mode) {
   if (mode === true || mode === 'dark') return 'dark';
+  if (mode === false || mode === 'light') return 'light';
+  if (typeof mode === 'string') {
+    const s = mode.trim().toLowerCase();
+    if (s === 'dark') return 'dark';
+    if (s === 'light') return 'light';
+  }
   return 'light';
 }
 
@@ -48,9 +54,9 @@ export function ThemeProvider({ children }) {
   }, [storageUserId, supabaseConfigured]);
 
   const applyRemoteTheme = useCallback((mode) => {
-    if (mode !== 'dark' && mode !== 'light') return;
-    setThemeModeState(mode);
-    saveThemeMode(mode, storageUserId);
+    const next = normalizeRemoteMode(mode);
+    setThemeModeState(next);
+    saveThemeMode(next, storageUserId);
   }, [storageUserId]);
 
   const value = useMemo(

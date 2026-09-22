@@ -3,6 +3,9 @@ import { Platform } from 'react-native';
 
 import { isAdsUiEnabled } from './adsConfig';
 
+/** AdMob event gelmezse UI'nin sonsuza asılı kalmasını önler. */
+const REWARDED_AD_TIMEOUT_MS = 45000;
+
 function getRewardedUnitId() {
   const extra = Constants.expoConfig?.extra || {};
   if (Platform.OS === 'android') {
@@ -43,10 +46,12 @@ export async function showRewardedAd() {
     return await new Promise((resolve) => {
       let earned = false;
       let finished = false;
+      let timeoutId = null;
 
       const finish = (payload) => {
         if (finished) return;
         finished = true;
+        if (timeoutId != null) clearTimeout(timeoutId);
         detach();
         resolve(payload);
       };
@@ -64,6 +69,10 @@ export async function showRewardedAd() {
         subs.length = 0;
       };
 
+      timeoutId = setTimeout(() => {
+        finish({ shown: false, earned: false, reason: 'timeout' });
+      }, REWARDED_AD_TIMEOUT_MS);
+
       subs.push(
         rewarded.addAdEventListener(RewardedAdEventType.EARNED_REWARD, () => {
           earned = true;
@@ -76,7 +85,7 @@ export async function showRewardedAd() {
       );
       subs.push(
         rewarded.addAdEventListener(AdEventType.ERROR, () => {
-          finish({ shown: false, earned: false });
+          finish({ shown: false, earned: false, reason: 'error' });
         }),
       );
       subs.push(
