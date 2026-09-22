@@ -26,13 +26,11 @@ Test: Table Editor → görev ekle → `tasks` satırı, `user_id` dolu.
 - TR + EN dil değiştir
 - Uçak modu → online senkron (Supabase açıksa)
 
-## Adım 4 — Git (değişiklikleri kaydet)
+## Adım 4 — Git (değişiklikleri kaydet) ✅
 
-Dal: `cursor/harden-premium-billing-gates`. Commit istediğinizde:
-
-- Kod: TasksContext, ads, taskRemote, taskStorage
-- Yapılandırma: app.json, app.config.js, eas.json, android
-- Doküman + Play script’leri (isteğe bağlı asset’ler)
+- Commit: **1.0.6** (`237cba9` — sync, AppSettingsContext, Play dokümanları)
+- Dal: `cursor/harden-premium-billing-gates`
+- Remote: `git push -u origin cursor/harden-premium-billing-gates` (siz, gerektiğinde)
 
 `.env` ve `secrets/` **commit edilmez**.
 
