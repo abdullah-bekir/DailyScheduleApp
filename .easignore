@@ -17,3 +17,8 @@ eas-build-log.txt
 .expo-verify-export/
 exp-test-export/
 exp-verify-export/
+.expo-smoke-export/
+.expo-smoke-export-ios/
+store-assets/
+assets/app-store/
+scripts/__pycache__/

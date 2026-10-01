@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useLocale } from '../../context/LocaleContext';
+import { useTasks } from '../../context/TasksContext';
 import { useTheme } from '../../context/ThemeContext';
 import { formatDateKeyForDisplay } from '../../utils/dateKey';
 import PrimaryButton from '../common/PrimaryButton';
@@ -203,6 +204,7 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
   const titleRef = useRef(null);
   const scrollRef = useRef(null);
   const { colors, isDark } = useTheme();
+  const { tasksMutationReady } = useTasks();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const [title, setTitle] = useState('');
   const [time, setTime] = useState(() => timeStringToDate('09:00'));
@@ -239,6 +241,10 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
   }, []);
 
   async function handleSave() {
+    if (!tasksMutationReady) {
+      setError(t('addTask.waitReady'));
+      return;
+    }
     if (!title.trim()) {
       setError(t('addTask.titleRequired'));
       scrollTitleIntoView();
@@ -250,7 +256,7 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
     if (saved) {
       onClose();
     } else {
-      setError(t('settings.syncError'));
+      setError(t('addTask.saveFailed'));
     }
   }
 
@@ -366,7 +372,12 @@ export default function AddTaskModal({ visible, onClose, onSave, dateKey }) {
                     <PrimaryButton title={t('common.cancel')} variant="outline" onPress={onClose} />
                   </View>
                   <View style={styles.actionGrow}>
-                    <PrimaryButton title={t('common.save')} onPress={handleSave} mutedCta />
+                    <PrimaryButton
+                      title={t('common.save')}
+                      onPress={handleSave}
+                      disabled={!tasksMutationReady}
+                      mutedCta
+                    />
                   </View>
                 </View>
               </View>

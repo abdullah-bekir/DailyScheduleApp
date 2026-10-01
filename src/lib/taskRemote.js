@@ -32,21 +32,18 @@ export function mapRowToTask(row) {
         : String(row.date_key ?? '');
   const dateKey = isValidDateKey(rawDk) ? rawDk : getTodayDateKey();
   const updatedAt = normalizeUpdatedAt(row.updated_at) || new Date(0).toISOString();
-  return {
+  const normalized = normalizeTaskRecord({
     id: String(row.id),
     title: String(row.title ?? ''),
     time: String(row.time ?? ''),
-    done: coerceBoolean(row.done, false),
-    priority: ['high', 'medium', 'low'].includes(row.priority) ? row.priority : 'medium',
+    done: row.done,
+    priority: row.priority,
     dateKey,
     notes: String(row.notes ?? ''),
-    attachments: Array.isArray(row.attachments)
-      ? row.attachments
-          .map((x) => String(x ?? '').trim())
-          .filter((x) => x.length > 0)
-      : [],
+    attachments: Array.isArray(row.attachments) ? row.attachments : [],
     updatedAt,
-  };
+  });
+  return normalized;
 }
 
 export function taskToRemoteRow(task, userId) {
@@ -120,7 +117,7 @@ export function normalizeTaskRecord(task) {
 }
 
 export function mergeTasksWithRemote(localTasks, remoteRows) {
-  const remote = (remoteRows || []).map(mapRowToTask);
+  const remote = (remoteRows || []).map(mapRowToTask).filter(Boolean);
   const rMap = new Map(remote.map((t) => [String(t.id), t]));
   const lMap = new Map(
     (localTasks || [])

@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Purchases from 'react-native-purchases';
 import { useTranslation } from 'react-i18next';
 
+import { planDisplayPrice, planDisplayTitle } from '../lib/premiumPlans';
 import PrimaryButton from '../components/common/PrimaryButton';
 import ScreenHero from '../components/layout/ScreenHero';
 import SectionHeader from '../components/layout/SectionHeader';
@@ -113,35 +114,34 @@ export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
-  const { offerings, purchasePackage, restorePurchases, ready, entitlementId, billingConfigured } =
-    useSubscription();
+  const {
+    premiumPlans,
+    hasPurchasablePlans,
+    purchasePremium,
+    restorePurchases,
+    isPremiumActive,
+    ready,
+    billingConfigured,
+  } = useSubscription();
   const [busyId, setBusyId] = useState(null);
 
-  const current = offerings?.current;
-  const packages = current?.availablePackages ?? [];
-
-  const monthly = useMemo(
-    () => packages.find((p) => p.packageType === Purchases.PACKAGE_TYPE.MONTHLY) ?? null,
-    [packages],
-  );
-  const annual = useMemo(
-    () => packages.find((p) => p.packageType === Purchases.PACKAGE_TYPE.ANNUAL) ?? null,
-    [packages],
-  );
+  const monthlyPlan = premiumPlans.monthly.package ?? premiumPlans.monthly.product;
+  const annualPlan = premiumPlans.annual.package ?? premiumPlans.annual.product;
 
   const onPurchase = useCallback(
-    async (pkg) => {
-      if (!pkg) return;
-      setBusyId(pkg.identifier);
+    async (period) => {
+      const plan = period === 'annual' ? annualPlan : monthlyPlan;
+      if (!plan) return;
+      setBusyId(period);
       try {
-        const info = await purchasePackage(pkg);
-        const active = Boolean(info?.entitlements?.active?.[entitlementId]);
+        const info = await purchasePremium(period);
+        const active = isPremiumActive(info);
         if (active) {
           Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'), [
             { text: t('common.ok'), onPress: () => navigation.goBack() },
           ]);
         } else {
-          Alert.alert(t('paywall.purchaseErrorTitle'), t('paywall.restoreNoActive'));
+          Alert.alert(t('paywall.purchaseErrorTitle'), t('paywall.purchaseErrorBody'));
         }
       } catch (e) {
         if (
@@ -159,7 +159,7 @@ export default function PaywallScreen() {
         setBusyId(null);
       }
     },
-    [entitlementId, navigation, purchasePackage, t],
+    [annualPlan, isPremiumActive, monthlyPlan, navigation, purchasePremium, t],
   );
 
   const onRestore = useCallback(async () => {
@@ -170,7 +170,7 @@ export default function PaywallScreen() {
     setBusyId('restore');
     try {
       const info = await restorePurchases();
-      const active = Boolean(info?.entitlements?.active?.[entitlementId]);
+      const active = isPremiumActive(info);
       Alert.alert(
         t('paywall.restoreTitle'),
         active ? t('paywall.restoreActive') : t('paywall.restoreNoActive'),
@@ -184,9 +184,9 @@ export default function PaywallScreen() {
     } finally {
       setBusyId(null);
     }
-  }, [billingConfigured, entitlementId, restorePurchases, t]);
+  }, [billingConfigured, isPremiumActive, restorePurchases, t]);
 
-  const missingProducts = ready && (!billingConfigured || (!monthly && !annual));
+  const missingProducts = ready && (!billingConfigured || !hasPurchasablePlans);
 
   return (
     <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
@@ -228,27 +228,27 @@ export default function PaywallScreen() {
           </View>
         ) : null}
 
-        {monthly ? (
+        {monthlyPlan ? (
           <View style={styles.planCard}>
             <Text style={styles.planTitle}>{t('paywall.monthly')}</Text>
-            <Text style={styles.planPrice}>{monthly.product.priceString}</Text>
-            <Text style={styles.planHint}>{monthly.product.title}</Text>
+            <Text style={styles.planPrice}>{planDisplayPrice(monthlyPlan) ?? '—'}</Text>
+            <Text style={styles.planHint}>{planDisplayTitle(monthlyPlan)}</Text>
             <PrimaryButton
-              title={busyId === monthly.identifier ? t('common.processing') : t('paywall.monthlySelect')}
-              onPress={() => onPurchase(monthly)}
+              title={busyId === 'monthly' ? t('common.processing') : t('paywall.monthlySelect')}
+              onPress={() => onPurchase('monthly')}
               disabled={Boolean(busyId)}
             />
           </View>
         ) : null}
 
-        {annual ? (
+        {annualPlan ? (
           <View style={styles.planCard}>
             <Text style={styles.planTitle}>{t('paywall.annual')}</Text>
-            <Text style={styles.planPrice}>{annual.product.priceString}</Text>
-            <Text style={styles.planHint}>{annual.product.title}</Text>
+            <Text style={styles.planPrice}>{planDisplayPrice(annualPlan) ?? '—'}</Text>
+            <Text style={styles.planHint}>{planDisplayTitle(annualPlan)}</Text>
             <PrimaryButton
-              title={busyId === annual.identifier ? t('common.processing') : t('paywall.annualSelect')}
-              onPress={() => onPurchase(annual)}
+              title={busyId === 'annual' ? t('common.processing') : t('paywall.annualSelect')}
+              onPress={() => onPurchase('annual')}
               disabled={Boolean(busyId)}
             />
           </View>

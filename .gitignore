@@ -3,6 +3,10 @@
 # dependencies
 node_modules/
 
+# Python
+__pycache__/
+*.py[cod]
+
 # Expo
 .expo/
 dist/
@@ -66,3 +70,7 @@ eas-build-view.json
 .expo-export-verify2/
 .expo-export-check/
 .expo-export-temp/
+.expo-smoke-export/
+.expo-smoke-export-ios/
+.expo-export-healthcheck-temp/
+.expo-export-lint-temp/

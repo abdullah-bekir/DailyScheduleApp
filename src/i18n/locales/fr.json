@@ -106,7 +106,9 @@
     "timeHide": "Masquer le sélecteur d'heure",
     "timeTapClose": "Appuyer pour fermer",
     "timeTapOpen": "Appuyer pour modifier l'heure",
-    "titleRequired": "Le titre de la tâche est obligatoire."
+    "titleRequired": "Le titre de la tâche est obligatoire.",
+    "saveFailed": "Impossible d’enregistrer la tâche. Réessayez dans un instant.",
+    "waitReady": "Les tâches se chargent encore. Veuillez patienter."
   },
   "taskDetail": {
     "back": "Retour aux tâches",
@@ -162,14 +164,14 @@
     "chartCaption": "Haut : terminées / total des tâches · Bas : taux de réalisation · Période en cours mise en évidence",
     "chartYearSecondary": "année",
     "premiumTitle": "Abonnement Premium",
-    "premiumBody": "Supprimez les pubs et débloquez Premium. Les prix viennent de Google Play / App Store.",
+    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
     "premiumPriceMonthly": "Mensuel · {{price}}",
     "premiumPriceAnnual": "Annuel · {{price}}",
     "premiumPricePending": "Les prix apparaissent une fois les produits liés dans RevenueCat.",
     "premiumBuy": "Acheter Premium",
     "premiumSeePlans": "Voir tous les forfaits",
     "premiumActiveTitle": "Premium actif",
-    "premiumActiveBody": "Merci — les pubs restent désactivées pendant l’abonnement."
+    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -220,7 +222,10 @@
     "languageSub": "Langue de l'interface",
     "languageHint": "La langue s'applique immédiatement. L'arabe utilise une mise en page de droite à gauche.",
     "notifyComingSoonTitle": "Bientôt",
-    "notifyComingSoonBody": "Préférence enregistrée. Les rappels push ne sont pas encore actifs."
+    "notifyComingSoonBody": "Préférence enregistrée. Les rappels push ne sont pas encore actifs.",
+    "resetFailed": "Impossible de réinitialiser les données. Vérifiez la connexion et réessayez.",
+    "languageReloadBody": "Sens de lecture modifié. L’application va se recharger pour appliquer la mise en page.",
+    "notifyPrefSyncFailed": "Impossible de synchroniser la préférence de rappel dans le cloud ; elle est enregistrée sur cet appareil."
   },
   "sync": {
     "loading": "Synchronisation des tâches avec le cloud…",
@@ -264,11 +269,11 @@
   },
   "paywall": {
     "eyebrow": "Premium",
-    "title": "Sans publicité et plus",
+    "title": "Planly Premium",
     "subtitle": "Les abonnements utilisent RevenueCat ; configurez les produits dans App Store / Play Console et RevenueCat.",
     "benefitsTitle": "Inclus",
     "benefitsSubtitle": "Exemples d'avantages correspondant à l'entitlement du panneau.",
-    "benefitNoAds": "Supprimer les publicités intégrées (bannière + interstitiel)",
+    "benefitNoAds": "Weekly, monthly and yearly progress charts",
     "benefitUpdates": "Mises à jour prioritaires du thème et de l'apparence (selon la feuille de route)",
     "benefitPrivacy": "Les pratiques de données et de confidentialité restent identiques ; les achats sont liés à votre compte de boutique.",
     "plansTitle": "Forfaits",
@@ -286,7 +291,9 @@
     "restoreTitle": "Restaurer les achats",
     "restoreActive": "Premium semble actif.",
     "restoreNoActive": "Aucun abonnement actif n'a été trouvé pour ce compte.",
-    "billingNotConfigured": "Les achats in-app ne sont pas encore configurés. Ajoutez les clés API RevenueCat, liez les produits Play / App Store, puis recompilez."
+    "billingNotConfigured": "Les achats in-app ne sont pas encore configurés. Ajoutez les clés API RevenueCat, liez les produits Play / App Store, puis recompilez.",
+    "granularityLockedTitle": "Premium charts",
+    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
   },
   "languages": {
     "tr": "Türkçe",

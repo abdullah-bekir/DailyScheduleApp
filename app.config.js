@@ -53,6 +53,10 @@ export default ({ config }) => ({
     revenueCatApiKeyAndroid: process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY ?? '',
     revenueCatApiKeyIOS: process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY ?? '',
     revenueCatEntitlementId: process.env.EXPO_PUBLIC_REVENUECAT_ENTITLEMENT_ID ?? 'premium',
+    revenueCatProductIdMonthly:
+      process.env.EXPO_PUBLIC_REVENUECAT_PRODUCT_MONTHLY ?? 'planly_premium_monthly',
+    revenueCatProductIdAnnual:
+      process.env.EXPO_PUBLIC_REVENUECAT_PRODUCT_ANNUAL ?? 'planly_premium_annual',
     /** Reklamları göstermek için EXPO_PUBLIC_ADS_UI_ENABLED=true (varsayılan kapalı) */
     adsUiEnabled: process.env.EXPO_PUBLIC_ADS_UI_ENABLED === 'true',
     /** Tam ekran interstitial: en az bu kadar dakika arayla (4–120, varsayılan 15) */

@@ -106,7 +106,9 @@
     "timeHide": "إخفاء منتقي الوقت",
     "timeTapClose": "اضغط للإغلاق",
     "timeTapOpen": "اضغط لتغيير الوقت",
-    "titleRequired": "عنوان المهمة مطلوب."
+    "titleRequired": "عنوان المهمة مطلوب.",
+    "saveFailed": "تعذّر حفظ المهمة. حاول مرة أخرى بعد قليل.",
+    "waitReady": "المهام ما زالت تُحمَّل. يرجى الانتظار قليلاً."
   },
   "taskDetail": {
     "back": "العودة إلى المهام",
@@ -162,14 +164,14 @@
     "chartCaption": "الأعلى: المكتمل / إجمالي المهام · الأسفل: نسبة الإكمال · الفترة الحالية مميزة",
     "chartYearSecondary": "سنة",
     "premiumTitle": "عضوية Premium",
-    "premiumBody": "أزل الإعلانات وافتح مزايا Premium. الأسعار تأتي من Google Play / App Store.",
+    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
     "premiumPriceMonthly": "شهري · {{price}}",
     "premiumPriceAnnual": "سنوي · {{price}}",
     "premiumPricePending": "تظهر الأسعار بعد ربط منتجات المتجر في RevenueCat.",
     "premiumBuy": "اشترِ Premium",
     "premiumSeePlans": "عرض كل الخطط",
     "premiumActiveTitle": "Premium مفعّل",
-    "premiumActiveBody": "شكرًا — تبقى الإعلانات متوقفة أثناء الاشتراك النشط."
+    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -220,7 +222,10 @@
     "languageSub": "لغة واجهة التطبيق",
     "languageHint": "تُطبَّق اللغة فوراً. العربية تستخدم تخطيطاً من اليمين إلى اليسار.",
     "notifyComingSoonTitle": "قريباً",
-    "notifyComingSoonBody": "تم حفظ التفضيل. تذكيرات الدفع غير مفعّلة بعد."
+    "notifyComingSoonBody": "تم حفظ التفضيل. تذكيرات الدفع غير مفعّلة بعد.",
+    "resetFailed": "تعذّر مسح البيانات. تحقق من الاتصال وحاول مرة أخرى.",
+    "languageReloadBody": "تغيّر اتجاه القراءة. سيتم إعادة تحميل التطبيق لتطبيق التخطيط.",
+    "notifyPrefSyncFailed": "تعذّر مزامنة تفضيل التذكير مع السحابة؛ تم حفظه على هذا الجهاز."
   },
   "sync": {
     "loading": "جارٍ مزامنة المهام مع السحابة…",
@@ -264,11 +269,11 @@
   },
   "paywall": {
     "eyebrow": "Premium",
-    "title": "بلا إعلانات والمزيد",
+    "title": "Planly Premium",
     "subtitle": "تستخدم الاشتراكات RevenueCat؛ اضبط المنتجات في App Store / Play Console وRevenueCat.",
     "benefitsTitle": "ما يتضمنه",
     "benefitsSubtitle": "مزايا نموذجية متطابقة مع entitlement في اللوحة.",
-    "benefitNoAds": "إزالة الإعلانات داخل التطبيق (بانر + إعلان بيني)",
+    "benefitNoAds": "Weekly, monthly and yearly progress charts",
     "benefitUpdates": "تحديثات الأولوية للمظهر والسمات (حسب خارطة الطريق)",
     "benefitPrivacy": "تبقى ممارسات البيانات والخصوصية كما هي؛ ترتبط المشتريات بحساب المتجر الخاص بك.",
     "plansTitle": "الخطط",
@@ -286,7 +291,9 @@
     "restoreTitle": "استعادة المشتريات",
     "restoreActive": "يبدو أن Premium نشط.",
     "restoreNoActive": "لم يتم العثور على اشتراك نشط لهذا الحساب.",
-    "billingNotConfigured": "عمليات الشراء داخل التطبيق غير مُعدّة بعد. أضف مفاتيح RevenueCat واربط منتجات Play / App Store ثم أعد البناء."
+    "billingNotConfigured": "عمليات الشراء داخل التطبيق غير مُعدّة بعد. أضف مفاتيح RevenueCat واربط منتجات Play / App Store ثم أعد البناء.",
+    "granularityLockedTitle": "Premium charts",
+    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
   },
   "languages": {
     "tr": "Türkçe",

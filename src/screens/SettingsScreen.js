@@ -233,12 +233,12 @@ export default function SettingsScreen() {
     setDailyPlanGoal,
     setNotificationsEnabled,
   } = useAppSettings();
-  const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData, reportTasksSyncError } = useTasks();
+  const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData } = useTasks();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const [syncBusy, setSyncBusy] = useState(false);
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
 
-  const appVersion = Constants.expoConfig?.version ?? Constants.manifest?.version ?? '—';
+  const appVersion = Constants.expoConfig?.version ?? '—';
 
   const syncStatus = useMemo(() => {
     if (!supabaseConfigured) {
@@ -291,7 +291,9 @@ export default function SettingsScreen() {
 
   const onNotificationsChange = async (value) => {
     const result = await setNotificationsEnabled(value);
-    if (result?.ok === false) reportTasksSyncError(result?.error);
+    if (result && result.ok === false) {
+      Alert.alert(t('settings.notifyTitle'), t('settings.notifyPrefSyncFailed'));
+    }
   };
 
   const onSelectGoal = (n) => {
@@ -320,7 +322,7 @@ export default function SettingsScreen() {
           onPress: async () => {
             const ok = await resetAllTaskData();
             if (!ok) {
-              Alert.alert(t('settings.syncError'), t('settings.resetBody'));
+              Alert.alert(t('settings.syncError'), t('settings.resetFailed'));
             }
           },
         },

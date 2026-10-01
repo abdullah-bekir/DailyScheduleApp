@@ -36,7 +36,6 @@ Tüm script'ler için `package.json` dosyasına bakın.
 - [Play Console checklist cevapları](docs/PLAY_CHECKLIST_CEVAPLAR.md)
 - [Play Store listing metinleri](docs/PLAY_STORE_LISTING.md)
 - [Klasör rehberi](docs/KLASOR_REHBERI.md)
-- [Güvenilirlik test kontrol listesi](docs/guvenilirlik-test-kontrol-listesi.md)
 - [Reklam politikası](docs/REKLAM_POLITIKASI.md)
 - [Supabase kurulumu](supabase/README.md)
 

@@ -18,10 +18,11 @@
     },
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "8",
+      "buildNumber": "16",
       "bundleIdentifier": "com.abdullahbekir.DailyscheduleApp",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSUserTrackingUsageDescription": "Reklamları kişiselleştirmek için kullanılabilir. İzin vermezseniz reklamlar yine gösterilebilir."
       }
     },
     "android": {

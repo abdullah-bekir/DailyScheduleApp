@@ -58,7 +58,7 @@ export function LocaleProvider({ children }) {
     if (reloadOnDirectionChange && prevRtl !== nextRtl) {
       Alert.alert(
         i18n.t('settings.languageTitle'),
-        i18n.t('settings.languageHint'),
+        i18n.t('settings.languageReloadBody'),
         [
           {
             text: i18n.t('common.ok'),

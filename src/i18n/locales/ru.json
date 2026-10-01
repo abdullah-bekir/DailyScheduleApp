@@ -106,7 +106,9 @@
     "timeHide": "Скрыть выбор времени",
     "timeTapClose": "Нажмите, чтобы закрыть",
     "timeTapOpen": "Нажмите, чтобы изменить время",
-    "titleRequired": "Название задачи обязательно."
+    "titleRequired": "Название задачи обязательно.",
+    "saveFailed": "Не удалось сохранить задачу. Попробуйте ещё раз через минуту.",
+    "waitReady": "Задачи ещё загружаются. Подождите немного."
   },
   "taskDetail": {
     "back": "Назад к задачам",
@@ -162,14 +164,14 @@
     "chartCaption": "Сверху: выполнено / всего задач · Снизу: процент выполнения · Текущий период выделен",
     "chartYearSecondary": "год",
     "premiumTitle": "Подписка Premium",
-    "premiumBody": "Уберите рекламу и откройте Premium. Цены берутся из Google Play / App Store.",
+    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
     "premiumPriceMonthly": "Ежемесячно · {{price}}",
     "premiumPriceAnnual": "Ежегодно · {{price}}",
     "premiumPricePending": "Цены появятся после привязки продуктов магазина в RevenueCat.",
     "premiumBuy": "Купить Premium",
     "premiumSeePlans": "Все тарифы",
     "premiumActiveTitle": "Premium активен",
-    "premiumActiveBody": "Спасибо — реклама отключена, пока подписка активна."
+    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -220,7 +222,10 @@
     "languageSub": "Язык интерфейса приложения",
     "languageHint": "Язык применяется сразу. Для арабского используется макет справа налево.",
     "notifyComingSoonTitle": "Скоро",
-    "notifyComingSoonBody": "Настройка сохранена. Push-напоминания ещё не активны."
+    "notifyComingSoonBody": "Настройка сохранена. Push-напоминания ещё не активны.",
+    "resetFailed": "Не удалось сбросить данные. Проверьте подключение и повторите.",
+    "languageReloadBody": "Направление текста изменилось. Приложение перезагрузится для применения макета.",
+    "notifyPrefSyncFailed": "Не удалось синхронизировать настройку напоминаний с облаком; она сохранена на этом устройстве."
   },
   "sync": {
     "loading": "Синхронизация задач с облаком…",
@@ -264,11 +269,11 @@
   },
   "paywall": {
     "eyebrow": "Premium",
-    "title": "Без рекламы и больше",
+    "title": "Planly Premium",
     "subtitle": "Подписки используют RevenueCat; настройте продукты в App Store / Play Console и RevenueCat.",
     "benefitsTitle": "Что включено",
     "benefitsSubtitle": "Примеры преимуществ, соответствующих entitlement в панели.",
-    "benefitNoAds": "Отключение рекламы в приложении (баннеры + межстраничная)",
+    "benefitNoAds": "Weekly, monthly and yearly progress charts",
     "benefitUpdates": "Приоритетные обновления темы и внешнего вида (согласно плану развития)",
     "benefitPrivacy": "Подход к данным и конфиденциальности не меняется; покупки привязаны к вашей учётной записи магазина.",
     "plansTitle": "Планы",
@@ -286,7 +291,9 @@
     "restoreTitle": "Восстановить покупки",
     "restoreActive": "Premium, похоже, активен.",
     "restoreNoActive": "Для этой учётной записи не найдена активная подписка.",
-    "billingNotConfigured": "Внутренние покупки ещё не настроены. Добавьте ключи RevenueCat, привяжите продукты Play / App Store и пересоберите приложение."
+    "billingNotConfigured": "Внутренние покупки ещё не настроены. Добавьте ключи RevenueCat, привяжите продукты Play / App Store и пересоберите приложение.",
+    "granularityLockedTitle": "Premium charts",
+    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
   },
   "languages": {
     "tr": "Türkçe",

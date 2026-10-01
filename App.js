@@ -10,6 +10,7 @@ import { AppSettingsProvider } from './src/context/AppSettingsContext';
 import { LocaleProvider } from './src/context/LocaleContext';
 import { SupabaseProvider } from './src/context/SupabaseContext';
 import { TasksProvider } from './src/context/TasksContext';
+import { isAdsUiEnabled } from './src/lib/ads/adsConfig';
 import { registerAllAdFormatsInOrder } from './src/lib/ads/registerAdFormats';
 import { SubscriptionProvider } from './src/context/SubscriptionContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
@@ -27,7 +28,7 @@ function ThemedShell() {
 
 export default function App() {
   useEffect(() => {
-    if (Constants.appOwnership === 'expo') return;
+    if (Constants.appOwnership === 'expo' || !isAdsUiEnabled()) return;
     try {
       const mobileAds = require('react-native-google-mobile-ads').default;
       mobileAds().initialize().catch(() => {});

@@ -106,7 +106,9 @@
     "timeHide": "Saat seçiciyi gizle",
     "timeTapClose": "Kapatmak için dokun",
     "timeTapOpen": "Saati değiştirmek için dokun",
-    "titleRequired": "Görev başlığı zorunlu."
+    "titleRequired": "Görev başlığı zorunlu.",
+    "saveFailed": "Görev kaydedilemedi. Lütfen biraz sonra tekrar deneyin.",
+    "waitReady": "Görevler henüz yükleniyor. Lütfen kısa bir süre bekleyin."
   },
   "taskDetail": {
     "back": "Görevlere dön",
@@ -123,7 +125,7 @@
     "notes": "Notlar",
     "notesPlaceholder": "Görevle ilgili not ekle…",
     "notesHint": "Notlar otomatik kaydedilir.",
-    "attachments": "Ek Dosyalar",
+    "attachments": "Ek dosyalar",
     "attachmentPlaceholder": "Dosya adı veya link ekle",
     "attachmentsEmpty": "Henüz ek dosya yok."
   },
@@ -162,14 +164,14 @@
     "chartCaption": "Üst: tamamlanan / toplam görev · Alt: tamamlama oranı · Geçerli dönem vurgulu",
     "chartYearSecondary": "yılı",
     "premiumTitle": "Premium üyelik",
-    "premiumBody": "Reklamları kaldırın ve Premium avantajlarını açın. Fiyatlar Google Play / App Store üzerinden gelir.",
+    "premiumBody": "Haftalık, aylık ve yıllık grafikler ile Premium ayrıcalıklarını açın. Fiyatlar App Store / Google Play üzerinden gelir.",
     "premiumPriceMonthly": "Aylık · {{price}}",
     "premiumPriceAnnual": "Yıllık · {{price}}",
     "premiumPricePending": "Fiyatlar, RevenueCat’te Play / App Store ürünleri bağlandıktan sonra görünür.",
     "premiumBuy": "Premium satın al",
     "premiumSeePlans": "Tüm planları gör",
     "premiumActiveTitle": "Premium aktif",
-    "premiumActiveBody": "Teşekkürler — aboneliğiniz aktifken reklamlar kapalı kalır."
+    "premiumActiveBody": "Teşekkürler — genişletilmiş grafikler ve Premium avantajlarınız aktif."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -220,7 +222,10 @@
     "languageSub": "Uygulama arayüz dili",
     "languageHint": "Seçtiğin dil hemen uygulanır. Arapça için sağdan sola düzen kullanılır.",
     "notifyComingSoonTitle": "Yakında",
-    "notifyComingSoonBody": "Tercihin kaydedildi. Sistem bildirimleri henüz aktif değil."
+    "notifyComingSoonBody": "Tercihin kaydedildi. Sistem bildirimleri henüz aktif değil.",
+    "resetFailed": "Veri sıfırlanamadı. Bağlantınızı kontrol edip tekrar deneyin.",
+    "languageReloadBody": "Yazı yönü değişti. Düzenin uygulanması için uygulama yeniden yüklenecek.",
+    "notifyPrefSyncFailed": "Hatırlatıcı tercihin buluta kaydedilemedi; yalnızca bu cihazda saklandı."
   },
   "sync": {
     "loading": "Görevlerin bulutla eşitleniyor; tamamlanınca kayıtlı görevlerin görünür.",
@@ -264,16 +269,16 @@
   },
   "paywall": {
     "eyebrow": "Premium",
-    "title": "Reklamsız ve daha fazlası",
-    "subtitle": "Abonelikler RevenueCat kullanır; ürünleri App Store / Play Console ve RevenueCat'te yapılandırın.",
+    "title": "Planly Premium",
+    "subtitle": "Gelişmiş istatistikler ve sürekli iyileştirmeler. Ödeme mağaza hesabınız üzerinden yapılır.",
     "benefitsTitle": "Neler dahil",
     "benefitsSubtitle": "Paneldeki entitlement ile eşleşen örnek avantajlar.",
-    "benefitNoAds": "Uygulama içi reklamları kaldırma (banner + geçiş)",
+    "benefitNoAds": "Haftalık, aylık ve yıllık ilerleme grafikleri",
     "benefitUpdates": "Öncelikli tema ve görünüm güncellemeleri (yol haritasına bağlı)",
     "benefitPrivacy": "Veri ve gizlilik yaklaşımı aynı kalır; satın alma mağaza hesabınıza bağlıdır.",
     "plansTitle": "Planlar",
     "plansSubtitle": "Aylık ve yıllık paketler RevenueCat offerings üzerinden gelir.",
-    "missingProducts": "Henüz paket bulunamadı. `.env` içine RevenueCat API anahtarlarını ekleyin; RevenueCat'te Offering ve App Store / Play ürünlerini bağlayın. Ardından development build ile yeniden deneyin.",
+    "missingProducts": "Henüz paket bulunamadı. TestFlight için Expo EAS production ortamında EXPO_PUBLIC_REVENUECAT_IOS_KEY (Planly iOS Public API key, appl_ ile başlar) doğru olmalı; RevenueCat'te default offering'de iOS ürünleri bağlı olmalı. Anahtarı düzelttikten sonra yeni iOS build alın.",
     "monthly": "Aylık",
     "monthlySelect": "Aylık planı seç",
     "annual": "Yıllık",
@@ -286,7 +291,9 @@
     "restoreTitle": "Geri yükleme",
     "restoreActive": "Premium aktif görünüyor.",
     "restoreNoActive": "Bu hesapta aktif abonelik bulunamadı.",
-    "billingNotConfigured": "Uygulama içi satın alma henüz yapılandırılmadı. RevenueCat API anahtarlarını ekleyip Play / App Store ürünlerini bağlayın, ardından yeniden derleyin."
+    "billingNotConfigured": "Uygulama içi satın alma henüz yapılandırılmadı. RevenueCat API anahtarlarını ekleyip Play / App Store ürünlerini bağlayın, ardından yeniden derleyin.",
+    "granularityLockedTitle": "Premium grafikler",
+    "granularityLockedBody": "Haftalık, aylık ve yıllık görünümler Planly Premium'da. Günlük grafik ücretsiz kalır."
   },
   "languages": {
     "tr": "Türkçe",

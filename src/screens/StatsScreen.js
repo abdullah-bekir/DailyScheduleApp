@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Purchases from 'react-native-purchases';
+import { planDisplayPrice } from '../lib/premiumPlans';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AdMobBannerCard from '../components/ads/AdMobBannerCard';
@@ -499,9 +500,20 @@ export default function StatsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const scrollRef = useRef(null);
   useScrollToTop(scrollRef);
-  const { isPro, offerings, purchasePackage, ready, entitlementId, billingConfigured } = useSubscription();
+  const {
+    isPro,
+    premiumPlans,
+    hasPurchasablePlans,
+    purchasePremium,
+    restorePurchases,
+    refreshSubscription,
+    isPremiumActive,
+    ready,
+    billingConfigured,
+  } = useSubscription();
   const showAds = ready && !isPro && isAdsUiEnabled();
   const [purchaseBusy, setPurchaseBusy] = useState(false);
+  const [restoreBusy, setRestoreBusy] = useState(false);
   const { colors, isDark } = useTheme();
   const chartUi = useMemo(
     () =>
@@ -561,14 +573,8 @@ export default function StatsScreen() {
     }
   }, [showAds, bonusPoints, grantAdRewardBonus, t]);
 
-  const monthlyPkg = useMemo(() => {
-    const pkgs = offerings?.current?.availablePackages ?? [];
-    return pkgs.find((p) => p.packageType === Purchases.PACKAGE_TYPE.MONTHLY) ?? null;
-  }, [offerings]);
-  const annualPkg = useMemo(() => {
-    const pkgs = offerings?.current?.availablePackages ?? [];
-    return pkgs.find((p) => p.packageType === Purchases.PACKAGE_TYPE.ANNUAL) ?? null;
-  }, [offerings]);
+  const monthlyPlan = premiumPlans.monthly.package ?? premiumPlans.monthly.product;
+  const annualPlan = premiumPlans.annual.package ?? premiumPlans.annual.product;
 
   const openPaywall = useCallback(() => {
     navigation.navigate('Paywall');
@@ -576,18 +582,18 @@ export default function StatsScreen() {
 
   const onPremiumPurchase = useCallback(async () => {
     if (purchaseBusy) return;
-    if (!billingConfigured || !monthlyPkg) {
+    if (!billingConfigured || !monthlyPlan) {
       openPaywall();
       return;
     }
     setPurchaseBusy(true);
     try {
-      const info = await purchasePackage(monthlyPkg);
-      const active = Boolean(info?.entitlements?.active?.[entitlementId]);
+      const info = await purchasePremium('monthly');
+      const active = isPremiumActive(info);
       if (active) {
         Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'));
       } else {
-        Alert.alert(t('paywall.purchaseErrorTitle'), t('paywall.restoreNoActive'));
+        Alert.alert(t('paywall.purchaseErrorTitle'), t('paywall.purchaseErrorBody'));
       }
     } catch (e) {
       if (e?.userCancelled || e?.code === Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
@@ -601,7 +607,32 @@ export default function StatsScreen() {
     } finally {
       setPurchaseBusy(false);
     }
-  }, [billingConfigured, entitlementId, monthlyPkg, openPaywall, purchaseBusy, purchasePackage, t]);
+  }, [billingConfigured, isPremiumActive, monthlyPlan, openPaywall, purchaseBusy, purchasePremium, t]);
+
+  const onRestorePurchases = useCallback(async () => {
+    if (restoreBusy || purchaseBusy) return;
+    if (!billingConfigured) {
+      Alert.alert(t('paywall.restoreTitle'), t('paywall.billingNotConfigured'));
+      return;
+    }
+    setRestoreBusy(true);
+    try {
+      const info = await restorePurchases();
+      const active = isPremiumActive(info);
+      Alert.alert(
+        t('paywall.restoreTitle'),
+        active ? t('paywall.restoreActive') : t('paywall.restoreNoActive'),
+      );
+    } catch (e) {
+      const msg =
+        e?.code === 'BILLING_NOT_CONFIGURED'
+          ? t('paywall.billingNotConfigured')
+          : e?.message ?? t('paywall.purchaseErrorBody');
+      Alert.alert(t('paywall.restoreTitle'), msg);
+    } finally {
+      setRestoreBusy(false);
+    }
+  }, [billingConfigured, isPremiumActive, purchaseBusy, restoreBusy, restorePurchases, t]);
 
   const statsTasks = useMemo(() => (tasksDataReady ? tasks : []), [tasksDataReady, tasks]);
 
@@ -609,11 +640,30 @@ export default function StatsScreen() {
     useCallback(() => {
       if (!tasksDataReady) return undefined;
       refreshTasksFromSupabase();
+      if (billingConfigured) refreshSubscription();
       return undefined;
-    }, [tasksDataReady, refreshTasksFromSupabase]),
+    }, [billingConfigured, refreshSubscription, tasksDataReady, refreshTasksFromSupabase]),
   );
 
   const [granularity, setGranularity] = useState('day');
+
+  const onGranularityChange = useCallback(
+    (value) => {
+      if (!isPro && value !== 'day') {
+        Alert.alert(t('paywall.granularityLockedTitle'), t('paywall.granularityLockedBody'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          { text: t('stats.premiumSeePlans'), onPress: openPaywall },
+        ]);
+        return;
+      }
+      setGranularity(value);
+    },
+    [isPro, openPaywall, t],
+  );
+
+  useEffect(() => {
+    if (!isPro && granularity !== 'day') setGranularity('day');
+  }, [isPro, granularity]);
   const [displayTally, setDisplayTally] = useState(0);
   const displayRef = useRef(0);
   const tallyHydrateSnapDone = useRef(false);
@@ -705,17 +755,17 @@ export default function StatsScreen() {
             <Text style={styles.premiumHeadline}>{t('stats.premiumTitle')}</Text>
             <Text style={styles.premiumBody}>{t('stats.premiumBody')}</Text>
             <View style={styles.premiumPriceRow}>
-              {monthlyPkg ? (
+              {monthlyPlan ? (
                 <Text style={styles.premiumPrice}>
-                  {t('stats.premiumPriceMonthly', { price: monthlyPkg.product.priceString })}
+                  {t('stats.premiumPriceMonthly', { price: planDisplayPrice(monthlyPlan) })}
                 </Text>
               ) : null}
-              {annualPkg ? (
+              {annualPlan ? (
                 <Text style={styles.premiumPrice}>
-                  {t('stats.premiumPriceAnnual', { price: annualPkg.product.priceString })}
+                  {t('stats.premiumPriceAnnual', { price: planDisplayPrice(annualPlan) })}
                 </Text>
               ) : null}
-              {ready && (!billingConfigured || (!monthlyPkg && !annualPkg)) ? (
+              {ready && (!billingConfigured || !hasPurchasablePlans) ? (
                 <Text style={styles.premiumPriceMuted}>
                   {billingConfigured ? t('stats.premiumPricePending') : t('paywall.billingNotConfigured')}
                 </Text>
@@ -726,15 +776,21 @@ export default function StatsScreen() {
                 title={
                   purchaseBusy
                     ? t('common.processing')
-                    : billingConfigured && monthlyPkg
+                    : billingConfigured && monthlyPlan
                       ? t('stats.premiumBuy')
                       : t('stats.premiumSeePlans')
                 }
                 onPress={onPremiumPurchase}
                 disabled={purchaseBusy}
               />
-              {billingConfigured && monthlyPkg ? (
+              {billingConfigured && monthlyPlan ? (
                 <TextLink title={t('stats.premiumSeePlans')} onPress={openPaywall} />
+              ) : null}
+              {billingConfigured ? (
+                <TextLink
+                  title={restoreBusy ? t('common.processing') : t('paywall.restore')}
+                  onPress={() => !restoreBusy && !purchaseBusy && onRestorePurchases()}
+                />
               ) : null}
             </View>
           </View>
@@ -833,7 +889,7 @@ export default function StatsScreen() {
                 <TaskFilterChips
                   compact
                   value={granularity}
-                  onChange={setGranularity}
+                  onChange={onGranularityChange}
                   options={[
                     { id: 'day', label: t('stats.granDay') },
                     { id: 'week', label: t('stats.granWeek') },

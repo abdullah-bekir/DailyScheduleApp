@@ -106,7 +106,9 @@
     "timeHide": "隐藏时间选择器",
     "timeTapClose": "点击关闭",
     "timeTapOpen": "点击更改时间",
-    "titleRequired": "任务标题为必填项。"
+    "titleRequired": "任务标题为必填项。",
+    "saveFailed": "无法保存任务。请稍后再试。",
+    "waitReady": "任务仍在加载，请稍候。"
   },
   "taskDetail": {
     "back": "返回任务",
@@ -162,14 +164,14 @@
     "chartCaption": "上方：已完成 / 任务总数 · 下方：完成率 · 当前周期已突出显示",
     "chartYearSecondary": "年",
     "premiumTitle": "Premium 会员",
-    "premiumBody": "去除广告并解锁 Premium。价格来自 Google Play / App Store。",
+    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
     "premiumPriceMonthly": "每月 · {{price}}",
     "premiumPriceAnnual": "每年 · {{price}}",
     "premiumPricePending": "在 RevenueCat 关联商店商品后显示价格。",
     "premiumBuy": "购买 Premium",
     "premiumSeePlans": "查看全部方案",
     "premiumActiveTitle": "Premium 已开通",
-    "premiumActiveBody": "谢谢 — 订阅有效期间广告保持关闭。"
+    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -220,7 +222,10 @@
     "languageSub": "应用界面语言",
     "languageHint": "语言立即生效。阿拉伯语使用从右到左布局。",
     "notifyComingSoonTitle": "即将推出",
-    "notifyComingSoonBody": "偏好已保存。系统推送提醒尚未启用。"
+    "notifyComingSoonBody": "偏好已保存。系统推送提醒尚未启用。",
+    "resetFailed": "无法重置数据。请检查网络连接后重试。",
+    "languageReloadBody": "阅读方向已更改。应用将重新加载以应用布局。",
+    "notifyPrefSyncFailed": "提醒偏好未能同步到云端，已保存在本设备。"
   },
   "sync": {
     "loading": "正在与云端同步任务…",
@@ -264,11 +269,11 @@
   },
   "paywall": {
     "eyebrow": "Premium",
-    "title": "无广告及更多功能",
+    "title": "Planly Premium",
     "subtitle": "订阅使用 RevenueCat；请在 App Store / Play Console 和 RevenueCat 中配置产品。",
     "benefitsTitle": "包含内容",
     "benefitsSubtitle": "与面板 entitlement 匹配的示例权益。",
-    "benefitNoAds": "移除应用内广告（横幅 + 插屏）",
+    "benefitNoAds": "Weekly, monthly and yearly progress charts",
     "benefitUpdates": "优先获得主题和外观更新（取决于路线图）",
     "benefitPrivacy": "数据和隐私做法保持不变；购买与您的商店账户关联。",
     "plansTitle": "套餐",
@@ -286,7 +291,9 @@
     "restoreTitle": "恢复购买",
     "restoreActive": "Premium 似乎已激活。",
     "restoreNoActive": "未找到此账户的有效订阅。",
-    "billingNotConfigured": "应用内购买尚未配置。请添加 RevenueCat API 密钥并关联 Play / App Store 产品，然后重新构建。"
+    "billingNotConfigured": "应用内购买尚未配置。请添加 RevenueCat API 密钥并关联 Play / App Store 产品，然后重新构建。",
+    "granularityLockedTitle": "Premium charts",
+    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
   },
   "languages": {
     "tr": "Türkçe",

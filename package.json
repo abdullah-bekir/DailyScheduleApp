@@ -20,7 +20,8 @@
     "eas:submit:ios": "npx eas-cli submit --platform ios --profile production",
     "eas:update:preview": "npx eas-cli update --channel preview",
     "eas:update:production": "npx eas-cli update --channel production",
-    "i18n:check": "node scripts/check-i18n.cjs"
+    "i18n:check": "node scripts/check-i18n.cjs",
+    "smoke": "node scripts/smoke-regression.cjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

@@ -86,10 +86,6 @@ export function TasksProvider({ children }) {
     [supabaseConfigured, userId],
   );
 
-  const reportTasksSyncError = useCallback((message) => {
-    setTasksSyncError(message || i18n.t('settings.syncError'));
-  }, []);
-
   useEffect(() => {
     let cancelled = false;
     const loadId = ++storageLoadRef.current;
@@ -124,10 +120,10 @@ export function TasksProvider({ children }) {
   }, [supabaseConfigured, authReady, userId, storageUserId]);
 
   const mergeRemoteRows = useCallback(
-    (prev, rows) => {
+    async (prev, rows) => {
       const rowList = Array.isArray(rows) ? rows : [];
       const merged = mergeTasksWithRemote(prev, rowList);
-      persistTasks(merged);
+      await persistTasks(merged);
       return merged;
     },
     [persistTasks],
@@ -237,7 +233,7 @@ export function TasksProvider({ children }) {
     );
     const remoteRows = (data ?? []).filter((row) => !pendingDeleteIds.has(String(row.id)));
     const remoteById = new Map(remoteRows.map((row) => [String(row.id), row]));
-    const merged = mergeRemoteRows(tasksRef.current, remoteRows);
+    const merged = await mergeRemoteRows(tasksRef.current, remoteRows);
     tasksRef.current = merged;
     setTasksState(merged);
     const localChanges = merged.filter((task) => {
@@ -302,7 +298,7 @@ export function TasksProvider({ children }) {
       pendingOperations.filter((operation) => operation.type === 'delete').map((operation) => operation.taskId),
     );
     if (outboxSynced) setTasksSyncError(null);
-    const merged = mergeRemoteRows(
+    const merged = await mergeRemoteRows(
       tasksRef.current,
       data.filter((row) => !pendingDeleteIds.has(String(row.id))),
     );
@@ -541,7 +537,6 @@ export function TasksProvider({ children }) {
       applyRemoteCompletionTally,
       resetAllTaskData,
       grantAdRewardBonus,
-      reportTasksSyncError,
     }),
     [
       tasks,
@@ -560,7 +555,6 @@ export function TasksProvider({ children }) {
       applyRemoteCompletionTally,
       resetAllTaskData,
       grantAdRewardBonus,
-      reportTasksSyncError,
     ],
   );
 

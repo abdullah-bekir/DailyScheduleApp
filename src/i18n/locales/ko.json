@@ -106,7 +106,9 @@
     "timeHide": "시간 선택기 숨기기",
     "timeTapClose": "탭하여 닫기",
     "timeTapOpen": "탭하여 시간 변경",
-    "titleRequired": "작업 제목은 필수입니다."
+    "titleRequired": "작업 제목은 필수입니다.",
+    "saveFailed": "작업을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+    "waitReady": "작업을 불러오는 중입니다. 잠시만 기다려 주세요."
   },
   "taskDetail": {
     "back": "작업으로 돌아가기",
@@ -162,14 +164,14 @@
     "chartCaption": "위: 완료 / 전체 작업 · 아래: 완료율 · 현재 기간 강조",
     "chartYearSecondary": "년",
     "premiumTitle": "Premium 멤버십",
-    "premiumBody": "광고를 제거하고 Premium을 이용하세요. 가격은 Google Play / App Store에서 가져옵니다.",
+    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
     "premiumPriceMonthly": "월간 · {{price}}",
     "premiumPriceAnnual": "연간 · {{price}}",
     "premiumPricePending": "RevenueCat에 스토어 제품을 연결하면 가격이 표시됩니다.",
     "premiumBuy": "Premium 구매",
     "premiumSeePlans": "모든 요금제 보기",
     "premiumActiveTitle": "Premium 활성",
-    "premiumActiveBody": "감사합니다 — 구독이 활성인 동안 광고가 표시되지 않습니다."
+    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -220,7 +222,10 @@
     "languageSub": "앱 인터페이스 언어",
     "languageHint": "언어는 즉시 적용됩니다. 아랍어는 오른쪽에서 왼쪽 레이아웃을 사용합니다.",
     "notifyComingSoonTitle": "곧 제공",
-    "notifyComingSoonBody": "설정이 저장되었습니다. 푸시 알림은 아직 활성화되지 않았습니다."
+    "notifyComingSoonBody": "설정이 저장되었습니다. 푸시 알림은 아직 활성화되지 않았습니다.",
+    "resetFailed": "데이터를 초기화하지 못했습니다. 연결을 확인한 뒤 다시 시도하세요.",
+    "languageReloadBody": "글 읽기 방향이 변경되었습니다. 레이아웃 적용을 위해 앱이 다시 로드됩니다.",
+    "notifyPrefSyncFailed": "알림 설정을 클라우드에 동기화하지 못했습니다. 이 기기에만 저장되었습니다."
   },
   "sync": {
     "loading": "클라우드와 작업 동기화 중…",
@@ -264,11 +269,11 @@
   },
   "paywall": {
     "eyebrow": "Premium",
-    "title": "광고 없이 더 많은 기능",
+    "title": "Planly Premium",
     "subtitle": "구독에는 RevenueCat을 사용합니다. App Store / Play Console 및 RevenueCat에서 상품을 설정하세요.",
     "benefitsTitle": "포함된 내용",
     "benefitsSubtitle": "패널 entitlement에 연결된 예시 혜택입니다.",
-    "benefitNoAds": "앱 내 광고 제거(배너 + 전면 광고)",
+    "benefitNoAds": "Weekly, monthly and yearly progress charts",
     "benefitUpdates": "테마 및 외관 우선 업데이트(로드맵에 따름)",
     "benefitPrivacy": "데이터 및 개인정보 처리 방식은 동일하며, 구매는 스토어 계정에 연결됩니다.",
     "plansTitle": "요금제",
@@ -286,7 +291,9 @@
     "restoreTitle": "구매 복원",
     "restoreActive": "Premium이 활성화된 것으로 보입니다.",
     "restoreNoActive": "이 계정에 활성 구독이 없습니다.",
-    "billingNotConfigured": "인앱 결제가 아직 구성되지 않았습니다. RevenueCat API 키를 추가하고 Play / App Store 제품을 연결한 뒤 다시 빌드하세요."
+    "billingNotConfigured": "인앱 결제가 아직 구성되지 않았습니다. RevenueCat API 키를 추가하고 Play / App Store 제품을 연결한 뒤 다시 빌드하세요.",
+    "granularityLockedTitle": "Premium charts",
+    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
   },
   "languages": {
     "tr": "Türkçe",

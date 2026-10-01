@@ -106,7 +106,9 @@
     "timeHide": "Hide time picker",
     "timeTapClose": "Tap to close",
     "timeTapOpen": "Tap to change time",
-    "titleRequired": "Task title is required."
+    "titleRequired": "Task title is required.",
+    "saveFailed": "Could not save the task. Try again in a moment.",
+    "waitReady": "Tasks are still loading. Please wait a moment."
   },
   "taskDetail": {
     "back": "Back to tasks",
@@ -162,14 +164,14 @@
     "chartCaption": "Top: completed / total tasks · Bottom: completion rate · Current period highlighted",
     "chartYearSecondary": "year",
     "premiumTitle": "Premium membership",
-    "premiumBody": "Remove ads and unlock Premium. Prices come from Google Play / App Store.",
+    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
     "premiumPriceMonthly": "Monthly · {{price}}",
     "premiumPriceAnnual": "Annual · {{price}}",
     "premiumPricePending": "Prices appear after Play / App Store products are linked in RevenueCat.",
     "premiumBuy": "Buy Premium",
     "premiumSeePlans": "See all plans",
     "premiumActiveTitle": "Premium is active",
-    "premiumActiveBody": "Thanks — ads stay off while your subscription is active."
+    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -220,7 +222,10 @@
     "languageSub": "App interface language",
     "languageHint": "Language applies immediately. Arabic uses right-to-left layout.",
     "notifyComingSoonTitle": "Coming soon",
-    "notifyComingSoonBody": "Your preference is saved. System push reminders are not active yet."
+    "notifyComingSoonBody": "Your preference is saved. System push reminders are not active yet.",
+    "resetFailed": "Could not reset your data. Check your connection and try again.",
+    "languageReloadBody": "Reading direction changed. The app will reload to apply the layout.",
+    "notifyPrefSyncFailed": "Your reminder preference could not be synced to the cloud. It is saved on this device."
   },
   "sync": {
     "loading": "Syncing tasks with cloud…",
@@ -264,11 +269,11 @@
   },
   "paywall": {
     "eyebrow": "Premium",
-    "title": "Ad-free and more",
-    "subtitle": "Subscriptions use RevenueCat; configure products in App Store / Play Console and RevenueCat.",
+    "title": "Planly Premium",
+    "subtitle": "Extended statistics and ongoing improvements. Billed through your app store account.",
     "benefitsTitle": "What's included",
     "benefitsSubtitle": "Sample benefits matched to the panel entitlement.",
-    "benefitNoAds": "Remove in-app ads (banner + interstitial)",
+    "benefitNoAds": "Weekly, monthly and yearly progress charts",
     "benefitUpdates": "Priority theme and appearance updates (subject to roadmap)",
     "benefitPrivacy": "Data and privacy practices stay the same; purchases are tied to your store account.",
     "plansTitle": "Plans",
@@ -286,7 +291,9 @@
     "restoreTitle": "Restore purchases",
     "restoreActive": "Premium appears to be active.",
     "restoreNoActive": "No active subscription was found for this account.",
-    "billingNotConfigured": "In-app purchases are not configured yet. Add RevenueCat API keys and link Play / App Store products, then rebuild."
+    "billingNotConfigured": "In-app purchases are not configured yet. Add RevenueCat API keys and link Play / App Store products, then rebuild.",
+    "granularityLockedTitle": "Premium charts",
+    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
   },
   "languages": {
     "tr": "Türkçe",
