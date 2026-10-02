@@ -3,7 +3,7 @@
 Apple’ın **Unable to Add for Review** listesindeki maddeler için adım adım rehber.  
 **Connect’e sadece sen girebilirsin;** aşağıdaki metinleri kopyala-yapıştır.
 
-**Sürüm:** 1.0.6 · **Build:** 16 · **Bundle ID:** `com.abdullahbekir.DailyscheduleApp`
+**Sürüm:** 1.0.6 · **Build:** 17 · **Bundle ID:** `com.abdullahbekir.DailyscheduleApp`
 
 ---
 
@@ -22,6 +22,9 @@ Apple’ın **Unable to Add for Review** listesindeki maddeler için adım adım
 | 8   | Copyright                      | 1.0.6 (genel) + Turkish alanı                                | ☐     |
 | 9   | **Add for Review** mavi        | 1.0.6 üst                                                    | ☐     |
 | 10  | **Submit** (Draft Submissions) | Taslak sunum                                                 | ☐     |
+| 11  | **App Review Notes** (6 madde) | Aşağıdaki § App Review — Notes alanına | ☐     |
+| 12  | **Ekran kaydı (.mp4)**         | Fiziksel iPhone; § App Review akışı    | ☐     |
+| 13  | **EAS: RevenueCat iOS key**    | production env (expo.dev) — tanımlı      | ☑     |
 
 
 Hepsi ☐ → ✓ olunca inceleme başlar.
@@ -89,17 +92,10 @@ Varsa: `assets/app-store/ios-subscription-review-1080x1920.png` veya script çı
 
 ## 3) Privacy Policy URL
 
-1. `docs/PRIVACY_POLICY_PLANLY.md` içinde e-posta placeholder’larını düzenle.
-2. Metni **HTTPS** ile yayınla (GitHub Pages, Google Sites, Notion public, kendi siten).
-3. **Planly** → sol menü **App Privacy** (Uygulama Gizliliği):
+1. Canlı URL (Play ile aynı): `https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html` — kaynak: `docs/privacy.html` (Gist’i güncelle).
+2. **Planly** → sol menü **App Privacy** (Uygulama Gizliliği):
   - Anketi daha önce doldurmadıysan tamamla (veri türleri: görev verisi, reklam kimliği, satın alma — Play checklist ile uyumlu).
   - **Privacy Policy URL** alanına canlı linki yapıştır → **Publish** / kaydet.
-
-**Placeholder (URL’in hazır olana kadar kullanma — Apple https ister):**
-
-```text
-https://SENIN-Domainin.com/planly-privac
-```
 
 ---
 
@@ -123,15 +119,28 @@ Dağıtım → **1.0.6** → **App Review Information** / **İnceleme bilgileri*
 | Notes                  | Aşağıdaki “İnceleme notu”                  |
 
 
-**İnceleme notu (kopyala):**
+**Notes (English — paste into App Review Information → Notes):**
 
 ```text
-Planly is a daily task planner. No login is required.
+Planly v1.0.6 — com.abdullahbekir.DailyscheduleApp
 
-To test Premium: open the Stats tab → Premium / paywall → subscription plans (monthly/annual). Use Sandbox Apple ID for IAP. Restore Purchases is on the paywall and Stats.
+(1) Screen recording: cold launch → Home → add/complete task → Tasks → Stats → Settings → Stats → See plans → Paywall (monthly/annual) → Restore or Sandbox purchase. Account deletion: Settings → Data management → Delete account. No public UGC/social content.
 
-Ads appear in the free tier; Pro subscription removes ads via RevenueCat entitlement "premium".
+(2) Purpose: daily task planner for adults 18+; no email login; optional anonymous cloud backup via Supabase.
+
+(3) Sign-in required: NO. Premium: Stats → See plans; Sandbox Apple ID for IAP; entitlement "premium" (RevenueCat).
+
+(4) External services: Supabase, AdMob (free tier), RevenueCat, Apple IAP. No AI providers.
+
+(5) Same features worldwide; 13 UI languages.
+
+(6) Not medical/financial/government; no licensed third-party content.
+
+Privacy: https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html
+Support: abdullahbekir@gmail.com
 ```
+
+**Ekran kaydı (senin cihazında):** Uygulamayı kapat → kayıt başlat → ikondan aç → yukarıdaki akış → `.mp4`’ü Resolution Center veya Review ekinde gönder. (Bunu IDE otomatik yükleyemez; fiziksel iPhone gerekir.)
 
 
 
@@ -157,7 +166,7 @@ Planly, gününü sade ve net tutmana yardımcı olan günlük plan ve görev uy
 • Öncelik, saat ve tarih ile görev ekle
 • İlerlemeyi istatistiklerle takip et
 • Açık / koyu tema ve 13 dil
-• İsteğe bağlı cihazlar arası bulut senkronu
+• Anonim bulut senkronu (e-posta girişi yok)
 
 Planly Pro (isteğe bağlı abonelik)
 • Reklamları kaldırır
@@ -183,10 +192,10 @@ görev,plan,günlük,planlayıcı,todo,alışkanlık,verimlilik,ajanda,istatisti
 **https://** ile başlamalı (mailto geçmez). Örnekler:
 
 ```text
-https://SENIN-Siten.com/planly-support
+https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html#contact
 ```
 
-veya gizlilik sayfası + `#contact`, veya GitHub Issues public link. Play Console’da kullandığın **aynı** destek sayfası varsa onu kullan.
+(Gist’i `docs/privacy.html` ile güncelle; `#contact` destek iletişimi için.)
 
 ### Copyright (Telif)
 
@@ -230,10 +239,8 @@ Android’deki Pro aboneliği iOS’ta **Restore** ile gelmez; iOS’ta ayrı Sa
 
 
 
-## Senin doldurman gereken 3 placeholder
+## Yeniden gönderim
 
-1. **Privacy Policy URL** (canlı https) — `PRIVACY_POLICY_PLANLY.md` yayınlandıktan sonra
-2. **Support URL** (canlı https)
-3. **Copyright** ismi (yukarıdaki © satırı onayın)
+Tüm mağaza adımları: [STORE_RESUBMIT_CHECKLIST.md](./STORE_RESUBMIT_CHECKLIST.md)
 
-Bunları Connect’e girdikten sonra **Add for Review** durumunu yaz; Submit öncesi son kontrolü birlikte yaparız.
+Connect’e Privacy + Support URL girdikten sonra **Add for Review** → **Submit**.

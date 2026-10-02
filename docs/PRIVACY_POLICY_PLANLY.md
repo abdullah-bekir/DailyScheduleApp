@@ -22,7 +22,7 @@ Planly (“uygulama”), günlük görev ve planlarınızı yönetmenize yardım
 **Topladığımız veriler**
 
 - **Görev ve uygulama verileri:** Eklediğiniz görevler, tamamlama durumu ve tercihler (tema, dil vb.) cihazınızda saklanır.
-- **İsteğe bağlı bulut senkasyonu:** Bulut senkronunu kullanırsanız, görev verileriniz kimlik doğrulama için Supabase hizmetine aktarılabilir. Giriş zorunlu değildir.
+- **Bulut senkronu:** Supabase yapılandırıldığında uygulama anonim hesap oluşturur; görev ve ayarlar bulutta yedeklenebilir. E-posta ile giriş zorunlu değildir.
 - **Reklamlar:** Ücretsiz sürümde Google AdMob reklam kimliği ve ilgili veriler reklam gösterimi için kullanılabilir.
 - **Abonelikler:** Planly Pro satın alımları Apple App Store veya Google Play ve RevenueCat üzerinden işlenir; ödeme bilgilerinizi biz toplamayız.
 - **Analitik:** Uygulama kararlılığı için sınırlı teknik günlükler (çökme vb.) toplanabilir.
@@ -37,7 +37,7 @@ Planly (“uygulama”), günlük görev ve planlarınızı yönetmenize yardım
 
 **Saklama ve silme**
 
-- Yerel veriler uygulamayı cihazdan kaldırınca silinir. Bulut verileri için uygulama içi senkron hesabınızı ve verilerinizi kaldırma seçeneklerini kullanabilir veya bizimle iletişime geçebilirsiniz.
+- Yerel veriler uygulamayı kaldırınca silinir. Bulut verisi: **Ayarlar → Veri yönetimi → Tüm veriyi sıfırla** veya **Bulut hesabını sil**; alternatif: abdullahbekir@gmail.com
 
 **Çocuklar**
 
@@ -45,7 +45,7 @@ Planly (“uygulama”), günlük görev ve planlarınızı yönetmenize yardım
 
 **İletişim**
 
-- Sorularınız için: **DESTEK_EPOSTA_BURAYA** (App Store’daki Destek URL’nizle aynı kanalı kullanın).
+- Sorularınız için: **abdullahbekir@gmail.com**
 
 ---
 

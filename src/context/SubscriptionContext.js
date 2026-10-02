@@ -43,7 +43,7 @@ function hasActivePremium(info, entitlementId) {
 }
 
 async function loadPremiumPlans(offerings, productIds) {
-  const fromPackages = pickPackagesFromOfferings(offerings);
+  const fromPackages = pickPackagesFromOfferings(offerings, productIds);
   const plans = {
     monthly: { package: fromPackages.monthly, product: null },
     annual: { package: fromPackages.annual, product: null },
@@ -140,12 +140,14 @@ export function SubscriptionProvider({ children }) {
           setPremiumPlans(plans);
         }
         if (!cancelled && !hasPurchasablePlan(plans) && Platform.OS === 'ios') {
-          await new Promise((r) => setTimeout(r, 1500));
-          off = await Purchases.getOfferings();
-          plans = await loadPremiumPlans(off, productIds);
-          if (!cancelled) {
-            setOfferings(off);
-            setPremiumPlans(plans);
+          for (let attempt = 0; attempt < 3 && !hasPurchasablePlan(plans); attempt += 1) {
+            await new Promise((r) => setTimeout(r, 1200 + attempt * 800));
+            off = await Purchases.getOfferings();
+            plans = await loadPremiumPlans(off, productIds);
+            if (!cancelled) {
+              setOfferings(off);
+              setPremiumPlans(plans);
+            }
           }
         }
       } catch {

@@ -4,12 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Purchases from 'react-native-purchases';
-import { planDisplayPrice } from '../lib/premiumPlans';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AdMobBannerCard from '../components/ads/AdMobBannerCard';
 import PrimaryButton from '../components/common/PrimaryButton';
-import TextLink from '../components/common/TextLink';
+import StatsPremiumCard from '../components/stats/StatsPremiumCard';
 import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner';
 import ScreenHero from '../components/layout/ScreenHero';
 import TaskFilterChips from '../components/tasks/TaskFilterChips';
@@ -580,34 +579,47 @@ export default function StatsScreen() {
     navigation.navigate('Paywall');
   }, [navigation]);
 
-  const onPremiumPurchase = useCallback(async () => {
-    if (purchaseBusy) return;
-    if (!billingConfigured || !monthlyPlan) {
-      openPaywall();
-      return;
-    }
-    setPurchaseBusy(true);
-    try {
-      const info = await purchasePremium('monthly');
-      const active = isPremiumActive(info);
-      if (active) {
-        Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'));
-      } else {
-        Alert.alert(t('paywall.purchaseErrorTitle'), t('paywall.purchaseErrorBody'));
-      }
-    } catch (e) {
-      if (e?.userCancelled || e?.code === Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
+  const runPremiumPurchase = useCallback(
+    async (period) => {
+      if (purchaseBusy) return;
+      const plan = period === 'annual' ? annualPlan : monthlyPlan;
+      if (!billingConfigured || !plan) {
+        openPaywall();
         return;
       }
-      const msg =
-        e?.code === 'BILLING_NOT_CONFIGURED'
-          ? t('paywall.billingNotConfigured')
-          : e?.message ?? t('paywall.purchaseErrorBody');
-      Alert.alert(t('paywall.purchaseErrorTitle'), msg);
-    } finally {
-      setPurchaseBusy(false);
-    }
-  }, [billingConfigured, isPremiumActive, monthlyPlan, openPaywall, purchaseBusy, purchasePremium, t]);
+      setPurchaseBusy(true);
+      try {
+        const info = await purchasePremium(period);
+        const active = isPremiumActive(info);
+        if (active) {
+          Alert.alert(t('paywall.purchaseSuccessTitle'), t('paywall.purchaseSuccessBody'));
+        } else {
+          Alert.alert(t('paywall.purchaseErrorTitle'), t('paywall.purchaseErrorBody'));
+        }
+      } catch (e) {
+        if (e?.userCancelled || e?.code === Purchases.PURCHASES_ERROR_CODE.PURCHASE_CANCELLED_ERROR) {
+          return;
+        }
+        const msg =
+          e?.code === 'BILLING_NOT_CONFIGURED'
+            ? t('paywall.billingNotConfigured')
+            : e?.message ?? t('paywall.purchaseErrorBody');
+        Alert.alert(t('paywall.purchaseErrorTitle'), msg);
+      } finally {
+        setPurchaseBusy(false);
+      }
+    },
+    [
+      annualPlan,
+      billingConfigured,
+      isPremiumActive,
+      monthlyPlan,
+      openPaywall,
+      purchaseBusy,
+      purchasePremium,
+      t,
+    ],
+  );
 
   const onRestorePurchases = useCallback(async () => {
     if (restoreBusy || purchaseBusy) return;
@@ -743,58 +755,20 @@ export default function StatsScreen() {
           visible={tasksHydrated && !tasksDataReady}
         />
 
-        {isPro ? (
-          <View style={styles.premiumCard}>
-            <Text style={styles.premiumTitle}>{t('paywall.eyebrow')}</Text>
-            <Text style={styles.premiumHeadline}>{t('stats.premiumActiveTitle')}</Text>
-            <Text style={styles.premiumBody}>{t('stats.premiumActiveBody')}</Text>
-          </View>
-        ) : (
-          <View style={styles.premiumCard}>
-            <Text style={styles.premiumTitle}>{t('paywall.eyebrow')}</Text>
-            <Text style={styles.premiumHeadline}>{t('stats.premiumTitle')}</Text>
-            <Text style={styles.premiumBody}>{t('stats.premiumBody')}</Text>
-            <View style={styles.premiumPriceRow}>
-              {monthlyPlan ? (
-                <Text style={styles.premiumPrice}>
-                  {t('stats.premiumPriceMonthly', { price: planDisplayPrice(monthlyPlan) })}
-                </Text>
-              ) : null}
-              {annualPlan ? (
-                <Text style={styles.premiumPrice}>
-                  {t('stats.premiumPriceAnnual', { price: planDisplayPrice(annualPlan) })}
-                </Text>
-              ) : null}
-              {ready && (!billingConfigured || !hasPurchasablePlans) ? (
-                <Text style={styles.premiumPriceMuted}>
-                  {billingConfigured ? t('stats.premiumPricePending') : t('paywall.billingNotConfigured')}
-                </Text>
-              ) : null}
-            </View>
-            <View style={styles.premiumActions}>
-              <PrimaryButton
-                title={
-                  purchaseBusy
-                    ? t('common.processing')
-                    : billingConfigured && monthlyPlan
-                      ? t('stats.premiumBuy')
-                      : t('stats.premiumSeePlans')
-                }
-                onPress={onPremiumPurchase}
-                disabled={purchaseBusy}
-              />
-              {billingConfigured && monthlyPlan ? (
-                <TextLink title={t('stats.premiumSeePlans')} onPress={openPaywall} />
-              ) : null}
-              {billingConfigured ? (
-                <TextLink
-                  title={restoreBusy ? t('common.processing') : t('paywall.restore')}
-                  onPress={() => !restoreBusy && !purchaseBusy && onRestorePurchases()}
-                />
-              ) : null}
-            </View>
-          </View>
-        )}
+        <StatsPremiumCard
+          isPro={isPro}
+          billingConfigured={billingConfigured}
+          ready={ready}
+          hasPurchasablePlans={hasPurchasablePlans}
+          monthlyPlan={monthlyPlan}
+          annualPlan={annualPlan}
+          purchaseBusy={purchaseBusy}
+          restoreBusy={restoreBusy}
+          onBuyMonthly={() => runPremiumPurchase('monthly')}
+          onBuyAnnual={() => runPremiumPurchase('annual')}
+          onOpenPaywall={openPaywall}
+          onRestore={() => !restoreBusy && !purchaseBusy && onRestorePurchases()}
+        />
 
         {tasksDataReady && s.total === 0 ? (
           <View style={styles.emptyBox}>

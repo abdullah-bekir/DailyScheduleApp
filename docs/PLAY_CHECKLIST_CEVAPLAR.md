@@ -1,7 +1,7 @@
 # Planly — Play Console checklist cevapları
 
 Paket: `com.abdullahbekir.DailyscheduleApp`  
-Sürüm: **1.0.5** (versionCode **8**)
+Sürüm: **1.0.6** (versionCode **9**)
 
 Bu dosya, Play Console “Uygulama içeriği / Politika” formlarını tek seferde doldurmak içindir.  
 Önceki oturumda tamamlananlar: uygulama oluşturma, gizlilik politikası, oturum açma beyanı.
@@ -65,8 +65,9 @@ Not: 13–17 seçersen reklam politikası (Families / COPPA) daha sıkı olur. P
 | Veri toplanıyor mu? | **Evet** |
 | Veri paylaşılıyor mu? | **Evet** (reklam SDK / AdMob; abonelik için mağaza / RevenueCat) |
 | Şifreleme (transit) | **Evet** (HTTPS) |
-| Kullanıcı silme talebi | Anonim oturum; uygulama silinince yerel veri gider. Politika URL’sinde belirt. |
-| Gizlilik politikası URL | Play’deki mevcut politikanı bağla |
+| Kullanıcı silme talebi | **Evet** — Ayarlar → Veri yönetimi → Sıfırla / **Bulut hesabını sil**; e-posta: abdullahbekir@gmail.com |
+| Gizlilik politikası URL | https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html |
+| Hesap silme URL (form) | Aynı gizlilik URL + uygulama içi yol (yukarı) |
 
 ### Toplanan veri türleri (işaretle)
 
@@ -120,7 +121,7 @@ Checklist’te şu maddeler yeşil olmalı:
 - [x] İçerik derecelendirme
 - [x] Hedef kitle
 - [x] Veri güvenliği
-- [ ] Resmi kurum / Finans / Sağlık
-- [ ] Mağaza girişi (açıklama + görseller)
+- [ ] Resmi kurum / Finans / Sağlık → Console’da **Hayır** işaretle
+- [ ] Mağaza girişi (açıklama + görseller) → [PLAY_STORE_LISTING.md](./PLAY_STORE_LISTING.md)
 
-Mağaza girişi metinleri: [PLAY_STORE_LISTING.md](./PLAY_STORE_LISTING.md)
+Yeniden gönderim adımları: [STORE_RESUBMIT_CHECKLIST.md](./STORE_RESUBMIT_CHECKLIST.md)

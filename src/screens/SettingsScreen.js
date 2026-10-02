@@ -4,11 +4,15 @@ import { useScrollToTop } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PrimaryButton from '../components/common/PrimaryButton';
+import TextLink from '../components/common/TextLink';
+import { PRIVACY_POLICY_URL } from '../constants/legalUrls';
+import { openExternalUrl, openSupportEmail } from '../utils/openExternalUrl';
 import ScreenHero from '../components/layout/ScreenHero';
+import AccountAuthSection from '../components/settings/AccountAuthSection';
 import SettingsSectionCard from '../components/settings/SettingsSectionCard';
 import SettingsToggleRow from '../components/settings/SettingsToggleRow';
 import { useAppSettings } from '../context/AppSettingsContext';
@@ -172,6 +176,18 @@ function createStyles(colors, isDark) {
       color: colors.danger,
       lineHeight: 19,
     },
+    infoNote: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: colors.textSecondary,
+      lineHeight: 19,
+    },
+    linkRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 12,
+      alignItems: 'center',
+    },
     divider: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: colors.border,
@@ -233,12 +249,14 @@ export default function SettingsScreen() {
     setDailyPlanGoal,
     setNotificationsEnabled,
   } = useAppSettings();
-  const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData } = useTasks();
+  const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData, deleteCloudAccountAndData } =
+    useTasks();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const [syncBusy, setSyncBusy] = useState(false);
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
 
   const appVersion = Constants.expoConfig?.version ?? '—';
+  const storeName = Platform.OS === 'ios' ? t('paywall.storeAppStore') : t('paywall.storeGooglePlay');
 
   const syncStatus = useMemo(() => {
     if (!supabaseConfigured) {
@@ -330,6 +348,28 @@ export default function SettingsScreen() {
     );
   }, [resetAllTaskData, t]);
 
+  const onDeleteCloudAccount = useCallback(() => {
+    if (!supabaseConfigured) {
+      Alert.alert(t('settings.deleteCloudTitle'), t('settings.syncLocalDetail'));
+      return;
+    }
+    Alert.alert(t('settings.deleteCloudTitle'), t('settings.deleteCloudBody', { store: storeName }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('settings.deleteCloudConfirm'),
+        style: 'destructive',
+        onPress: async () => {
+          const ok = await deleteCloudAccountAndData();
+          if (ok) {
+            Alert.alert(t('settings.legalTitle'), t('settings.deleteCloudSuccess'), [{ text: t('common.ok') }]);
+          } else {
+            Alert.alert(t('settings.syncError'), t('settings.deleteCloudFailed'));
+          }
+        },
+      },
+    ]);
+  }, [deleteCloudAccountAndData, storeName, supabaseConfigured, t]);
+
   const scrollBottom = Math.max(insets.bottom + tabBarHeight + 40, tabBarHeight + 56);
 
   return (
@@ -364,6 +404,14 @@ export default function SettingsScreen() {
             </View>
           </View>
         </View>
+
+        <SettingsSectionCard
+          icon="person-outline"
+          title={t('settings.accountTitle')}
+          subtitle={t('settings.accountSub')}
+        >
+          <AccountAuthSection />
+        </SettingsSectionCard>
 
         <SettingsSectionCard
           icon="cloud-outline"
@@ -511,14 +559,40 @@ export default function SettingsScreen() {
         </SettingsSectionCard>
 
         <SettingsSectionCard
+          icon="document-text-outline"
+          title={t('settings.legalTitle')}
+          subtitle={t('settings.legalSub')}
+        >
+          <Text style={styles.infoNote}>{t('settings.privacyPolicyDetail')}</Text>
+          <View style={styles.linkRow}>
+            <TextLink
+              title={t('settings.privacyPolicyLink')}
+              onPress={() => openExternalUrl(PRIVACY_POLICY_URL)}
+            />
+            <TextLink title={t('settings.supportEmailLink')} onPress={() => openSupportEmail('Planly support')} />
+          </View>
+        </SettingsSectionCard>
+
+        <SettingsSectionCard
           icon="trash-outline"
           title={t('settings.dataTitle')}
           subtitle={t('settings.dataSub')}
           tone="danger"
         >
+          <Text style={styles.infoNote}>{t('settings.dataDeletionInfo', { store: storeName })}</Text>
           <Text style={styles.dangerNote}>{t('settings.dataWarning')}</Text>
           <View style={styles.divider} />
           <PrimaryButton title={t('settings.resetBtn')} variant="outline" onPress={onResetData} />
+          {supabaseConfigured && userId ? (
+            <>
+              <View style={styles.divider} />
+              <PrimaryButton
+                title={t('settings.deleteCloudBtn')}
+                variant="outline"
+                onPress={onDeleteCloudAccount}
+              />
+            </>
+          ) : null}
         </SettingsSectionCard>
 
         <Text style={styles.versionText}>{t('settings.version', { version: appVersion })}</Text>

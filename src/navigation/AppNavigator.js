@@ -7,7 +7,9 @@ import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import TabBarIcon from '../components/common/TabBarIcon';
+import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTheme } from '../context/ThemeContext';
+import AuthWelcomeScreen from '../screens/AuthWelcomeScreen';
 import HomeScreen from '../screens/HomeScreen';
 import PaywallScreen from '../screens/PaywallScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -130,6 +132,14 @@ function RootStack() {
   );
 }
 
+function AppRoot() {
+  const { authReady, isRegistered, supabaseConfigured } = useSupabaseSession();
+  if (supabaseConfigured && authReady && !isRegistered) {
+    return <AuthWelcomeScreen />;
+  }
+  return <RootStack />;
+}
+
 export default function AppNavigator() {
   const { isDark, colors } = useTheme();
 
@@ -150,7 +160,7 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer theme={navigationTheme}>
-      <RootStack />
+      <AppRoot />
     </NavigationContainer>
   );
 }

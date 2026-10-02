@@ -3,6 +3,7 @@ import { useCallback, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -18,6 +19,8 @@ import PrimaryButton from '../components/common/PrimaryButton';
 import ScreenHero from '../components/layout/ScreenHero';
 import SectionHeader from '../components/layout/SectionHeader';
 import TextLink from '../components/common/TextLink';
+import { PRIVACY_POLICY_URL } from '../constants/legalUrls';
+import { openExternalUrl, openSubscriptionManagement } from '../utils/openExternalUrl';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useTheme } from '../context/ThemeContext';
 import { cardShadow } from '../theme/shadows';
@@ -105,6 +108,17 @@ function createStyles(colors) {
       color: colors.textSecondary,
       lineHeight: 20,
     },
+    legalBlock: {
+      gap: 8,
+      paddingTop: 4,
+    },
+    legalText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: colors.textSecondary,
+      lineHeight: 18,
+      textAlign: 'center',
+    },
   });
 }
 
@@ -187,6 +201,7 @@ export default function PaywallScreen() {
   }, [billingConfigured, isPremiumActive, restorePurchases, t]);
 
   const missingProducts = ready && (!billingConfigured || !hasPurchasablePlans);
+  const storeName = Platform.OS === 'ios' ? t('paywall.storeAppStore') : t('paywall.storeGooglePlay');
 
   return (
     <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
@@ -259,6 +274,17 @@ export default function PaywallScreen() {
             <TextLink title={t('paywall.restore')} onPress={() => !busyId && onRestore()} />
           ) : null}
           {busyId === 'restore' ? <ActivityIndicator color={colors.primary} /> : null}
+          {(monthlyPlan || annualPlan) && billingConfigured ? (
+            <View style={styles.legalBlock}>
+              <Text style={styles.legalText}>{t('paywall.legalAutoRenew', { store: storeName })}</Text>
+              <Text style={styles.legalText}>{t('paywall.legalManage', { store: storeName })}</Text>
+              <TextLink title={t('paywall.manageSubscription')} onPress={() => openSubscriptionManagement()} />
+              <TextLink
+                title={t('paywall.legalPrivacyLink')}
+                onPress={() => openExternalUrl(PRIVACY_POLICY_URL)}
+              />
+            </View>
+          ) : null}
         </View>
       </View>
     </ScrollView>

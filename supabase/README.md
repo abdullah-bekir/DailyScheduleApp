@@ -1,6 +1,6 @@
-# Supabase kurulumu (DailyscheduleApp)
+# Supabase kurulumu (Planly / DailyscheduleApp)
 
-UI değiştirmeden backend’i devreye almak için sıra:
+Uygulama açılışında **kullanıcı adı + şifre** ile kayıt/giriş vardır. Bulut senkronu yalnızca **giriş yapmış** kullanıcılar için çalışır.
 
 ## Klasör yapısı (`supabase/sql/`)
 
@@ -8,41 +8,49 @@ UI değiştirmeden backend’i devreye almak için sıra:
 |--------|--------|
 | `sql/schema.sql` | İlk kurulum: tam şema (`profiles`, `tasks`, RLS, tetikleyiciler). |
 | `sql/upgrades/` | Mevcut projeye **üst üste** uygulanan yükseltme betikleri. |
-| `sql/optional_alternatives/` | Farklı senaryolar (yalnızca görevler tablosu vb.) — **birini** seçin, hepsini değil. |
+| `sql/optional_alternatives/` | Farklı senaryolar — **birini** seçin, hepsini değil. |
 | `sql/settings/` | Ayarlar ekranı ile ilgili ek SQL. |
 
-Dosya sırası özeti: kökteki `ROLLOUT_ORDER.txt`.
+Dosya sırası: kökteki `ROLLOUT_ORDER.txt`.
 
-## 1) Dashboard ayarları
+## 1) Dashboard ayarları (sırayla)
 
-1. **Project Settings → API:** `Project URL` ve `anon` `public` anahtarını kopyala.
-2. **Authentication → Providers → Anonymous:** **Açık** olmalı (login ekranı yok; ilk açılışta anon kullanıcı).
-3. (İsteğe bağlı) **Database → Replication:** `public.tasks` için realtime.
+Detaylı Türkçe adımlar: [`docs/SUPABASE_AUTH_KURULUM.md`](../docs/SUPABASE_AUTH_KURULUM.md)
+
+Özet:
+
+1. **Project Settings → API:** `Project URL` ve **anon public** anahtarını kopyala.
+2. **Authentication → Providers → Email:** **Açık** (Sign up + Sign in).
+3. **Authentication → Providers → Anonymous:** **Kapalı** (eski misafir oturumu artık kullanılmıyor).
+4. **Authentication → Settings:** Kullanıcı hesap silme açık (`auth.deleteUser()` — Ayarlar → Hesabı sil).
+5. **Confirm email:** Test için kapalı; canlıda açacaksan kayıttan sonra e-posta doğrulama gerekir.
+6. (İsteğe bağlı) **Database → Replication:** `public.tasks` için realtime.
 
 ## 2) Uygulama ortam değişkenleri
 
-Proje kökünde `.env` oluştur (`.env.example` şablonu):
+Proje kökünde `.env` (`.env.example` şablonu):
 
 ```
 EXPO_PUBLIC_SUPABASE_URL=https://PROJE_REF.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 ```
 
-`app.config.js` bu değerleri `extra` ile Expo’ya aktarır; `src/lib/supabaseClient.js` hem `extra` hem `process.env` okur.
+`app.config.js` → `extra`; EAS **production** ortamında da aynı değişkenler tanımlı olmalı.
 
-Sunucuyu yeniden başlat: `npx expo start` (gerekirse `-c`).
+**Expo Go:** Supabase oturumu ve mağaza modülleri sınırlı çalışabilir; tam test için **EAS development build** veya **production / TestFlight** kullan.
 
-## 3) Veritabanı şeması (SQL Editor)
+## 3) Veritabanı şeması
 
-**İlk kurulum (önerilen):** `sql/schema.sql` dosyasının **tamamını** tek seferde çalıştır → `profiles`, `tasks`, tetikleyiciler, RLS.
+**İlk kurulum:** SQL Editor’de `sql/schema.sql` dosyasının **tamamını** bir kez çalıştır.
 
-## 4) Kod tarafı (zaten bağlı)
+## 4) Kod tarafı
 
 | Öğe | Dosya |
 |-----|--------|
 | İstemci | `src/lib/supabaseClient.js` |
-| Anon oturum | `src/context/SupabaseContext.js` |
+| Oturum (username auth) | `src/context/SupabaseContext.js`, `src/utils/authUsername.js` |
+| Karşılama ekranı | `src/screens/AuthWelcomeScreen.js` |
 | Görevler | `src/context/TasksContext.js` |
 | Profil senkron | `src/components/sync/RemoteProfileSync.js`, `src/lib/profileRemote.js` |
 
-Detaylı mimari: depo kökündeki `backend-plan` (veya `docs/` altı plan dosyaları).
+Kullanıcı adı arayüzde görünür; Auth için dahili e-posta: `kullaniciadi@users.planly.app` (domain sabittir, kullanıcıya gösterilmez).

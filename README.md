@@ -33,6 +33,7 @@ Tüm script'ler için `package.json` dosyasına bakın.
 
 ## Dokümantasyon
 
+- [Mağazaya yeniden gönderim](docs/STORE_RESUBMIT_CHECKLIST.md)
 - [Play Console checklist cevapları](docs/PLAY_CHECKLIST_CEVAPLAR.md)
 - [Play Store listing metinleri](docs/PLAY_STORE_LISTING.md)
 - [Klasör rehberi](docs/KLASOR_REHBERI.md)

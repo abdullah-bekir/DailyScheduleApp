@@ -24,18 +24,34 @@ export function resolveOffering(offerings) {
   return offerings.current ?? null;
 }
 
-export function pickPackagesFromOfferings(offerings) {
+function pickPackage(list, packageType, productId) {
+  const byType = list.find((p) => p.packageType === packageType);
+  if (byType) return byType;
+  const id = String(productId ?? '').trim();
+  if (!id) return null;
+  return list.find((p) => p.product?.identifier === id || p.identifier === id) ?? null;
+}
+
+export function pickPackagesFromOfferings(offerings, productIds = {}) {
   const list = packagesFromOffering(resolveOffering(offerings));
   return {
-    monthly: list.find((p) => p.packageType === Purchases.PACKAGE_TYPE.MONTHLY) ?? null,
-    annual: list.find((p) => p.packageType === Purchases.PACKAGE_TYPE.ANNUAL) ?? null,
+    monthly: pickPackage(list, Purchases.PACKAGE_TYPE.MONTHLY, productIds.monthly),
+    annual: pickPackage(list, Purchases.PACKAGE_TYPE.ANNUAL, productIds.annual),
   };
 }
 
 export async function fetchDirectStoreProducts(productIds) {
   const ids = [productIds.monthly, productIds.annual].filter(Boolean);
   if (!ids.length) return { monthly: null, annual: null };
-  const products = await Purchases.getProducts(ids);
+  let products = [];
+  try {
+    products = await Purchases.getProducts(ids, Purchases.PRODUCT_CATEGORY.SUBSCRIPTION);
+  } catch {
+    products = [];
+  }
+  if (!products.length) {
+    products = await Purchases.getProducts(ids);
+  }
   const map = new Map(products.map((p) => [p.identifier, p]));
   return {
     monthly: map.get(productIds.monthly) ?? null,

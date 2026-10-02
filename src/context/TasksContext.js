@@ -507,6 +507,38 @@ export function TasksProvider({ children }) {
     return true;
   }, [userId, storageUserId, persistTasks, persistTally, syncProfilePatch]);
 
+  const deleteCloudAccountAndData = useCallback(async () => {
+    const sb = getSupabase();
+    const ownerId = userId;
+    const outboxCleared = await saveTaskOutbox(storageUserId, []);
+    if (!outboxCleared) {
+      setTasksSyncError(i18n.t('settings.syncError'));
+      return false;
+    }
+    tasksRef.current = [];
+    setTasksState([]);
+    await persistTasks([]);
+    persistTally(0);
+
+    if (sb && ownerId) {
+      const { error: deleteUserError } = await sb.auth.deleteUser();
+      if (deleteUserError) {
+        const { error: tasksError } = await sb.from('tasks').delete().eq('user_id', ownerId);
+        if (tasksError) {
+          setTasksSyncError(deleteUserError.message || tasksError.message || i18n.t('settings.deleteCloudFailed'));
+          return false;
+        }
+        await syncProfilePatch({ completion_tally: 0 });
+        setTasksSyncError(deleteUserError.message || i18n.t('settings.deleteCloudFailed'));
+        return false;
+      }
+      await sb.auth.signOut();
+    }
+
+    setTasksSyncError(null);
+    return true;
+  }, [userId, storageUserId, persistTasks, persistTally, syncProfilePatch]);
+
   const grantAdRewardBonus = useCallback((delta) => {
     const d = Math.max(1, Math.min(50, Math.floor(Number(delta)) || 5));
     setCompletionTally((prev) => {
@@ -536,6 +568,7 @@ export function TasksProvider({ children }) {
       updateTaskDetails,
       applyRemoteCompletionTally,
       resetAllTaskData,
+      deleteCloudAccountAndData,
       grantAdRewardBonus,
     }),
     [
@@ -554,6 +587,7 @@ export function TasksProvider({ children }) {
       updateTaskDetails,
       applyRemoteCompletionTally,
       resetAllTaskData,
+      deleteCloudAccountAndData,
       grantAdRewardBonus,
     ],
   );

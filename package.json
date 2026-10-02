@@ -21,7 +21,8 @@
     "eas:update:preview": "npx eas-cli update --channel preview",
     "eas:update:production": "npx eas-cli update --channel production",
     "i18n:check": "node scripts/check-i18n.cjs",
-    "smoke": "node scripts/smoke-regression.cjs"
+    "smoke": "node scripts/smoke-regression.cjs",
+    "privacy:sync-gist": "gh gist edit c7a5148c5458a345a4237aaf8eecd93a docs/privacy.html -f privacy.html"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

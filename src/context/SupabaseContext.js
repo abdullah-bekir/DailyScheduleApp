@@ -1,18 +1,64 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { getSupabase, getSupabaseConfig } from '../lib/supabaseClient';
+import {
+  isRegisteredAuthUser,
+  normalizeUsername,
+  usernameFromAuthUser,
+  usernameToAuthEmail,
+} from '../utils/authUsername';
 
 const SupabaseContext = createContext(null);
+
+function readUserMeta(user) {
+  if (!user) {
+    return {
+      userId: null,
+      username: null,
+      userEmail: null,
+      isAnonymous: true,
+      isRegistered: false,
+    };
+  }
+  const isAnonymous = user.is_anonymous === true;
+  const username = usernameFromAuthUser(user);
+  const userEmail = typeof user.email === 'string' && user.email.trim() ? user.email.trim() : null;
+  return {
+    userId: user.id ?? null,
+    username,
+    userEmail,
+    isAnonymous,
+    isRegistered: isRegisteredAuthUser(user),
+  };
+}
 
 export function SupabaseProvider({ children }) {
   const { isConfigured } = useMemo(() => getSupabaseConfig(), []);
   const [authReady, setAuthReady] = useState(!isConfigured);
   const [userId, setUserId] = useState(null);
+  const [username, setUsername] = useState(null);
+  const [userEmail, setUserEmail] = useState(null);
+  const [isAnonymous, setIsAnonymous] = useState(true);
+  const [isRegistered, setIsRegistered] = useState(false);
+
+  const applySession = useCallback((session) => {
+    const meta = readUserMeta(session?.user ?? null);
+    setUserId(meta.userId);
+    setUsername(meta.username);
+    setUserEmail(meta.userEmail);
+    setIsAnonymous(meta.isAnonymous);
+    setIsRegistered(meta.isRegistered);
+    setAuthReady(true);
+  }, []);
 
   useEffect(() => {
     if (!isConfigured) {
       setAuthReady(true);
       setUserId(null);
+      setUsername(null);
+      setUserEmail(null);
+      setIsAnonymous(true);
+      setIsRegistered(false);
       return undefined;
     }
 
@@ -20,36 +66,24 @@ export function SupabaseProvider({ children }) {
     if (!sb) {
       setAuthReady(true);
       setUserId(null);
+      setUsername(null);
+      setUserEmail(null);
+      setIsAnonymous(true);
+      setIsRegistered(false);
       return undefined;
     }
 
     let cancelled = false;
 
-    const applySession = (session) => {
+    const safeApply = (session) => {
       if (cancelled) return;
-      setUserId(session?.user?.id ?? null);
-      setAuthReady(true);
+      applySession(session);
     };
 
     sb.auth
       .getSession()
       .then(({ data }) => {
-        if (data?.session) {
-          applySession(data.session);
-        } else {
-          return sb.auth.signInAnonymously();
-        }
-        return null;
-      })
-      .then((anonRes) => {
-        if (cancelled) return;
-        if (anonRes?.data?.session) {
-          applySession(anonRes.data.session);
-        } else if (!anonRes) {
-          /* getSession already set */
-        } else {
-          setAuthReady(true);
-        }
+        safeApply(data?.session ?? null);
       })
       .catch(() => {
         if (!cancelled) setAuthReady(true);
@@ -58,22 +92,98 @@ export function SupabaseProvider({ children }) {
     const {
       data: { subscription },
     } = sb.auth.onAuthStateChange((_event, session) => {
-      applySession(session);
+      safeApply(session);
     });
 
     return () => {
       cancelled = true;
       subscription?.unsubscribe();
     };
-  }, [isConfigured]);
+  }, [isConfigured, applySession]);
+
+  const signInWithUsername = useCallback(async (rawUsername, password) => {
+    const sb = getSupabase();
+    if (!sb) {
+      const err = new Error('SUPABASE_NOT_CONFIGURED');
+      err.code = 'SUPABASE_NOT_CONFIGURED';
+      throw err;
+    }
+    const name = normalizeUsername(rawUsername);
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: usernameToAuthEmail(name),
+      password: String(password ?? ''),
+    });
+    if (error) throw error;
+    return data;
+  }, []);
+
+  const signUpWithUsername = useCallback(async (rawUsername, password) => {
+    const sb = getSupabase();
+    if (!sb) {
+      const err = new Error('SUPABASE_NOT_CONFIGURED');
+      err.code = 'SUPABASE_NOT_CONFIGURED';
+      throw err;
+    }
+    const name = normalizeUsername(rawUsername);
+    const pwd = String(password ?? '');
+    const email = usernameToAuthEmail(name);
+    const {
+      data: { user },
+    } = await sb.auth.getUser();
+
+    if (user?.is_anonymous) {
+      const { data, error } = await sb.auth.updateUser({
+        email,
+        password: pwd,
+        data: { username: name },
+      });
+      if (error) throw error;
+      const confirmed = Boolean(data.user?.email_confirmed_at);
+      return { data, needsEmailConfirmation: !confirmed };
+    }
+
+    const { data, error } = await sb.auth.signUp({
+      email,
+      password: pwd,
+      options: { data: { username: name } },
+    });
+    if (error) throw error;
+    const confirmed = Boolean(data.user?.email_confirmed_at);
+    return { data, needsEmailConfirmation: !confirmed };
+  }, []);
+
+  const signOutForLogin = useCallback(async () => {
+    const sb = getSupabase();
+    if (!sb) return;
+    const { error } = await sb.auth.signOut();
+    if (error) throw error;
+  }, []);
 
   const value = useMemo(
     () => ({
       supabaseConfigured: isConfigured,
       authReady,
       userId,
+      username,
+      userEmail,
+      isAnonymous,
+      isRegistered,
+      signInWithUsername,
+      signUpWithUsername,
+      signOutForLogin,
     }),
-    [isConfigured, authReady, userId],
+    [
+      isConfigured,
+      authReady,
+      userId,
+      username,
+      userEmail,
+      isAnonymous,
+      isRegistered,
+      signInWithUsername,
+      signUpWithUsername,
+      signOutForLogin,
+    ],
   );
 
   return <SupabaseContext.Provider value={value}>{children}</SupabaseContext.Provider>;
