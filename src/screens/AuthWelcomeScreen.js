@@ -21,7 +21,7 @@ import { TERMS_URL } from '../constants/legalUrls';
 import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTheme } from '../context/ThemeContext';
 import { openExternalUrl } from '../utils/openExternalUrl';
-import { normalizeUsername, validateUsername } from '../utils/authUsername';
+import { normalizeEmail, normalizeUsername, validateEmail, validateUsername } from '../utils/authUsername';
 
 function createStyles(colors, isDark) {
   return StyleSheet.create({
@@ -130,7 +130,7 @@ function mapAuthError(t, error) {
     return t('auth.errorInvalidLogin');
   }
   if (msg.includes('already registered') || msg.includes('already been registered')) {
-    return t('auth.errorUsernameTaken');
+    return t('auth.errorEmailTaken');
   }
   return error?.message || t('auth.errorGeneric');
 }
@@ -140,10 +140,11 @@ export default function AuthWelcomeScreen() {
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
-  const { signInWithUsername, signUpWithUsername } = useSupabaseSession();
+  const { signInWithEmail, signUpWithEmailAndUsername } = useSupabaseSession();
 
   const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -153,11 +154,11 @@ export default function AuthWelcomeScreen() {
   const bottomPad = Math.max(insets.bottom + 24, 32);
 
   const onLogin = async () => {
-    const u = normalizeUsername(username);
+    const mail = normalizeEmail(email);
     const pwd = String(password ?? '');
-    const userErr = validateUsername(u);
-    if (userErr) {
-      Alert.alert(t('auth.titleLogin'), t(`auth.errorUsername_${userErr}`));
+    const emailErr = validateEmail(mail);
+    if (emailErr) {
+      Alert.alert(t('auth.titleLogin'), t(`auth.errorEmail_${emailErr}`));
       return;
     }
     if (!pwd) {
@@ -166,7 +167,7 @@ export default function AuthWelcomeScreen() {
     }
     setBusy(true);
     try {
-      await signInWithUsername(u, pwd);
+      await signInWithEmail(mail, pwd);
     } catch (e) {
       Alert.alert(t('auth.titleLogin'), mapAuthError(t, e));
     } finally {
@@ -175,12 +176,18 @@ export default function AuthWelcomeScreen() {
   };
 
   const onRegister = async () => {
-    const u = normalizeUsername(username);
+    const name = normalizeUsername(username);
+    const mail = normalizeEmail(email);
     const pwd = String(password ?? '');
     const confirm = String(confirmPassword ?? '');
-    const userErr = validateUsername(u);
+    const userErr = validateUsername(name);
     if (userErr) {
       Alert.alert(t('auth.titleRegister'), t(`auth.errorUsername_${userErr}`));
+      return;
+    }
+    const emailErr = validateEmail(mail);
+    if (emailErr) {
+      Alert.alert(t('auth.titleRegister'), t(`auth.errorEmail_${emailErr}`));
       return;
     }
     if (pwd.length < 6) {
@@ -197,13 +204,16 @@ export default function AuthWelcomeScreen() {
     }
     setBusy(true);
     try {
-      const { needsEmailConfirmation } = await signUpWithUsername(u, pwd);
+      const { needsEmailConfirmation } = await signUpWithEmailAndUsername(name, mail, pwd);
       if (needsEmailConfirmation) {
         Alert.alert(t('auth.confirmTitle'), t('auth.confirmBody'));
+      } else {
+        Alert.alert(t('auth.titleRegister'), t('auth.successSignUp'));
       }
       setPassword('');
       setConfirmPassword('');
       setTermsAccepted(false);
+      setUsername('');
       setMode('login');
     } catch (e) {
       Alert.alert(t('auth.titleRegister'), mapAuthError(t, e));
@@ -244,16 +254,33 @@ export default function AuthWelcomeScreen() {
         </View>
 
         <View style={styles.form}>
+          {mode === 'register' ? (
+            <View style={styles.field}>
+              <Text style={styles.label}>{t('auth.usernameLabel')}</Text>
+              <TextInput
+                style={styles.input}
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="username"
+                placeholder={t('auth.usernamePlaceholder')}
+                placeholderTextColor={colors.textTertiary}
+              />
+            </View>
+          ) : null}
+
           <View style={styles.field}>
-            <Text style={styles.label}>{t('auth.usernameLabel')}</Text>
+            <Text style={styles.label}>{t('auth.emailLabel')}</Text>
             <TextInput
               style={styles.input}
-              value={username}
-              onChangeText={setUsername}
+              value={email}
+              onChangeText={setEmail}
               autoCapitalize="none"
               autoCorrect={false}
-              textContentType="username"
-              placeholder={t('auth.usernamePlaceholder')}
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              placeholder={t('auth.emailPlaceholder')}
               placeholderTextColor={colors.textTertiary}
             />
           </View>

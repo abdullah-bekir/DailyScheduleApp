@@ -53,4 +53,4 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
 | Görevler | `src/context/TasksContext.js` |
 | Profil senkron | `src/components/sync/RemoteProfileSync.js`, `src/lib/profileRemote.js` |
 
-Kullanıcı adı arayüzde görünür; Auth için dahili e-posta: `kullaniciadi@users.planly.app` (domain sabittir, kullanıcıya gösterilmez).
+Kayıtta **kullanıcı adı** + gerçek **e-posta**; giriş her zaman **e-posta + şifre**. Kullanıcı adı `user_metadata.username` içinde saklanır.

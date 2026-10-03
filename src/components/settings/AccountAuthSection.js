@@ -74,8 +74,6 @@ export default function AccountAuthSection() {
     return <Text style={styles.hint}>{t('auth.settingsSignedOutHint')}</Text>;
   }
 
-  const displayName = username || userEmail || '—';
-
   return (
     <View style={{ gap: 12 }}>
       <View style={styles.sessionRow}>
@@ -84,8 +82,13 @@ export default function AccountAuthSection() {
         </View>
         <View style={styles.sessionText}>
           <Text style={styles.sessionTitle}>{t('settings.accountRegisteredTitle')}</Text>
+          {username ? (
+            <Text style={styles.sessionSub} numberOfLines={1}>
+              {t('auth.usernameLabel')}: {username}
+            </Text>
+          ) : null}
           <Text style={styles.sessionSub} numberOfLines={2}>
-            {displayName}
+            {userEmail || '—'}
           </Text>
         </View>
         <Ionicons name="checkmark-circle" size={22} color={colors.success} />

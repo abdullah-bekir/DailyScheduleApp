@@ -386,6 +386,13 @@
     "errorUsername_short": "Username must be at least 3 characters.",
     "errorUsername_long": "Username must be at most 24 characters.",
     "errorUsername_invalid": "Use letters, numbers, dots, dashes or underscores only.",
-    "settingsSignedOutHint": "Sign in from the welcome screen when you open the app."
+    "settingsSignedOutHint": "Sign in from the welcome screen when you open the app.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Your email address",
+    "errorEmailTaken": "This email is already registered.",
+    "successSignUp": "Account created. Sign in with your email and password.",
+    "errorEmail_empty": "Email is required.",
+    "errorEmail_long": "Email address is too long.",
+    "errorEmail_invalid": "Enter a valid email address."
   }
 }

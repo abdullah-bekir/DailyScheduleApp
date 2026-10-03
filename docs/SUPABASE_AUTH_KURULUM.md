@@ -19,7 +19,7 @@ Bu rehberi **Supabase Dashboard** ve **EAS** ile birlikte uygula. Kod tarafı re
 
 | Sağlayıcı | Ayar |
 |-----------|------|
-| **Email** | **Enabled** — “Confirm email” test aşamasında **kapalı** önerilir (hemen giriş). Canlıda açarsan kullanıcı e-posta doğrular. |
+| **Email** | **Enabled** — Giriş/kayıt gerçek e-posta ile. “Confirm email” test için **kapalı** (hemen giriş); canlıda açarsan kullanıcı gelen kutusundan onaylar. |
 | **Anonymous** | **Disabled** — uygulama artık otomatik misafir oturumu açmıyor. |
 
 Kaydet.
@@ -78,7 +78,7 @@ Expo Go’da hata alman normal (native modüller + tam auth akışı).
 2. TestFlight’tan yükle.
 3. **Yeni hesap oluştur** → kullanıcı adı, şifre, şartlar.
 4. Çıkış → **Giriş yap** aynı bilgilerle.
-5. Supabase **Authentication → Users** listesinde kullanıcı görünmeli (e-posta `@users.planly.app` ile).
+5. Supabase **Authentication → Users** listesinde kullanıcı **gerçek e-posta** adresiyle görünmeli.
 
 ---
 

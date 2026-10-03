@@ -3,9 +3,9 @@ import React, { createContext, useCallback, useContext, useEffect, useMemo, useS
 import { getSupabase, getSupabaseConfig } from '../lib/supabaseClient';
 import {
   isRegisteredAuthUser,
+  normalizeEmail,
   normalizeUsername,
   usernameFromAuthUser,
-  usernameToAuthEmail,
 } from '../utils/authUsername';
 
 const SupabaseContext = createContext(null);
@@ -101,23 +101,23 @@ export function SupabaseProvider({ children }) {
     };
   }, [isConfigured, applySession]);
 
-  const signInWithUsername = useCallback(async (rawUsername, password) => {
+  const signInWithEmail = useCallback(async (rawEmail, password) => {
     const sb = getSupabase();
     if (!sb) {
       const err = new Error('SUPABASE_NOT_CONFIGURED');
       err.code = 'SUPABASE_NOT_CONFIGURED';
       throw err;
     }
-    const name = normalizeUsername(rawUsername);
+    const email = normalizeEmail(rawEmail);
     const { data, error } = await sb.auth.signInWithPassword({
-      email: usernameToAuthEmail(name),
+      email,
       password: String(password ?? ''),
     });
     if (error) throw error;
     return data;
   }, []);
 
-  const signUpWithUsername = useCallback(async (rawUsername, password) => {
+  const signUpWithEmailAndUsername = useCallback(async (rawUsername, rawEmail, password) => {
     const sb = getSupabase();
     if (!sb) {
       const err = new Error('SUPABASE_NOT_CONFIGURED');
@@ -125,8 +125,8 @@ export function SupabaseProvider({ children }) {
       throw err;
     }
     const name = normalizeUsername(rawUsername);
+    const email = normalizeEmail(rawEmail);
     const pwd = String(password ?? '');
-    const email = usernameToAuthEmail(name);
     const {
       data: { user },
     } = await sb.auth.getUser();
@@ -168,8 +168,8 @@ export function SupabaseProvider({ children }) {
       userEmail,
       isAnonymous,
       isRegistered,
-      signInWithUsername,
-      signUpWithUsername,
+      signInWithEmail,
+      signUpWithEmailAndUsername,
       signOutForLogin,
     }),
     [
@@ -180,8 +180,8 @@ export function SupabaseProvider({ children }) {
       userEmail,
       isAnonymous,
       isRegistered,
-      signInWithUsername,
-      signUpWithUsername,
+      signInWithEmail,
+      signUpWithEmailAndUsername,
       signOutForLogin,
     ],
   );

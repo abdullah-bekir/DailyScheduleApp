@@ -1,10 +1,14 @@
-/** Supabase Auth e-posta alanı; kullanıcı arayüzünde yalnızca username gösterilir. */
+/** Eski sürümlerde kullanılan dahili e-posta alan adı (geriye dönük okuma). */
 export const AUTH_USERNAME_EMAIL_DOMAIN = 'users.planly.app';
 
 export function normalizeUsername(raw) {
   return String(raw ?? '')
     .trim()
     .toLowerCase();
+}
+
+export function normalizeEmail(raw) {
+  return String(raw ?? '').trim().toLowerCase();
 }
 
 export function validateUsername(username) {
@@ -15,9 +19,12 @@ export function validateUsername(username) {
   return null;
 }
 
-export function usernameToAuthEmail(username) {
-  const u = normalizeUsername(username);
-  return `${u}@${AUTH_USERNAME_EMAIL_DOMAIN}`;
+export function validateEmail(raw) {
+  const email = normalizeEmail(raw);
+  if (!email) return 'empty';
+  if (email.length > 254) return 'long';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'invalid';
+  return null;
 }
 
 export function usernameFromAuthUser(user) {
@@ -34,5 +41,6 @@ export function usernameFromAuthUser(user) {
 
 export function isRegisteredAuthUser(user) {
   if (!user || user.is_anonymous === true) return false;
-  return Boolean(usernameFromAuthUser(user) || user.email);
+  const email = typeof user.email === 'string' ? user.email.trim() : '';
+  return Boolean(email);
 }
