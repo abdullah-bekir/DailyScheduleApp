@@ -22,7 +22,7 @@ Planly (“uygulama”), günlük görev ve planlarınızı yönetmenize yardım
 **Topladığımız veriler**
 
 - **Görev ve uygulama verileri:** Eklediğiniz görevler, tamamlama durumu ve tercihler (tema, dil vb.) cihazınızda saklanır.
-- **Bulut senkronu:** Supabase yapılandırıldığında uygulama anonim hesap oluşturur; görev ve ayarlar bulutta yedeklenebilir. E-posta ile giriş zorunlu değildir.
+- **Bulut senkronu:** Kayıt olurken kullanıcı adı, e-posta ve şifre ile hesap açılır; giriş e-posta ve şifre ile yapılır. Görev ve ayarlar bulutta yedeklenebilir.
 - **Reklamlar:** Ücretsiz sürümde Google AdMob reklam kimliği ve ilgili veriler reklam gösterimi için kullanılabilir.
 - **Abonelikler:** Planly Pro satın alımları Apple App Store veya Google Play ve RevenueCat üzerinden işlenir; ödeme bilgilerinizi biz toplamayız.
 - **Analitik:** Uygulama kararlılığı için sınırlı teknik günlükler (çökme vb.) toplanabilir.

@@ -3,7 +3,7 @@
 Apple’ın **Unable to Add for Review** listesindeki maddeler için adım adım rehber.  
 **Connect’e sadece sen girebilirsin;** aşağıdaki metinleri kopyala-yapıştır.
 
-**Sürüm:** 1.0.6 · **Build:** 17 · **Bundle ID:** `com.abdullahbekir.DailyscheduleApp`
+**Sürüm:** 1.0.6 · **Build:** 20 (TestFlight; e-posta kayıt/giriş) · **Bundle ID:** `com.abdullahbekir.DailyscheduleApp`
 
 ---
 
@@ -115,7 +115,7 @@ Dağıtım → **1.0.6** → **App Review Information** / **İnceleme bilgileri*
 | First name / Last name | Adın soyadın                               |
 | Phone                  | +90 … (ulaşılabilir)                       |
 | Email                  | App Store’da kayıtlı geliştirici e-postası |
-| Sign-in required       | **Hayır** (Planly anonim kullanım)         |
+| Sign-in required       | **Evet** (e-posta + şifre; kayıt: kullanıcı adı + e-posta) |
 | Notes                  | Aşağıdaki “İnceleme notu”                  |
 
 
@@ -124,11 +124,11 @@ Dağıtım → **1.0.6** → **App Review Information** / **İnceleme bilgileri*
 ```text
 Planly v1.0.6 — com.abdullahbekir.DailyscheduleApp
 
-(1) Screen recording: cold launch → Home → add/complete task → Tasks → Stats → Settings → Stats → See plans → Paywall (monthly/annual) → Restore or Sandbox purchase. Account deletion: Settings → Data management → Delete account. No public UGC/social content.
+(1) Screen recording: cold launch → Welcome (email + password sign-in OR Create account: username, email, password, accept Terms) → Home → add/complete task → Tasks → Stats → Settings → Stats → See plans → Paywall (monthly/annual) → Restore or Sandbox purchase. Account deletion: Settings → Data management → Delete account. No public UGC/social content.
 
-(2) Purpose: daily task planner for adults 18+; no email login; optional anonymous cloud backup via Supabase.
+(2) Purpose: daily task planner for adults 18+; account with email/password via Supabase; cloud sync when signed in.
 
-(3) Sign-in required: NO. Premium: Stats → See plans; Sandbox Apple ID for IAP; entitlement "premium" (RevenueCat).
+(3) Sign-in required: YES (email + password at first launch). Demo: create a test account in the recording or provide reviewer credentials below if needed. Premium: Stats → See plans; Sandbox Apple ID for IAP; entitlement "premium" (RevenueCat).
 
 (4) External services: Supabase, AdMob (free tier), RevenueCat, Apple IAP. No AI providers.
 
@@ -140,7 +140,7 @@ Privacy: https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237
 Support: abdullahbekir@gmail.com
 ```
 
-**Ekran kaydı (senin cihazında):** Uygulamayı kapat → kayıt başlat → ikondan aç → yukarıdaki akış → `.mp4`’ü Resolution Center veya Review ekinde gönder. (Bunu IDE otomatik yükleyemez; fiziksel iPhone gerekir.)
+**Ekran kaydı (senin cihazında):** Uygulamayı kapat → kayıt başlat → ikondan aç → **giriş veya yeni hesap** → yukarıdaki akış → `.mp4`’ü Resolution Center veya Review ekinde gönder. (Fiziksel iPhone; TestFlight **build 20**.)
 
 
 
@@ -166,13 +166,13 @@ Planly, gününü sade ve net tutmana yardımcı olan günlük plan ve görev uy
 • Öncelik, saat ve tarih ile görev ekle
 • İlerlemeyi istatistiklerle takip et
 • Açık / koyu tema ve 13 dil
-• Anonim bulut senkronu (e-posta girişi yok)
+• E-posta ve şifre ile hesap; bulut senkronu (Supabase)
 
 Planly Pro (isteğe bağlı abonelik)
 • Reklamları kaldırır
 • Premium özelliklere erişim sağlar
 
-Giriş zorunlu değildir; uygulamayı açıp hemen kullanmaya başlayabilirsin.
+İlk açılışta e-posta ile kayıt veya giriş gerekir. Hesap silme: Ayarlar → Veri yönetimi.
 
 Gizlilik: Görevlerin sana aittir. Reklam ve abonelik için Apple App Store, AdMob ve RevenueCat kullanılabilir. Ayrıntılar gizlilik politikasında.
 ```
