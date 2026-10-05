@@ -33,7 +33,10 @@ export function LocaleProvider({ children }) {
       // ready'yi false yapma: children unmount olmasın; oturum/dil yenilenirken mevcut dili göster.
       if (supabaseConfigured && !authReady) return;
       const saved = await loadLanguage(SUPPORTED_LANGUAGE_CODES, storageUserId);
-      const code = saved ?? normalizeLanguage(i18n.resolvedLanguage || i18n.language);
+      const code =
+        saved ??
+        (isSupportedLanguage(languageRef.current) ? languageRef.current : null) ??
+        normalizeLanguage(i18n.resolvedLanguage || i18n.language);
       if (!active) return;
       applyRtlLayout(code);
       await i18n.changeLanguage(code);

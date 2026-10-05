@@ -121,7 +121,12 @@ function isAllowedLanguage(code, allowedCodes) {
 
 export async function loadLanguage(allowedCodes, userId) {
   try {
-    const v = await readSetting(SETTINGS_LANGUAGE_KEY, userId);
+    const id = typeof userId === 'string' ? userId.trim() : '';
+    let v = await readSetting(SETTINGS_LANGUAGE_KEY, userId);
+    // Oturum kapalıyken veya kullanıcı anahtarı yokken cihazdaki son dil (giriş ekranı).
+    if (!v) {
+      v = await AsyncStorage.getItem(SETTINGS_LANGUAGE_KEY);
+    }
     const code = typeof v === 'string' ? v.trim() : '';
     if (code && isAllowedLanguage(code, allowedCodes)) return code;
   } catch {
@@ -134,6 +139,7 @@ export async function saveLanguage(code, allowedCodes, userId) {
   try {
     if (isAllowedLanguage(code, allowedCodes)) {
       await writeSetting(SETTINGS_LANGUAGE_KEY, code, userId);
+      await AsyncStorage.setItem(SETTINGS_LANGUAGE_KEY, code);
     }
   } catch {
     /* ignore */
