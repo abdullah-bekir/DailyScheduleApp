@@ -29,7 +29,7 @@ Burada yaptığın değişiklikler: paket adı, izinler, imzalama, ikon/splash k
 | Klasör / dosya | Rol |
 |----------------|-----|
 | `assets/` | Uygulama ikonu, splash, favicon (Expo `app.json` ile bağlı). |
-| `scripts/` | Örn. ikon üretimi (`generate_app_icons.py`) gibi yardımcı araçlar. |
+| `scripts/` | Örn. ikon üretimi (`generate_app_icons.py`), yerel temizlik (`clean-local-artifacts.ps1`). |
 | `docs/` | Dokümantasyon (bu rehber, yayın notları, politikalar). |
 
 ## Supabase SQL (`supabase/`)
@@ -135,5 +135,6 @@ flowchart LR
 
 ## İsteğe bağlı: daha da sade görünüm
 
+- Yerel önbellek / export artıkları: `npm run clean:local` veya NOTEPADSS kökünden `.\planly-clean.ps1` (önce `-WhatIf` ile deneyebilirsiniz).
 - IDE’de **`android`** ve **`node_modules`** klasörlerini **kapalı** tut.
 - İleride **feature klasörleri** (`src/features/gorevler/…`) gibi bir yapı istenirse, bu refaktör ayrı planlanır (çok dosyada import güncellemesi gerekir).

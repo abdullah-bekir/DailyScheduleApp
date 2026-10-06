@@ -112,8 +112,8 @@ async function main() {
 
   console.log('\nYapılandırma (F kısmi)');
   const appJson = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
-  assert(appJson.expo.version === '1.0.6', 'F — app.json version 1.0.6');
-  assert(Number(appJson.expo.android.versionCode) >= 9, 'F — Android versionCode tanımlı');
+  assert(appJson.expo.version === '1.0.7', 'F — app.json version 1.0.7');
+  assert(Number(appJson.expo.android.versionCode) >= 10, 'F — Android versionCode tanımlı');
   assert(
     appJson.expo.ios?.bundleIdentifier === 'com.abdullahbekir.DailyscheduleApp',
     'F — iOS bundleIdentifier App Store ile uyumlu',

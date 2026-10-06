@@ -2,8 +2,8 @@
   "expo": {
     "name": "Planly",
     "slug": "DailyscheduleApp",
-    "version": "1.0.6",
-    "runtimeVersion": "1.0.6",
+    "version": "1.0.7",
+    "runtimeVersion": "1.0.7",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "scheme": "planly",
@@ -16,17 +16,29 @@
     "updates": {
       "url": "https://u.expo.dev/9ae0995c-b1d2-4f6c-af66-7ac85640513c"
     },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#18181B",
+          "mode": "production"
+        }
+      ],
+      "./plugins/withLocalNotificationsOnly.cjs"
+    ],
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "21",
+      "buildNumber": "26",
       "bundleIdentifier": "com.abdullahbekir.DailyscheduleApp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSUserTrackingUsageDescription": "Reklamları kişiselleştirmek için kullanılabilir. İzin vermezseniz reklamlar yine gösterilebilir."
+        "NSUserTrackingUsageDescription": "Reklamları kişiselleştirmek için kullanılabilir. İzin vermezseniz reklamlar yine gösterilebilir.",
+        "NSUserNotificationsUsageDescription": "Günlük plan hatırlatıcısı göndermek için bildirim izni gerekir. Kapattığınızda bildirim gelmez."
       }
     },
     "android": {
-      "versionCode": 9,
+      "versionCode": 10,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1F2228"

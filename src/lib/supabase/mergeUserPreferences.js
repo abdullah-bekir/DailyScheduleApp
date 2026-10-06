@@ -16,7 +16,7 @@ export async function mergeUserPreferences(client, userId, patch) {
     id: userId,
     theme_mode: row?.theme_mode ?? 'light',
     completion_tally: row?.completion_tally ?? 0,
-    notifications_enabled: row?.notifications_enabled ?? true,
+    notifications_enabled: row?.notifications_enabled ?? false,
     language_code: row?.language_code ?? 'tr',
     ...patch,
   };

@@ -5,6 +5,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import AppOpenAdController from './src/components/ads/AppOpenAdController';
+import DailyReminderController from './src/components/notifications/DailyReminderController';
 import RemoteProfileSync from './src/components/sync/RemoteProfileSync';
 import { AppSettingsProvider } from './src/context/AppSettingsContext';
 import { LocaleProvider } from './src/context/LocaleContext';
@@ -48,6 +49,7 @@ export default function App() {
                 <SubscriptionProvider>
                   <TasksProvider>
                     <AppOpenAdController />
+                    <DailyReminderController />
                     <RemoteProfileSync />
                     <ThemedShell />
                   </TasksProvider>

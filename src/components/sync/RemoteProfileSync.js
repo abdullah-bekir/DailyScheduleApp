@@ -7,6 +7,7 @@ import { useAppSettings } from '../../context/AppSettingsContext';
 import { useLocale } from '../../context/LocaleContext';
 import { coerceBoolean } from '../../lib/taskRemote';
 import { fetchProfile } from '../../lib/profileRemote';
+import { getDailyReminderPermissionStatus } from '../../utils/dailyReminderNotifications';
 
 /**
  * Oturum ve görev bulutu hazır olduğunda profil (tema, bildirim, tamamlama puanı) sunucudan okunur;
@@ -60,7 +61,12 @@ export default function RemoteProfileSync() {
       if (profile.language_code && currentPreferences.language === initialPreferences.language) {
         await applyRemoteLanguage(profile.language_code);
       }
-      await applyRemoteNotificationsEnabled(coerceBoolean(profile.notifications_enabled, true));
+      let notifyOn = coerceBoolean(profile.notifications_enabled, false);
+      if (notifyOn) {
+        const perm = await getDailyReminderPermissionStatus();
+        if (!perm.granted) notifyOn = false;
+      }
+      await applyRemoteNotificationsEnabled(notifyOn);
     })();
     return () => {
       cancelled = true;

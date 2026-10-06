@@ -9,8 +9,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import PrimaryButton from '../components/common/PrimaryButton';
 import TextLink from '../components/common/TextLink';
-import { PRIVACY_POLICY_URL } from '../constants/legalUrls';
-import { openExternalUrl, openSupportEmail } from '../utils/openExternalUrl';
+import { PRIVACY_POLICY_URL, SUPPORT_EMAIL } from '../constants/legalUrls';
+import {
+  cancelDailyReminder,
+  DAILY_REMINDER_HOUR,
+  requestDailyReminderPermissions,
+} from '../utils/dailyReminderNotifications';
+import { openExternalUrl, openPrivacyContactEmail, openSupportEmail } from '../utils/openExternalUrl';
 import ScreenHero from '../components/layout/ScreenHero';
 import AccountAuthSection from '../components/settings/AccountAuthSection';
 import SettingsSectionCard from '../components/settings/SettingsSectionCard';
@@ -188,6 +193,22 @@ function createStyles(colors, isDark) {
       gap: 12,
       alignItems: 'center',
     },
+    contactBlock: {
+      gap: 6,
+    },
+    contactHeading: {
+      fontSize: 13,
+      fontWeight: '800',
+      color: colors.textPrimary,
+      marginTop: 4,
+    },
+    dataBullet: {
+      fontSize: 13,
+      fontWeight: '500',
+      color: colors.textSecondary,
+      lineHeight: 20,
+      paddingLeft: 4,
+    },
     divider: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: colors.border,
@@ -308,6 +329,19 @@ export default function SettingsScreen() {
   }, [supabaseConfigured, authReady, userId, tasksDataReady, tasksSyncError, colors, t]);
 
   const onNotificationsChange = async (value) => {
+    if (value) {
+      const perm = await requestDailyReminderPermissions();
+      if (perm.expoGo) {
+        Alert.alert(t('settings.notifyExpoGoTitle'), t('settings.notifyExpoGoBody'));
+        return;
+      }
+      if (!perm.granted) {
+        Alert.alert(t('settings.notifyPermissionTitle'), t('settings.notifyPermissionBody'));
+        return;
+      }
+    } else {
+      await cancelDailyReminder();
+    }
     const result = await setNotificationsEnabled(value);
     if (result && result.ok === false) {
       Alert.alert(t('settings.notifyTitle'), t('settings.notifyPrefSyncFailed'));
@@ -459,7 +493,7 @@ export default function SettingsScreen() {
           <SettingsToggleRow
             icon="alarm-outline"
             title={t('settings.notifyToggle')}
-            subtitle={t('settings.notifyToggleSub')}
+            subtitle={t('settings.notifyToggleSub', { hour: String(DAILY_REMINDER_HOUR).padStart(2, '0') })}
             value={notificationsOn}
             onValueChange={onNotificationsChange}
           />
@@ -563,13 +597,23 @@ export default function SettingsScreen() {
           title={t('settings.legalTitle')}
           subtitle={t('settings.legalSub')}
         >
-          <Text style={styles.infoNote}>{t('settings.privacyPolicyDetail')}</Text>
-          <View style={styles.linkRow}>
+          <Text style={styles.infoNote}>{t('settings.legalIntro')}</Text>
+          <TextLink
+            title={t('settings.privacyPolicyLink')}
+            onPress={() => openExternalUrl(PRIVACY_POLICY_URL)}
+          />
+          <View style={styles.contactBlock}>
+            <Text style={styles.contactHeading}>{t('settings.privacyContactLabel')}</Text>
+            <Text style={styles.infoNote}>{t('settings.privacyContactHint')}</Text>
             <TextLink
-              title={t('settings.privacyPolicyLink')}
-              onPress={() => openExternalUrl(PRIVACY_POLICY_URL)}
+              title={SUPPORT_EMAIL}
+              onPress={() => openPrivacyContactEmail('Planly privacy / data request')}
             />
-            <TextLink title={t('settings.supportEmailLink')} onPress={() => openSupportEmail('Planly support')} />
+          </View>
+          <View style={styles.contactBlock}>
+            <Text style={styles.contactHeading}>{t('settings.supportContactLabel')}</Text>
+            <Text style={styles.infoNote}>{t('settings.supportContactHint')}</Text>
+            <TextLink title={SUPPORT_EMAIL} onPress={() => openSupportEmail('Planly support')} />
           </View>
         </SettingsSectionCard>
 
@@ -579,7 +623,10 @@ export default function SettingsScreen() {
           subtitle={t('settings.dataSub')}
           tone="danger"
         >
-          <Text style={styles.infoNote}>{t('settings.dataDeletionInfo', { store: storeName })}</Text>
+          <Text style={styles.infoNote}>{t('settings.dataIntro')}</Text>
+          <Text style={styles.dataBullet}>• {t('settings.dataResetDetail')}</Text>
+          <Text style={styles.dataBullet}>• {t('settings.dataDeleteDetail')}</Text>
+          <Text style={styles.infoNote}>{t('settings.dataSubscriptionNote', { store: storeName })}</Text>
           <Text style={styles.dangerNote}>{t('settings.dataWarning')}</Text>
           <View style={styles.divider} />
           <PrimaryButton title={t('settings.resetBtn')} variant="outline" onPress={onResetData} />

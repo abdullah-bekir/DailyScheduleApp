@@ -17,7 +17,7 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   completion_tally integer not null default 0 check (completion_tally >= 0),
   theme_mode text not null default 'light' check (theme_mode in ('light', 'dark')),
-  notifications_enabled boolean not null default true,
+  notifications_enabled boolean not null default false,
   language_code text not null default 'tr'
     check (language_code in ('tr', 'en', 'es', 'de', 'fr', 'ar', 'pt', 'ru', 'zh', 'ja', 'ko', 'hi', 'it')),
   premium_enrolled boolean not null default false,
@@ -29,7 +29,7 @@ create table if not exists public.profiles (
 alter table public.profiles
   add column if not exists completion_tally integer not null default 0,
   add column if not exists theme_mode text not null default 'light',
-  add column if not exists notifications_enabled boolean not null default true,
+  add column if not exists notifications_enabled boolean not null default false,
   add column if not exists language_code text not null default 'tr',
   add column if not exists premium_enrolled boolean not null default false,
   add column if not exists created_at timestamptz not null default now(),

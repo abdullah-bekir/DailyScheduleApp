@@ -1,10 +1,20 @@
 // Planly — app.json içeriği `config` olarak gelir; .env içindeki EXPO_PUBLIC_* burada extra'ya da yazılır
 // (bazı ortamlarda process.env okunur, Constants.expoConfig.extra yedek olur).
 
+import { withEntitlementsPlist } from 'expo/config-plugins';
+
+/** Günlük hatırlatıcı yalnızca yerel bildirim; uzak push / App Store Push capability gerekmez. */
+function withLocalNotificationsOnlyEntitlements(config) {
+  return withEntitlementsPlist(config, (cfg) => {
+    delete cfg.modResults['aps-environment'];
+    return cfg;
+  });
+}
+
 export default ({ config }) => ({
   ...config,
   /** Bare workflow (android/ klasörü var): runtimeVersion metin olmalı; policy kullanılamaz. app.json version ile hizalı tutulur. */
-  runtimeVersion: String(config.version ?? '1.0.6'),
+  runtimeVersion: String(config.version ?? '1.0.7'),
   plugins: [
     ...(config.plugins || []),
     'expo-localization',
@@ -19,6 +29,7 @@ export default ({ config }) => ({
         iosAppId: process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID || 'ca-app-pub-3940256099942544~1458002511',
       },
     ],
+    withLocalNotificationsOnlyEntitlements,
   ],
   extra: {
     ...config.extra,

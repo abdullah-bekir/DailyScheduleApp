@@ -104,7 +104,7 @@ export async function loadNotificationsEnabled(userId) {
   } catch {
     /* ignore */
   }
-  return true;
+  return false;
 }
 
 export async function saveNotificationsEnabled(enabled, userId) {

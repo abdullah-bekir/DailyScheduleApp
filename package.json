@@ -1,6 +1,6 @@
 {
   "name": "planly",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
@@ -22,6 +22,7 @@
     "eas:update:production": "npx eas-cli update --channel production",
     "i18n:check": "node scripts/check-i18n.cjs",
     "smoke": "node scripts/smoke-regression.cjs",
+    "clean:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-local-artifacts.ps1",
     "privacy:sync-gist": "gh gist edit c7a5148c5458a345a4237aaf8eecd93a docs/privacy.html -f privacy.html"
   },
   "dependencies": {
@@ -38,6 +39,7 @@
     "expo-constants": "~18.0.14",
     "expo-font": "~14.0.12",
     "expo-localization": "~17.0.9",
+    "expo-notifications": "~0.32.17",
     "expo-status-bar": "~3.0.9",
     "expo-updates": "~29.0.20",
     "i18next": "^26.3.6",
