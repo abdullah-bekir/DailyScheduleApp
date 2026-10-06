@@ -10,6 +10,7 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "eas:whoami": "npx eas-cli whoami",
+    "eas:credentials:ios": "npx eas-cli credentials -p ios",
     "eas:build": "npx eas-cli build",
     "eas:build:preview:android": "npx eas-cli build --profile preview --platform android",
     "eas:build:preview:ios": "npx eas-cli build --profile preview --platform ios",

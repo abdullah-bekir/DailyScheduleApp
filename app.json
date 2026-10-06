@@ -25,11 +25,10 @@
           "mode": "production"
         }
       ],
-      "./plugins/withLocalNotificationsOnly.cjs"
     ],
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "26",
+      "buildNumber": "27",
       "bundleIdentifier": "com.abdullahbekir.DailyscheduleApp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
