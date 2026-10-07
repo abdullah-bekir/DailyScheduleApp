@@ -315,7 +315,8 @@
     "languageHint": "Seçtiğin dil hemen uygulanır. Arapça için sağdan sola düzen kullanılır.",
     "resetFailed": "Veri sıfırlanamadı. Bağlantınızı kontrol edip tekrar deneyin.",
     "languageReloadBody": "Yazı yönü değişti. Düzenin uygulanması için uygulama yeniden yüklenecek.",
-    "notifyPrefSyncFailed": "Hatırlatıcı tercihin buluta kaydedilemedi; yalnızca bu cihazda saklandı."
+    "notifyPrefSyncFailed": "Hatırlatıcı tercihin buluta kaydedilemedi; yalnızca bu cihazda saklandı.",
+    "notifyScheduleFailed": "Günlük hatırlatıcı kurulamadı. Bildirim izinlerini kontrol edip tekrar deneyin."
   },
   "reminder": {
     "dailyTitle": "Gününü planla",

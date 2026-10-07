@@ -315,7 +315,8 @@
     "languageHint": "Language applies immediately. Arabic uses right-to-left layout.",
     "resetFailed": "Could not reset your data. Check your connection and try again.",
     "languageReloadBody": "Reading direction changed. The app will reload to apply the layout.",
-    "notifyPrefSyncFailed": "Your reminder preference could not be synced to the cloud. It is saved on this device."
+    "notifyPrefSyncFailed": "Your reminder preference could not be synced to the cloud. It is saved on this device.",
+    "notifyScheduleFailed": "Could not schedule the daily reminder. Check notification permissions and try again."
   },
   "reminder": {
     "dailyTitle": "Plan your day",

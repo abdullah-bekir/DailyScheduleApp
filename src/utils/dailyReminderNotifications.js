@@ -8,13 +8,15 @@ export const DAILY_REMINDER_NOTIFICATION_ID = 'planly-daily-reminder';
 export const DAILY_REMINDER_HOUR = 9;
 export const DAILY_REMINDER_MINUTE = 0;
 
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+if (Platform.OS !== 'web') {
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+    }),
+  });
+}
 
 async function ensureAndroidChannel() {
   if (Platform.OS !== 'android') return;
@@ -25,7 +27,14 @@ async function ensureAndroidChannel() {
   });
 }
 
+function isNativeReminderEnvironment() {
+  return Platform.OS !== 'web' && Constants.appOwnership !== 'expo';
+}
+
 export async function getDailyReminderPermissionStatus() {
+  if (Platform.OS === 'web') {
+    return { granted: false, canAskAgain: false, expoGo: false };
+  }
   if (Constants.appOwnership === 'expo') {
     return { granted: false, canAskAgain: true, expoGo: true };
   }
@@ -38,6 +47,9 @@ export async function getDailyReminderPermissionStatus() {
 }
 
 export async function requestDailyReminderPermissions() {
+  if (Platform.OS === 'web') {
+    return { granted: false, canAskAgain: false, expoGo: false };
+  }
   if (Constants.appOwnership === 'expo') {
     return { granted: false, canAskAgain: true, expoGo: true };
   }
@@ -55,6 +67,7 @@ export async function requestDailyReminderPermissions() {
 }
 
 export async function cancelDailyReminder() {
+  if (!isNativeReminderEnvironment()) return;
   try {
     await Notifications.cancelScheduledNotificationAsync(DAILY_REMINDER_NOTIFICATION_ID);
   } catch {
@@ -66,24 +79,32 @@ export async function cancelDailyReminder() {
  * @param {{ title: string, body: string }} content
  */
 export async function scheduleDailyReminder(content) {
+  if (Platform.OS === 'web') return { ok: false, reason: 'web' };
   if (Constants.appOwnership === 'expo') return { ok: false, reason: 'expo_go' };
-  await ensureAndroidChannel();
-  await cancelDailyReminder();
-  await Notifications.scheduleNotificationAsync({
-    identifier: DAILY_REMINDER_NOTIFICATION_ID,
-    content: {
-      title: content.title,
-      body: content.body,
-      sound: true,
-      ...(Platform.OS === 'android' ? { channelId: 'planly-reminders' } : {}),
-    },
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DAILY,
-      hour: DAILY_REMINDER_HOUR,
-      minute: DAILY_REMINDER_MINUTE,
-    },
-  });
-  return { ok: true };
+  if (!content?.title || !content?.body) {
+    return { ok: false, reason: 'missing_content' };
+  }
+  try {
+    await ensureAndroidChannel();
+    await cancelDailyReminder();
+    await Notifications.scheduleNotificationAsync({
+      identifier: DAILY_REMINDER_NOTIFICATION_ID,
+      content: {
+        title: content.title,
+        body: content.body,
+        sound: true,
+        ...(Platform.OS === 'android' ? { channelId: 'planly-reminders' } : {}),
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour: DAILY_REMINDER_HOUR,
+        minute: DAILY_REMINDER_MINUTE,
+      },
+    });
+    return { ok: true };
+  } catch {
+    return { ok: false, reason: 'schedule_failed' };
+  }
 }
 
 export async function applyDailyReminderEnabled(enabled, content) {

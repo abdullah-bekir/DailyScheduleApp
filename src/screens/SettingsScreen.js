@@ -11,6 +11,7 @@ import PrimaryButton from '../components/common/PrimaryButton';
 import TextLink from '../components/common/TextLink';
 import { PRIVACY_POLICY_URL, SUPPORT_EMAIL } from '../constants/legalUrls';
 import {
+  applyDailyReminderEnabled,
   cancelDailyReminder,
   DAILY_REMINDER_HOUR,
   requestDailyReminderPermissions,
@@ -339,12 +340,23 @@ export default function SettingsScreen() {
         Alert.alert(t('settings.notifyPermissionTitle'), t('settings.notifyPermissionBody'));
         return;
       }
+      const scheduled = await applyDailyReminderEnabled(true, {
+        title: t('reminder.dailyTitle'),
+        body: t('reminder.dailyBody'),
+      });
+      if (!scheduled.ok) {
+        Alert.alert(t('settings.notifyTitle'), t('settings.notifyScheduleFailed'));
+        return;
+      }
     } else {
       await cancelDailyReminder();
     }
     const result = await setNotificationsEnabled(value);
     if (result && result.ok === false) {
       Alert.alert(t('settings.notifyTitle'), t('settings.notifyPrefSyncFailed'));
+      if (value) {
+        await cancelDailyReminder();
+      }
     }
   };
 

@@ -109,11 +109,32 @@ async function main() {
   const en = JSON.parse(fs.readFileSync(path.join(root, 'src/i18n/locales/en.json'), 'utf8'));
   assert(tr.tabs.home === 'Ana sayfa' && en.tabs.home === 'Home', 'C — TR/EN sekme etiketleri');
   assert(Boolean(tr.settings.languageReloadBody) && Boolean(en.settings.languageReloadBody), 'C — yeni dil metinleri mevcut');
+  assert(Boolean(en.settings.notifyScheduleFailed) && Boolean(tr.settings.notifyScheduleFailed), 'C — hatırlatıcı zamanlama metinleri');
+  const staleReminderHint = /soon|pronto|bientôt|近日|Solo preferencia|Nur Einstellung|Préférence seule|Только настройка|preference only/i;
+  for (const loc of ['de', 'fr', 'es', 'ja']) {
+    const j = JSON.parse(fs.readFileSync(path.join(root, 'src/i18n/locales', `${loc}.json`), 'utf8'));
+    assert(
+      !staleReminderHint.test(j.home?.remindersCardSub || ''),
+      `C — ${loc} ana sayfa hatırlatıcı metni güncel`,
+    );
+  }
 
   console.log('\nYapılandırma (F kısmi)');
   const appJson = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
   assert(appJson.expo.version === '1.0.7', 'F — app.json version 1.0.7');
   assert(Number(appJson.expo.android.versionCode) >= 10, 'F — Android versionCode tanımlı');
+  const gradlePath = path.join(root, 'android/app/build.gradle');
+  if (fs.existsSync(gradlePath)) {
+    const gradle = fs.readFileSync(gradlePath, 'utf8');
+    const gradleMatch = gradle.match(/versionCode\s+(\d+)/);
+    const gradleCode = gradleMatch ? Number(gradleMatch[1]) : 0;
+    assert(
+      gradleCode === Number(appJson.expo.android.versionCode),
+      `F — Gradle versionCode (${gradleCode}) app.json (${appJson.expo.android.versionCode}) ile uyumlu`,
+    );
+  }
+  const settingsPath = path.join(root, 'src/screens/SettingsScreen.js');
+  assert(fs.statSync(settingsPath).size > 5000, 'F — SettingsScreen.js yeterli boyutta (boş değil)');
   assert(
     appJson.expo.ios?.bundleIdentifier === 'com.abdullahbekir.DailyscheduleApp',
     'F — iOS bundleIdentifier App Store ile uyumlu',

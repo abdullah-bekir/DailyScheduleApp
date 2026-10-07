@@ -24,7 +24,7 @@
           "color": "#18181B",
           "mode": "production"
         }
-      ],
+      ]
     ],
     "ios": {
       "supportsTablet": true,
