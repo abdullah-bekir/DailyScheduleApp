@@ -15,7 +15,7 @@ from PIL import Image, ImageDraw, ImageFilter
 
 SIZE = 1024
 SPLASH_BG = (242, 242, 244)
-DEFAULT_SRC = "assets/logo-proposals/planly-logo-v1-bright-p.jpg"
+DEFAULT_SRC = "assets/logo-proposals/planly-logo-approved-final.png"
 
 
 def compose_splash(icon: Image.Image) -> Image.Image:
