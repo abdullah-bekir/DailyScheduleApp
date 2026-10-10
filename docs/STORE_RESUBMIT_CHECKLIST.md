@@ -1,7 +1,7 @@
-# Planly — Mağazaya yeniden gönderim kontrol listesi (1.0.7)
+# Planly — Mağazaya yeniden gönderim kontrol listesi (1.0.10)
 
 Paket: `com.abdullahbekir.DailyscheduleApp`  
-Sürüm: **1.0.7** · Android `versionCode` **10** · iOS build **27** (EAS `app.json`)
+Sürüm: **1.0.10** · Android `versionCode` **13** · iOS build **30** (EAS `app.json`)
 
 Bu dosya, **çözülmemiş politika maddelerini** kapatmak ve reddedilen sürümü yeniden göndermek içindir.  
 Kod tarafında eklenenler: paywall abonelik metni, Ayarlar → gizlilik + **Bulut hesabını sil**, güncellenmiş gizlilik metni.
@@ -48,7 +48,7 @@ Play Console → **Planly** → **Politika durumu**. Kırmızı/sarı her satır
 - `planly_premium_monthly` / `monthly` — **Active**
 - `planly_premium_annual` / `annual` — **Active**
 - RevenueCat offering `default` bağlı
-- Yüklenen AAB: **1.0.7 (10)** — eski taslakları güncelle
+- Yüklenen AAB: **1.0.10 (13)** — eski taslakları güncelle
 
 ### A4 — EAS production sırları
 

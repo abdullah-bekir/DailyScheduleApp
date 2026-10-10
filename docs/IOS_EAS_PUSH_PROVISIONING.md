@@ -1,4 +1,4 @@
-# iOS Push + Git + EAS (Planly 1.0.7)
+# iOS Push + Git + EAS (Planly 1.0.10)
 
 Günlük hatırlatıcı için `expo-notifications` kullanılıyor. App Store imzası **Push Notifications** capability ve provisioning profile içinde **aps-environment** ister.
 
@@ -42,7 +42,7 @@ EAS build, yüklemeden önce repodaki **commit** ile eşleşir; push etmeden de 
 
 ## 4) iOS build + TestFlight
 
-`app.json` → `ios.buildNumber` her yeni mağaza binary’sinde **artmalı** (ör. 27).
+`app.json` → `ios.buildNumber` her yeni mağaza binary’sinde **artmalı** (ör. 30).
 
 ```powershell
 npm run smoke
@@ -50,11 +50,11 @@ npx eas-cli build --profile production --platform ios --non-interactive
 npm run eas:submit:ios
 ```
 
-Submit’te listeden **en son başarılı** 1.0.7 build’ini seç (aynı build number’ı iki kez yükleme).
+Submit’te listeden **en son başarılı** 1.0.10 build’ini seç (aynı build number’ı iki kez yükleme).
 
 ## 5) Android sürümü
 
-Bare `android/` klasörü var: Play sürümü **`android/app/build.gradle`** içindeki `versionCode` / `versionName` ile gider; `app.json` ile aynı tut (ör. 10 / `"1.0.7"`).
+Bare `android/` klasörü var: Play sürümü **`android/app/build.gradle`** içindeki `versionCode` / `versionName` ile gider; `app.json` ile aynı tut (ör. 13 / `"1.0.10"`).
 
 ```powershell
 npx eas-cli build --profile production --platform android --non-interactive
