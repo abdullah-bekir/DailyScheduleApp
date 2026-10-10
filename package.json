@@ -1,6 +1,6 @@
 {
   "name": "planly",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "index.js",
   "scripts": {
     "start": "expo start",
@@ -23,6 +23,7 @@
     "eas:update:production": "npx eas-cli update --channel production",
     "i18n:check": "node scripts/check-i18n.cjs",
     "smoke": "node scripts/smoke-regression.cjs",
+    "logo:integrate": "python scripts/integrate_approved_logo_proposal.py",
     "clean:local": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/clean-local-artifacts.ps1",
     "privacy:sync-gist": "gh gist edit c7a5148c5458a345a4237aaf8eecd93a docs/privacy.html -f privacy.html"
   },

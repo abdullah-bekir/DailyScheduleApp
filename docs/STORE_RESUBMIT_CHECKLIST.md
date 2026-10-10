@@ -1,7 +1,7 @@
-# Planly — Mağazaya yeniden gönderim kontrol listesi (1.0.6)
+# Planly — Mağazaya yeniden gönderim kontrol listesi (1.0.7)
 
 Paket: `com.abdullahbekir.DailyscheduleApp`  
-Sürüm: **1.0.6** · Android `versionCode` **9** · iOS build **16**
+Sürüm: **1.0.7** · Android `versionCode` **10** · iOS build **27** (EAS `app.json`)
 
 Bu dosya, **çözülmemiş politika maddelerini** kapatmak ve reddedilen sürümü yeniden göndermek içindir.  
 Kod tarafında eklenenler: paywall abonelik metni, Ayarlar → gizlilik + **Bulut hesabını sil**, güncellenmiş gizlilik metni.
@@ -48,7 +48,7 @@ Play Console → **Planly** → **Politika durumu**. Kırmızı/sarı her satır
 - `planly_premium_monthly` / `monthly` — **Active**
 - `planly_premium_annual` / `annual` — **Active**
 - RevenueCat offering `default` bağlı
-- Yüklenen AAB: **1.0.6 (9)** — eski 1.0.5 taslaklarını güncelle
+- Yüklenen AAB: **1.0.7 (10)** — eski taslakları güncelle
 
 ### A4 — EAS production sırları
 
@@ -77,7 +77,7 @@ Dashboard → **Authentication** → **Settings** → kullanıcıların hesabın
 
 ## B) Apple App Store Connect
 
-Detay: [APP_STORE_IOS_1.0.6.md](./APP_STORE_IOS_1.0.6.md)
+Adım adım metinler (Turkish açıklama, Review Notes): [APP_STORE_IOS.md](./APP_STORE_IOS.md)
 
 | # | Madde | Durum |
 |---|--------|--------|
@@ -85,13 +85,15 @@ Detay: [APP_STORE_IOS_1.0.6.md](./APP_STORE_IOS_1.0.6.md)
 | 2 | 13" iPad ekran görüntüleri | `assets/app-store/ipad-*.png` |
 | 3 | Privacy Policy URL | Gist HTTPS (yukarı) |
 | 4 | İletişim / Review bilgisi | E-posta, telefon, “Sign-in: No” |
-| 5–8 | Turkish açıklama, keywords, Support URL, Copyright | Dokümandaki metinler |
+| 5–8 | Turkish açıklama, keywords, Support URL, Copyright | Connect’te güncel sürüm alanları |
 | 9–10 | Add for Review → Submit | |
+| 11 | EAS iOS build / Push profili | [IOS_EAS_PUSH_PROVISIONING.md](./IOS_EAS_PUSH_PROVISIONING.md) |
 
 **iOS kod / EAS:**
 
 - `EXPO_PUBLIC_REVENUECAT_IOS_KEY` production secret’ta olmalı
-- Sandbox ile paywall test notunu Review Notes’a yapıştır (APP_STORE dokümanı)
+- Sandbox ile paywall test notunu **App Review Notes**’a ekle
+- Abonelik: [IOS_SUBSCRIPTIONS.md](./IOS_SUBSCRIPTIONS.md)
 
 Support URL önerisi (Play ile aynı politika sayfası):
 
@@ -121,4 +123,4 @@ Cihazda (5 dk):
 3. Ayarlar → Bulut hesabını sil (test hesabı)
 4. Android: Play internal build ile satın alma + restore
 
-Son güncelleme: 2026-10-02
+Son güncelleme: 2026-10-09

@@ -2,8 +2,8 @@
   "expo": {
     "name": "Planly",
     "slug": "DailyscheduleApp",
-    "version": "1.0.7",
-    "runtimeVersion": "1.0.7",
+    "version": "1.0.8",
+    "runtimeVersion": "1.0.8",
     "orientation": "default",
     "icon": "./assets/icon.png",
     "scheme": "planly",
@@ -28,7 +28,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "27",
+      "buildNumber": "28",
       "bundleIdentifier": "com.abdullahbekir.DailyscheduleApp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -37,7 +37,7 @@
       }
     },
     "android": {
-      "versionCode": 10,
+      "versionCode": 11,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1F2228"

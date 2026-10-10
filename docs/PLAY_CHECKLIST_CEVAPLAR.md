@@ -1,7 +1,7 @@
 # Planly — Play Console checklist cevapları
 
 Paket: `com.abdullahbekir.DailyscheduleApp`  
-Sürüm: **1.0.6** (versionCode **9**)
+Sürüm: **1.0.7** (versionCode **10**)
 
 Bu dosya, Play Console “Uygulama içeriği / Politika” formlarını tek seferde doldurmak içindir.  
 Önceki oturumda tamamlananlar: uygulama oluşturma, gizlilik politikası, oturum açma beyanı.

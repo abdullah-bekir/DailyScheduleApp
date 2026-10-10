@@ -24,11 +24,24 @@ function assert(cond, label, detail) {
   else fail(label, detail);
 }
 
-function runCmd(name, cmd, args) {
-  const r = spawnSync(cmd, args, { cwd: root, encoding: 'utf8', shell: process.platform === 'win32' });
+/** shell:true ile arg dizisi Node DEP0190 uyarısı verir; tek satır komut kullan. */
+function runShell(name, cmdLine, opts = {}) {
+  const r = spawnSync(cmdLine, {
+    cwd: root,
+    encoding: 'utf8',
+    shell: true,
+    stdio: 'pipe',
+    ...opts,
+  });
   if (r.status === 0) pass(name);
   else {
     fail(name, (r.stderr || r.stdout || '').trim().slice(0, 200));
+  }
+}
+
+function rmDirSafe(dir) {
+  if (fs.existsSync(dir)) {
+    fs.rmSync(dir, { recursive: true, force: true });
   }
 }
 
@@ -52,28 +65,38 @@ async function main() {
   console.log('\nPlanly smoke regression (PC)\n');
 
   console.log('Kurulum / derleme');
-  runCmd('expo-doctor', 'npx', ['expo-doctor']);
-  runCmd('i18n:check', 'npm', ['run', 'i18n:check']);
+  runShell('expo-doctor', 'npx expo-doctor');
+  runShell('i18n:check', 'npm run i18n:check');
 
   const exportDir = path.join(root, '.expo-smoke-export');
-  const ex = spawnSync('npx', ['expo', 'export', '--platform', 'android', '--output-dir', exportDir], {
-    cwd: root,
-    encoding: 'utf8',
-    shell: true,
-    timeout: 120000,
-  });
-  if (ex.status === 0) pass('Android JS bundle export');
-  else fail('Android JS bundle export', (ex.stderr || ex.stdout || '').trim().slice(0, 200));
-
   const exportDirIos = path.join(root, '.expo-smoke-export-ios');
-  const exIos = spawnSync('npx', ['expo', 'export', '--platform', 'ios', '--output-dir', exportDirIos], {
-    cwd: root,
-    encoding: 'utf8',
-    shell: true,
-    timeout: 180000,
-  });
-  if (exIos.status === 0) pass('iOS JS bundle export');
-  else fail('iOS JS bundle export', (exIos.stderr || exIos.stdout || '').trim().slice(0, 200));
+  const exportDirQuoted = JSON.stringify(exportDir);
+  const exportDirIosQuoted = JSON.stringify(exportDirIos);
+
+  try {
+    const ex = spawnSync(`npx expo export --platform android --output-dir ${exportDirQuoted}`, {
+      cwd: root,
+      encoding: 'utf8',
+      shell: true,
+      stdio: 'pipe',
+      timeout: 120000,
+    });
+    if (ex.status === 0) pass('Android JS bundle export');
+    else fail('Android JS bundle export', (ex.stderr || ex.stdout || '').trim().slice(0, 200));
+
+    const exIos = spawnSync(`npx expo export --platform ios --output-dir ${exportDirIosQuoted}`, {
+      cwd: root,
+      encoding: 'utf8',
+      shell: true,
+      stdio: 'pipe',
+      timeout: 180000,
+    });
+    if (exIos.status === 0) pass('iOS JS bundle export');
+    else fail('iOS JS bundle export', (exIos.stderr || exIos.stdout || '').trim().slice(0, 200));
+  } finally {
+    rmDirSafe(exportDir);
+    rmDirSafe(exportDirIos);
+  }
 
   console.log('\nB — günlük hedef / ilerleme');
   const progress = await loadSrc('src/utils/dailyPlanProgress.js');
@@ -121,8 +144,8 @@ async function main() {
 
   console.log('\nYapılandırma (F kısmi)');
   const appJson = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
-  assert(appJson.expo.version === '1.0.7', 'F — app.json version 1.0.7');
-  assert(Number(appJson.expo.android.versionCode) >= 10, 'F — Android versionCode tanımlı');
+  assert(appJson.expo.version === '1.0.8', 'F — app.json version 1.0.8');
+  assert(Number(appJson.expo.android.versionCode) >= 11, 'F — Android versionCode tanımlı');
   const gradlePath = path.join(root, 'android/app/build.gradle');
   if (fs.existsSync(gradlePath)) {
     const gradle = fs.readFileSync(gradlePath, 'utf8');

@@ -1,10 +1,8 @@
 import { useMemo } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 
-/**
- * v8 mağaza ikonu ile uyumlu P + onay işareti monogramı.
- */
-export default function AppBrandMark({ size = 40 }) {
+/** Onaylı Planly ikonu — `assets/brand-logo-source.png` (mağaza ikonu ile aynı kaynak). */
+export default function AppBrandMark({ size = 40, accessibilityLabel = 'Planly' }) {
   const styles = useMemo(
     () =>
       StyleSheet.create({
@@ -23,7 +21,12 @@ export default function AppBrandMark({ size = 40 }) {
 
   return (
     <View style={styles.wrap}>
-      <Image source={require('../../../assets/brand-logo-source.png')} style={styles.image} resizeMode="cover" />
+      <Image
+        source={require('../../../assets/brand-logo-source.png')}
+        style={styles.image}
+        resizeMode="cover"
+        accessibilityLabel={accessibilityLabel}
+      />
     </View>
   );
 }

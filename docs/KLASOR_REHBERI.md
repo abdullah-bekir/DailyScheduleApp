@@ -30,7 +30,7 @@ Burada yaptığın değişiklikler: paket adı, izinler, imzalama, ikon/splash k
 |----------------|-----|
 | `assets/` | Uygulama ikonu, splash, favicon (Expo `app.json` ile bağlı). |
 | `scripts/` | Örn. ikon üretimi (`generate_app_icons.py`), yerel temizlik (`clean-local-artifacts.ps1`). |
-| `docs/` | Dokümantasyon (bu rehber, yayın notları, politikalar). |
+| `docs/` | Dokümantasyon (bu rehber, yayın notları, politikalar). iOS mağaza metinleri: `APP_STORE_IOS.md`. |
 
 ## Supabase SQL (`supabase/`)
 
@@ -92,11 +92,11 @@ Saf yardımcılar: tarih anahtarı, yerel görev depolama, sıralama, istatistik
 
 ### `src/theme/`
 
-Renk paletleri, gölgeler — `ThemeContext` ile birlikte kullanılır.
+Renk paletleri (`palettes.js`), gölgeler (`shadows.js`) — `ThemeContext` ile birlikte kullanılır.
 
 ### `src/constants/`
 
-SQL şema / operasyon metinleri (görev tablosu ile uyumlu).
+Uygulama sabitleri (ör. mağaza / gizlilik URL’leri). SQL şeması yalnızca `supabase/sql/` altındadır.
 
 ### `src/data/`
 

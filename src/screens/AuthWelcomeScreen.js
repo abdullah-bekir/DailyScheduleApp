@@ -3,7 +3,6 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -15,6 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import AppBrandMark from '../components/brand/AppBrandMark';
 import PrimaryButton from '../components/common/PrimaryButton';
 import TextLink from '../components/common/TextLink';
 import { TERMS_URL } from '../constants/legalUrls';
@@ -37,11 +37,6 @@ function createStyles(colors, isDark) {
       alignItems: 'center',
       gap: 12,
       marginBottom: 28,
-    },
-    logo: {
-      width: 88,
-      height: 88,
-      borderRadius: 22,
     },
     brand: {
       fontSize: 28,
@@ -246,7 +241,7 @@ export default function AuthWelcomeScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.hero}>
-          <Image source={require('../../assets/icon.png')} style={styles.logo} accessibilityLabel="Planly" />
+          <AppBrandMark size={88} accessibilityLabel="Planly" />
           <Text style={styles.brand}>Planly</Text>
           <Text style={styles.tagline}>
             {mode === 'login' ? t('auth.subtitleLogin') : t('auth.subtitleRegister')}

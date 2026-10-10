@@ -1,6 +1,6 @@
 """
-Onaylanan Planly v4 mağaza logosunu assets/ + android/ içine yazar.
-Kaynak: scripts/generate_planly_professional_logo.py (vektör — net, tekrarlanabilir).
+Onaylanan Planly logosunu assets/ + android/ içine yazar.
+Kaynak: assets/logo-proposals/planly-logo-proposal-v1-icon.jpg (veya argüman).
 
 Çalıştır: python scripts/integrate_approved_logo.py
 """
@@ -13,14 +13,13 @@ from pathlib import Path
 
 def main() -> None:
     root = Path(__file__).resolve().parents[1]
-    gen = root / "scripts" / "generate_planly_p_monogram_logo.py"
-    if not gen.is_file():
-        print("generate_planly_professional_logo.py bulunamadi", file=sys.stderr)
+    integrator = root / "scripts" / "integrate_approved_logo_proposal.py"
+    if not integrator.is_file():
+        print("integrate_approved_logo_proposal.py bulunamadi", file=sys.stderr)
         sys.exit(1)
-    result = subprocess.run([sys.executable, str(gen)], cwd=str(root))
+    result = subprocess.run([sys.executable, str(integrator), *sys.argv[1:]], cwd=str(root))
     if result.returncode != 0:
         sys.exit(result.returncode)
-    print("OK — Onayli Planly v4 logosu entegre edildi.")
 
 
 if __name__ == "__main__":

@@ -1,9 +1,10 @@
-# Planly — App Store Connect 1.0.6 (incelemeye gönderim)
+# Planly — App Store Connect (incelemeye gönderim)
 
 Apple’ın **Unable to Add for Review** listesindeki maddeler için adım adım rehber.  
 **Connect’e sadece sen girebilirsin;** aşağıdaki metinleri kopyala-yapıştır.
 
-**Sürüm:** 1.0.6 · **Build:** 20 (TestFlight; e-posta kayıt/giriş) · **Bundle ID:** `com.abdullahbekir.DailyscheduleApp`
+**Güncel sürüm:** **1.0.7** · **Build:** **27** (`app.json`) · **Bundle ID:** `com.abdullahbekir.DailyscheduleApp`  
+Özet: [STORE_RESUBMIT_CHECKLIST.md](./STORE_RESUBMIT_CHECKLIST.md) (B) · Push: [IOS_EAS_PUSH_PROVISIONING.md](./IOS_EAS_PUSH_PROVISIONING.md)
 
 ---
 
@@ -12,19 +13,19 @@ Apple’ın **Unable to Add for Review** listesindeki maddeler için adım adım
 
 | #   | Apple hatası                   | Nerede                                                       | Durum |
 | --- | ------------------------------ | ------------------------------------------------------------ | ----- |
-| 1   | 6.5-inch iPhone screenshot     | 1.0.6 → Screenshots → iPhone                                 | ☐     |
-| 2   | 13-inch iPad screenshot        | 1.0.6 → Screenshots → iPad                                   | ☐     |
+| 1   | 6.5-inch iPhone screenshot     | 1.0.7 → Screenshots → iPhone                                 | ☐     |
+| 2   | 13-inch iPad screenshot        | 1.0.7 → Screenshots → iPad                                   | ☐     |
 | 3   | Privacy Policy URL             | App → **App Privacy**                                        | ☐     |
 | 4   | Contact Information            | App → **App Information** / sürüm **App Review Information** | ☐     |
-| 5   | Turkish Description            | 1.0.6 → **Turkish** localization                             | ☐     |
+| 5   | Turkish Description            | 1.0.7 → **Turkish** localization                             | ☐     |
 | 6   | Turkish Keywords               | Aynı                                                         | ☐     |
 | 7   | Turkish Support URL            | Aynı                                                         | ☐     |
-| 8   | Copyright                      | 1.0.6 (genel) + Turkish alanı                                | ☐     |
-| 9   | **Add for Review** mavi        | 1.0.6 üst                                                    | ☐     |
+| 8   | Copyright                      | 1.0.7 (genel) + Turkish alanı                                | ☐     |
+| 9   | **Add for Review** mavi        | 1.0.7 üst                                                    | ☐     |
 | 10  | **Submit** (Draft Submissions) | Taslak sunum                                                 | ☐     |
 | 11  | **App Review Notes** (6 madde) | Aşağıdaki § App Review — Notes alanına | ☐     |
 | 12  | **Ekran kaydı (.mp4)**         | Fiziksel iPhone; § App Review akışı    | ☐     |
-| 13  | **EAS: RevenueCat iOS key**    | production env (expo.dev) — tanımlı      | ☑     |
+| 13  | **EAS: RevenueCat iOS key**    | production env (expo.dev) — `EXPO_PUBLIC_REVENUECAT_IOS_KEY` | ☐     |
 
 
 Hepsi ☐ → ✓ olunca inceleme başlar.
@@ -51,7 +52,7 @@ Hepsi ☐ → ✓ olunca inceleme başlar.
 | `03-stats-1284x2778.png` | Statistics              |
 
 
-**Connect:** Dağıtım → **1.0.6** → **Screenshots** → **iPhone** → **6.5" Display** (veya “6.5 inch”) → en az **3** görsel yükle (yukarıdaki sırayla).
+**Connect:** Dağıtım → **1.0.7** → **Screenshots** → **iPhone** → **6.5" Display** (veya “6.5 inch”) → en az **3** görsel yükle (yukarıdaki sırayla).
 
 Yeniden üretmek için (laptop):
 
@@ -79,7 +80,7 @@ python scripts/make_play_screenshots.py
 python scripts/make_play_screenshots.py
 ```
 
-**Connect:** Aynı 1.0.6 sayfası → **iPad** → **13-inch Display** → en az **1** (öneri: 3) görsel yükle.
+**Connect:** Aynı 1.0.7 sayfası → **iPad** → **13-inch Display** → en az **1** (öneri: 3) görsel yükle.
 
 ### Abonelik inceleme ekran görüntüsü (ayrı)
 
@@ -105,9 +106,9 @@ Varsa: `assets/app-store/ios-subscription-review-1080x1920.png` veya script çı
 
 Apple iki yeri karıştırır; **ikisini de** doldur:
 
-### A) App Review Information (sürüm 1.0.6)
+### A) App Review Information (sürüm 1.0.7)
 
-Dağıtım → **1.0.6** → **App Review Information** / **İnceleme bilgileri**
+Dağıtım → **1.0.7** → **App Review Information** / **İnceleme bilgileri**
 
 
 | Alan                   | Öneri                                      |
@@ -122,7 +123,7 @@ Dağıtım → **1.0.6** → **App Review Information** / **İnceleme bilgileri*
 **Notes (English — paste into App Review Information → Notes):**
 
 ```text
-Planly v1.0.6 — com.abdullahbekir.DailyscheduleApp
+Planly v1.0.7 — com.abdullahbekir.DailyscheduleApp
 
 (1) Screen recording: cold launch → Welcome (email + password sign-in OR Create account: username, email, password, accept Terms) → Home → add/complete task → Tasks → Stats → Settings → Stats → See plans → Paywall (monthly/annual) → Restore or Sandbox purchase. Account deletion: Settings → Data management → Delete account. No public UGC/social content.
 
@@ -140,7 +141,7 @@ Privacy: https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237
 Support: abdullahbekir@gmail.com
 ```
 
-**Ekran kaydı (senin cihazında):** Uygulamayı kapat → kayıt başlat → ikondan aç → **giriş veya yeni hesap** → yukarıdaki akış → `.mp4`’ü Resolution Center veya Review ekinde gönder. (Fiziksel iPhone; TestFlight **build 20**.)
+**Ekran kaydı (senin cihazında):** Uygulamayı kapat → kayıt başlat → ikondan aç → **giriş veya yeni hesap** → yukarıdaki akış → `.mp4`’ü Resolution Center veya Review ekinde gönder. (Fiziksel iPhone; TestFlight / mağaza **build 27**.)
 
 
 
@@ -155,7 +156,7 @@ Eksik **Contact** / **Support** alanları varsa doldur (Apple hesabındaki geli�
 
 ## 5–8) Turkish localization + Copyright
 
-**Dağıtım → 1.0.6 →** dil **Turkish** (veya **App Store Localization → Turkish**).
+**Dağıtım → 1.0.7 →** dil **Turkish** (veya **App Store Localization → Turkish**).
 
 ### Description (Açıklama) — yapıştır
 
@@ -199,7 +200,7 @@ https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd9
 
 ### Copyright (Telif)
 
-**1.0.6 sürüm sayfasındaki Copyright alanı** (ve Turkish gerekiyorsa):
+**1.0.7 sürüm sayfasındaki Copyright alanı** (ve Turkish gerekiyorsa):
 
 ```text
 © 2026 Abdullah Bekir
@@ -215,7 +216,7 @@ https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd9
 
 1. **Save** → üstteki kırmızı/sarı **“You have one or more errors”** kaybolmalı.
 2. **Add for Review** / **İnceleme için ekle** **mavi** olmalı → tıkla.
-3. **Draft Submissions (1) >** → pakette **iOS 1.0.6 + abonelikler** → **Submit to App Review**.
+3. **Draft Submissions (1) >** → pakette **iOS 1.0.7 + abonelikler** → **Submit to App Review**.
 
 ---
 
