@@ -4,7 +4,7 @@
 export default ({ config }) => ({
   ...config,
   /** Bare workflow (android/ klasörü var): runtimeVersion metin olmalı; policy kullanılamaz. app.json version ile hizalı tutulur. */
-  runtimeVersion: String(config.version ?? '1.0.8'),
+  runtimeVersion: String(config.version ?? '1.0.9'),
   plugins: [
     ...(config.plugins || []),
     'expo-localization',
