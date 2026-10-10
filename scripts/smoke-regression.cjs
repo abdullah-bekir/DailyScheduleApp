@@ -145,7 +145,7 @@ async function main() {
   console.log('\nYapılandırma (F kısmi)');
   const appJson = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8'));
   assert(appJson.expo.version === '1.0.10', 'F — app.json version 1.0.10');
-  assert(Number(appJson.expo.android.versionCode) >= 13, 'F — Android versionCode tanımlı');
+  assert(Number(appJson.expo.android.versionCode) >= 14, 'F — Android versionCode tanımlı');
   const gradlePath = path.join(root, 'android/app/build.gradle');
   if (fs.existsSync(gradlePath)) {
     const gradle = fs.readFileSync(gradlePath, 'utf8');
