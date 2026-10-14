@@ -202,7 +202,7 @@
     "chartCaption": "위: 완료 / 전체 작업 · 아래: 완료율 · 현재 기간 강조",
     "chartYearSecondary": "년",
     "premiumTitle": "Premium 멤버십",
-    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
+    "premiumBody": "작업 통계, 그래프, Premium 혜택은 구독 전까지 잠겨 있습니다. 가격은 App Store 또는 Google Play에서 제공됩니다.",
     "premiumPriceMonthly": "월간 · {{price}}",
     "premiumPriceAnnual": "연간 · {{price}}",
     "premiumPricePending": "RevenueCat에 스토어 제품을 연결하면 가격이 표시됩니다.",
@@ -215,7 +215,10 @@
     "premiumBadgeActive": "Premium active",
     "premiumSeePlans": "모든 요금제 보기",
     "premiumActiveTitle": "Premium 활성",
-    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
+    "premiumActiveBody": "감사합니다. 작업 통계와 Premium 혜택이 활성화되었습니다.",
+    "lockedSubtitle": "작업 통계는 Premium 구독으로 열립니다.",
+    "lockedTitle": "통계가 잠겨 있습니다",
+    "lockedBody": "작업을 아무리 추가해도 합계, 그래프, 우선순위 분포는 월간 또는 연간 Premium을 구매하기 전에는 보이지 않습니다."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -368,7 +371,7 @@
     "subtitle": "구독에는 RevenueCat을 사용합니다. App Store / Play Console 및 RevenueCat에서 상품을 설정하세요.",
     "benefitsTitle": "포함된 내용",
     "benefitsSubtitle": "패널 entitlement에 연결된 예시 혜택입니다.",
-    "benefitNoAds": "Weekly, monthly and yearly progress charts",
+    "benefitNoAds": "모든 작업 통계: 합계, 그래프, 우선순위 분포",
     "benefitUpdates": "테마 및 외관 우선 업데이트(로드맵에 따름)",
     "benefitPrivacy": "데이터 및 개인정보 처리 방식은 동일하며, 구매는 스토어 계정에 연결됩니다.",
     "plansTitle": "요금제",
@@ -390,11 +393,12 @@
     "legalAutoRenew": "Payment is charged to your {{store}} account. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period.",
     "legalManage": "Manage or cancel: {{store}} → Subscriptions.",
     "legalPrivacyLink": "Privacy policy",
+    "legalTermsLink": "Terms of Use (EULA)",
     "manageSubscription": "Manage subscription",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
     "granularityLockedTitle": "Premium charts",
-    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
+    "granularityLockedBody": "작업 통계는 Planly Premium에 포함됩니다. 보려면 구독하세요."
   },
   "languages": {
     "tr": "Türkçe",

@@ -21,4 +21,8 @@ Supabase SQL Editor — çalıştırma sırası (DailyscheduleApp)
    → sql/patches/preserve_client_updated_at.sql
    (schema.sql zaten bu fonksiyonu içerir; eski canlı DB için patch şart)
 
+7) Hesabı silme (Ayarlar → hesabı ve bulut verisini sil) — bir kez
+   → sql/patches/delete_own_account.sql
+   (Çalıştırılmazsa uygulama hesabı silemez; yalnızca görevleri temizler.)
+
 Not: "relation already exists" alırsan ilgili CREATE satırını atlayın veya upgrade dosyası kullanın.

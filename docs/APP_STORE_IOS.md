@@ -93,7 +93,7 @@ Varsa: `assets/app-store/ios-subscription-review-1080x1920.png` veya script çı
 
 ## 3) Privacy Policy URL
 
-1. Canlı URL (Play ile aynı): `https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html` — kaynak: `docs/privacy.html` (Gist’i güncelle).
+1. Canlı URL (Play ile aynı): `https://abdullah-bekir.github.io/planly-legal/` — kaynak: `docs/privacy.html` (Gist’i güncelle).
 2. **Planly** → sol menü **App Privacy** (Uygulama Gizliliği):
   - Anketi daha önce doldurmadıysan tamamla (veri türleri: görev verisi, reklam kimliği, satın alma — Play checklist ile uyumlu).
   - **Privacy Policy URL** alanına canlı linki yapıştır → **Publish** / kaydet.
@@ -137,7 +137,7 @@ Planly v1.0.10 — com.abdullahbekir.DailyscheduleApp
 
 (6) Not medical/financial/government; no licensed third-party content.
 
-Privacy: https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html
+Privacy: https://abdullah-bekir.github.io/planly-legal/
 Support: abdullahbekir@gmail.com
 ```
 
@@ -193,7 +193,7 @@ görev,plan,günlük,planlayıcı,todo,alışkanlık,verimlilik,ajanda,istatisti
 **https://** ile başlamalı (mailto geçmez). Örnekler:
 
 ```text
-https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html#contact
+https://abdullah-bekir.github.io/planly-legal/#contact
 ```
 
 (Gist’i `docs/privacy.html` ile güncelle; `#contact` destek iletişimi için.)

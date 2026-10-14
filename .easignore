@@ -20,5 +20,6 @@ exp-verify-export/
 .expo-smoke-export/
 .expo-smoke-export-ios/
 store-assets/
+dist/
 assets/app-store/
 scripts/__pycache__/

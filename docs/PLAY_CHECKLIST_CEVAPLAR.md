@@ -66,7 +66,7 @@ Not: 13–17 seçersen reklam politikası (Families / COPPA) daha sıkı olur. P
 | Veri paylaşılıyor mu? | **Evet** (reklam SDK / AdMob; abonelik için mağaza / RevenueCat) |
 | Şifreleme (transit) | **Evet** (HTTPS) |
 | Kullanıcı silme talebi | **Evet** — Ayarlar → Veri yönetimi → Sıfırla / **Bulut hesabını sil**; e-posta: abdullahbekir@gmail.com |
-| Gizlilik politikası URL | https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html |
+| Gizlilik politikası URL | https://abdullah-bekir.github.io/planly-legal/ |
 | Hesap silme URL (form) | Aynı gizlilik URL + uygulama içi yol (yukarı) |
 
 ### Toplanan veri türleri (işaretle)

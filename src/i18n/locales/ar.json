@@ -202,7 +202,7 @@
     "chartCaption": "الأعلى: المكتمل / إجمالي المهام · الأسفل: نسبة الإكمال · الفترة الحالية مميزة",
     "chartYearSecondary": "سنة",
     "premiumTitle": "عضوية Premium",
-    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
+    "premiumBody": "تبقى إحصاءات المهام والرسوم ومزايا Premium مقفلة بدون اشتراك. الأسعار تأتي من App Store أو Google Play.",
     "premiumPriceMonthly": "شهري · {{price}}",
     "premiumPriceAnnual": "سنوي · {{price}}",
     "premiumPricePending": "تظهر الأسعار بعد ربط منتجات المتجر في RevenueCat.",
@@ -215,7 +215,10 @@
     "premiumBadgeActive": "Premium active",
     "premiumSeePlans": "عرض كل الخطط",
     "premiumActiveTitle": "Premium مفعّل",
-    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
+    "premiumActiveBody": "شكرًا — إحصاءات مهامك ومزايا Premium نشطة.",
+    "lockedSubtitle": "تُفتح إحصاءات المهام باشتراك Premium.",
+    "lockedTitle": "الإحصاءات مقفلة",
+    "lockedBody": "مهما أضفت من مهام، تبقى المجاميع والرسوم وتوزيع الأولوية مخفية حتى تشتري Premium الشهري أو السنوي."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -368,7 +371,7 @@
     "subtitle": "تستخدم الاشتراكات RevenueCat؛ اضبط المنتجات في App Store / Play Console وRevenueCat.",
     "benefitsTitle": "ما يتضمنه",
     "benefitsSubtitle": "مزايا نموذجية متطابقة مع entitlement في اللوحة.",
-    "benefitNoAds": "Weekly, monthly and yearly progress charts",
+    "benefitNoAds": "كل إحصاءات المهام: المجاميع والرسوم وتوزيع الأولوية",
     "benefitUpdates": "تحديثات الأولوية للمظهر والسمات (حسب خارطة الطريق)",
     "benefitPrivacy": "تبقى ممارسات البيانات والخصوصية كما هي؛ ترتبط المشتريات بحساب المتجر الخاص بك.",
     "plansTitle": "الخطط",
@@ -390,11 +393,12 @@
     "legalAutoRenew": "Payment is charged to your {{store}} account. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period.",
     "legalManage": "Manage or cancel: {{store}} → Subscriptions.",
     "legalPrivacyLink": "Privacy policy",
+    "legalTermsLink": "Terms of Use (EULA)",
     "manageSubscription": "Manage subscription",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
     "granularityLockedTitle": "Premium charts",
-    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
+    "granularityLockedBody": "إحصاءات المهام جزء من Planly Premium. اشترك لرؤيتها."
   },
   "languages": {
     "tr": "Türkçe",

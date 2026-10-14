@@ -2,7 +2,7 @@ import { NavigationContainer, DefaultTheme, DarkTheme } from '@react-navigation/
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useMemo } from 'react';
-import { Platform } from 'react-native';
+import { ActivityIndicator, Platform, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -132,8 +132,20 @@ function RootStack() {
   );
 }
 
+function AuthBootScreen() {
+  const { colors } = useTheme();
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+      <ActivityIndicator size="large" color={colors.primary} />
+    </View>
+  );
+}
+
 function AppRoot() {
   const { authReady, isRegistered, supabaseConfigured } = useSupabaseSession();
+  if (supabaseConfigured && !authReady) {
+    return <AuthBootScreen />;
+  }
   if (supabaseConfigured && authReady && !isRegistered) {
     return <AuthWelcomeScreen />;
   }

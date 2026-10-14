@@ -13,6 +13,7 @@ import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner'
 import ScreenHero from '../components/layout/ScreenHero';
 import TaskFilterChips from '../components/tasks/TaskFilterChips';
 import { useLocale } from '../context/LocaleContext';
+import { useSupabaseSession } from '../context/SupabaseContext';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
@@ -543,6 +544,7 @@ export default function StatsScreen() {
   const styles = useMemo(() => createStyles(colors, chartUi), [colors, chartUi]);
   const { tasks, completionTally, tasksHydrated, tasksDataReady, refreshTasksFromSupabase, grantAdRewardBonus } =
     useTasks();
+  const { userId, supabaseConfigured } = useSupabaseSession();
   const [rewardBusy, setRewardBusy] = useState(false);
   const bonusPoints = useMemo(() => getAdsRewardBonusPoints(), []);
 
@@ -681,6 +683,16 @@ export default function StatsScreen() {
   const tallyHydrateSnapDone = useRef(false);
 
   useEffect(() => {
+    tallyHydrateSnapDone.current = false;
+    displayRef.current = 0;
+    setDisplayTally(0);
+  }, [userId, supabaseConfigured]);
+
+  useEffect(() => {
+    if (!tasksHydrated) tallyHydrateSnapDone.current = false;
+  }, [tasksHydrated]);
+
+  useEffect(() => {
     if (!tasksHydrated) return;
 
     if (!tallyHydrateSnapDone.current) {
@@ -745,7 +757,7 @@ export default function StatsScreen() {
       <ScreenHero
         eyebrow={t('stats.eyebrow')}
         title={t('stats.title')}
-        subtitle={t('stats.subtitle')}
+        subtitle={isPro ? t('stats.subtitle') : t('stats.lockedSubtitle')}
         titleSize={30}
       />
 
@@ -770,13 +782,19 @@ export default function StatsScreen() {
           onRestore={() => !restoreBusy && !purchaseBusy && onRestorePurchases()}
         />
 
-        {tasksDataReady && s.total === 0 ? (
+        {ready && !isPro ? (
+          <View style={styles.emptyBox}>
+            <Text style={styles.emptyTitle}>{t('stats.lockedTitle')}</Text>
+            <Text style={styles.emptyText}>{t('stats.lockedBody')}</Text>
+          </View>
+        ) : null}
+        {isPro && tasksDataReady && s.total === 0 ? (
           <View style={styles.emptyBox}>
             <Text style={styles.emptyTitle}>{t('stats.emptyTitle')}</Text>
             <Text style={styles.emptyText}>{t('stats.emptyBody')}</Text>
           </View>
         ) : null}
-        {s.total > 0 ? (
+        {isPro && s.total > 0 ? (
           <>
             <View style={styles.card}>
               <Text style={styles.cardTitle}>{t('stats.general')}</Text>

@@ -30,6 +30,14 @@
         "image": "sdk-54"
       }
     },
+    "production-apk": {
+      "extends": "production",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk",
+        "image": "sdk-54"
+      }
+    },
     "production": {
       "channel": "production",
       "environment": "production",

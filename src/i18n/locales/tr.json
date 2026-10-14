@@ -171,6 +171,9 @@
     "eyebrow": "Özet",
     "title": "İstatistikler",
     "subtitle": "Günlük, haftalık, aylık veya yıllık grafik; paneller aşağıda.",
+    "lockedSubtitle": "Görev istatistikleri Premium abonelikle açılır.",
+    "lockedTitle": "İstatistikler kilitli",
+    "lockedBody": "Kaç görev eklersen ekle, toplamlar, grafikler ve öncelik dağılımı aylık veya yıllık Premium satın alınmadan görünmez.",
     "emptyTitle": "Henüz veri yok",
     "emptyBody": "Ana sayfadan veya Görevler sekmesinden ilk görevini eklediğinde kartlar ve grafik otomatik güncellenir.",
     "general": "Genel",
@@ -202,7 +205,7 @@
     "chartCaption": "Üst: tamamlanan / toplam görev · Alt: tamamlama oranı · Geçerli dönem vurgulu",
     "chartYearSecondary": "yılı",
     "premiumTitle": "Premium üyelik",
-    "premiumBody": "Haftalık, aylık ve yıllık grafikler ile Premium ayrıcalıklarını açın. Fiyatlar App Store / Google Play üzerinden gelir.",
+    "premiumBody": "Görev istatistikleri, grafikler ve Premium ayrıcalıkları abonelik olmadan açılmaz. Fiyatlar App Store / Google Play üzerinden gelir.",
     "premiumPriceMonthly": "Aylık · {{price}}",
     "premiumPriceAnnual": "Yıllık · {{price}}",
     "premiumPricePending": "Fiyatlar, RevenueCat’te Play / App Store ürünleri bağlandıktan sonra görünür.",
@@ -215,7 +218,7 @@
     "premiumBadgeActive": "Premium aktif",
     "premiumSeePlans": "Tüm planları gör",
     "premiumActiveTitle": "Premium aktif",
-    "premiumActiveBody": "Teşekkürler — genişletilmiş grafikler ve Premium avantajlarınız aktif."
+    "premiumActiveBody": "Teşekkürler — görev istatistiklerin ve Premium avantajların aktif."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -368,7 +371,7 @@
     "subtitle": "Gelişmiş istatistikler ve sürekli iyileştirmeler. Ödeme mağaza hesabınız üzerinden yapılır.",
     "benefitsTitle": "Neler dahil",
     "benefitsSubtitle": "Paneldeki entitlement ile eşleşen örnek avantajlar.",
-    "benefitNoAds": "Haftalık, aylık ve yıllık ilerleme grafikleri",
+    "benefitNoAds": "Tüm görev istatistikleri: toplamlar, grafikler ve öncelik dağılımı",
     "benefitUpdates": "Öncelikli tema ve görünüm güncellemeleri (yol haritasına bağlı)",
     "benefitPrivacy": "Veri ve gizlilik yaklaşımı aynı kalır; satın alma mağaza hesabınıza bağlıdır.",
     "plansTitle": "Planlar",
@@ -390,11 +393,12 @@
     "legalAutoRenew": "Ödeme {{store}} hesabınıza yansır. Abonelik, dönem bitiminden en az 24 saat önce iptal etmezseniz otomatik yenilenir.",
     "legalManage": "Yönet / iptal: {{store}} → Abonelikler.",
     "legalPrivacyLink": "Gizlilik politikası",
+    "legalTermsLink": "Kullanım koşulları (EULA)",
     "manageSubscription": "Aboneliği yönet",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
     "granularityLockedTitle": "Premium grafikler",
-    "granularityLockedBody": "Haftalık, aylık ve yıllık görünümler Planly Premium'da. Günlük grafik ücretsiz kalır."
+    "granularityLockedBody": "Görev istatistikleri Planly Premium'a dahildir. Görmek için abone ol."
   },
   "languages": {
     "tr": "Türkçe",

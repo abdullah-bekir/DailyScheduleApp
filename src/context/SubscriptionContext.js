@@ -38,8 +38,7 @@ function hasActivePremium(info, entitlementId) {
     const want = id.toLowerCase();
     if (Object.keys(active).some((key) => key.toLowerCase() === want)) return true;
   }
-  const subs = info?.activeSubscriptions;
-  return Array.isArray(subs) && subs.length > 0;
+  return false;
 }
 
 async function loadPremiumPlans(offerings, productIds) {

@@ -202,7 +202,7 @@
     "chartCaption": "Oben: erledigt / Aufgaben gesamt · Unten: Abschlussrate · Aktueller Zeitraum hervorgehoben",
     "chartYearSecondary": "Jahr",
     "premiumTitle": "Premium-Mitgliedschaft",
-    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
+    "premiumBody": "Aufgabenstatistiken, Diagramme und Premium-Vorteile bleiben ohne Abo gesperrt. Preise kommen aus dem App Store oder Google Play.",
     "premiumPriceMonthly": "Monatlich · {{price}}",
     "premiumPriceAnnual": "Jährlich · {{price}}",
     "premiumPricePending": "Preise erscheinen, sobald Store-Produkte in RevenueCat verknüpft sind.",
@@ -215,7 +215,10 @@
     "premiumBadgeActive": "Premium active",
     "premiumSeePlans": "Alle Pläne ansehen",
     "premiumActiveTitle": "Premium aktiv",
-    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
+    "premiumActiveBody": "Danke — deine Aufgabenstatistiken und Premium-Vorteile sind aktiv.",
+    "lockedSubtitle": "Aufgabenstatistiken öffnen sich mit einem Premium-Abo.",
+    "lockedTitle": "Statistiken sind gesperrt",
+    "lockedBody": "Egal wie viele Aufgaben du hinzufügst: Summen, Diagramme und die Prioritätsverteilung bleiben verborgen, bis du monatliches oder jährliches Premium kaufst."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -368,7 +371,7 @@
     "subtitle": "Abonnements verwenden RevenueCat; konfiguriere Produkte in App Store / Play Console und RevenueCat.",
     "benefitsTitle": "Enthalten",
     "benefitsSubtitle": "Beispielvorteile, die dem Panel-Entitlement entsprechen.",
-    "benefitNoAds": "Weekly, monthly and yearly progress charts",
+    "benefitNoAds": "Alle Aufgabenstatistiken: Summen, Diagramme und Prioritätsverteilung",
     "benefitUpdates": "Vorrangige Theme- und Darstellungsupdates (je nach Roadmap)",
     "benefitPrivacy": "Daten- und Datenschutzpraktiken bleiben gleich; Käufe sind an dein Store-Konto gebunden.",
     "plansTitle": "Pläne",
@@ -390,11 +393,12 @@
     "legalAutoRenew": "Payment is charged to your {{store}} account. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period.",
     "legalManage": "Manage or cancel: {{store}} → Subscriptions.",
     "legalPrivacyLink": "Privacy policy",
+    "legalTermsLink": "Terms of Use (EULA)",
     "manageSubscription": "Manage subscription",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
     "granularityLockedTitle": "Premium charts",
-    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
+    "granularityLockedBody": "Aufgabenstatistiken gehören zu Planly Premium. Abonniere, um sie zu sehen."
   },
   "languages": {
     "tr": "Türkçe",

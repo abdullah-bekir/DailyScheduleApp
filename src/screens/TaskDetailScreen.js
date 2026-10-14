@@ -135,6 +135,7 @@ export default function TaskDetailScreen({ route }) {
   const task = useMemo(() => tasks.find((t) => String(t.id) === taskId), [tasks, taskId]);
   const [attachmentDraft, setAttachmentDraft] = useState('');
   const [notesDraft, setNotesDraft] = useState('');
+  const leavingRef = useRef(false);
 
   useEffect(() => {
     setNotesDraft(typeof task?.notes === 'string' ? task.notes : '');
@@ -150,11 +151,25 @@ export default function TaskDetailScreen({ route }) {
   }, [notesDraft, task, taskId, tasksMutationReady, updateTaskDetails]);
 
   useEffect(() => {
-    const unsub = navigation.addListener('beforeRemove', () => {
-      flushNotesIfChanged();
+    const unsub = navigation.addListener('beforeRemove', (e) => {
+      if (leavingRef.current) return;
+      if (!taskId || !task || !tasksMutationReady) return;
+      const next = String(notesDraft ?? '');
+      const current = String(task.notes ?? '');
+      if (next === current) return;
+      e.preventDefault();
+      void (async () => {
+        try {
+          await updateTaskDetails(taskId, { notes: next });
+        } finally {
+          // Kayıt başarısız olsa bile ekran kapanabilsin; beforeRemove tekrar engellemesin.
+          leavingRef.current = true;
+          navigation.dispatch(e.data.action);
+        }
+      })();
     });
     return unsub;
-  }, [navigation, flushNotesIfChanged]);
+  }, [navigation, notesDraft, task, taskId, tasksMutationReady, updateTaskDetails]);
 
   const confirmDelete = useCallback(() => {
     if (!taskId || !task) return;

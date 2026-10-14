@@ -202,7 +202,7 @@
     "chartCaption": "上段：完了 / タスク総数 · 下段：完了率 · 現在の期間を強調表示",
     "chartYearSecondary": "年",
     "premiumTitle": "Premium メンバーシップ",
-    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
+    "premiumBody": "タスク統計、グラフ、Premium特典は購読するまでロックされます。価格はApp StoreまたはGoogle Playから表示されます。",
     "premiumPriceMonthly": "月額 · {{price}}",
     "premiumPriceAnnual": "年額 · {{price}}",
     "premiumPricePending": "RevenueCat でストア商品を連携すると料金が表示されます。",
@@ -215,7 +215,10 @@
     "premiumBadgeActive": "Premium active",
     "premiumSeePlans": "すべてのプランを見る",
     "premiumActiveTitle": "Premium 有効",
-    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
+    "premiumActiveBody": "ありがとうございます。タスク統計とPremium特典が有効です。",
+    "lockedSubtitle": "タスク統計はPremiumの購読で開きます。",
+    "lockedTitle": "統計はロック中",
+    "lockedBody": "タスクをいくつ追加しても、合計・グラフ・優先度の内訳は月額または年額Premiumを購入するまで表示されません。"
   },
   "settings": {
     "eyebrow": "Planly",
@@ -368,7 +371,7 @@
     "subtitle": "サブスクリプションには RevenueCat を使用します。App Store / Play Console と RevenueCat で製品を設定してください。",
     "benefitsTitle": "含まれる内容",
     "benefitsSubtitle": "パネルの entitlement に対応する特典例です。",
-    "benefitNoAds": "Weekly, monthly and yearly progress charts",
+    "benefitNoAds": "すべてのタスク統計：合計、グラフ、優先度の内訳",
     "benefitUpdates": "テーマと外観の優先アップデート（ロードマップによる）",
     "benefitPrivacy": "データとプライバシーの方針は変わりません。購入はストアアカウントに紐づきます。",
     "plansTitle": "プラン",
@@ -390,11 +393,12 @@
     "legalAutoRenew": "Payment is charged to your {{store}} account. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period.",
     "legalManage": "Manage or cancel: {{store}} → Subscriptions.",
     "legalPrivacyLink": "Privacy policy",
+    "legalTermsLink": "Terms of Use (EULA)",
     "manageSubscription": "Manage subscription",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
     "granularityLockedTitle": "Premium charts",
-    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
+    "granularityLockedBody": "タスク統計はPlanly Premiumに含まれます。見るには購読してください。"
   },
   "languages": {
     "tr": "Türkçe",

@@ -202,7 +202,7 @@
     "chartCaption": "上方：已完成 / 任务总数 · 下方：完成率 · 当前周期已突出显示",
     "chartYearSecondary": "年",
     "premiumTitle": "Premium 会员",
-    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
+    "premiumBody": "任务统计、图表和 Premium 权益在订阅前保持锁定。价格来自 App Store 或 Google Play。",
     "premiumPriceMonthly": "每月 · {{price}}",
     "premiumPriceAnnual": "每年 · {{price}}",
     "premiumPricePending": "在 RevenueCat 关联商店商品后显示价格。",
@@ -215,7 +215,10 @@
     "premiumBadgeActive": "Premium active",
     "premiumSeePlans": "查看全部方案",
     "premiumActiveTitle": "Premium 已开通",
-    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
+    "premiumActiveBody": "谢谢 — 你的任务统计和 Premium 权益已生效。",
+    "lockedSubtitle": "任务统计需订阅 Premium 后才会打开。",
+    "lockedTitle": "统计已锁定",
+    "lockedBody": "无论添加多少任务，合计、图表和优先级分布都会保持隐藏，直到购买月度或年度 Premium。"
   },
   "settings": {
     "eyebrow": "Planly",
@@ -368,7 +371,7 @@
     "subtitle": "订阅使用 RevenueCat；请在 App Store / Play Console 和 RevenueCat 中配置产品。",
     "benefitsTitle": "包含内容",
     "benefitsSubtitle": "与面板 entitlement 匹配的示例权益。",
-    "benefitNoAds": "Weekly, monthly and yearly progress charts",
+    "benefitNoAds": "全部任务统计：合计、图表和优先级分布",
     "benefitUpdates": "优先获得主题和外观更新（取决于路线图）",
     "benefitPrivacy": "数据和隐私做法保持不变；购买与您的商店账户关联。",
     "plansTitle": "套餐",
@@ -390,11 +393,12 @@
     "legalAutoRenew": "Payment is charged to your {{store}} account. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period.",
     "legalManage": "Manage or cancel: {{store}} → Subscriptions.",
     "legalPrivacyLink": "Privacy policy",
+    "legalTermsLink": "Terms of Use (EULA)",
     "manageSubscription": "Manage subscription",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
     "granularityLockedTitle": "Premium charts",
-    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
+    "granularityLockedBody": "任务统计属于 Planly Premium。订阅后即可查看。"
   },
   "languages": {
     "tr": "Türkçe",

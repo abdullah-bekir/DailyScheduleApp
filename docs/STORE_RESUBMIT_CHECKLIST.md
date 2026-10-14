@@ -7,7 +7,7 @@ Bu dosya, **çözülmemiş politika maddelerini** kapatmak ve reddedilen sürüm
 Kod tarafında eklenenler: paywall abonelik metni, Ayarlar → gizlilik + **Bulut hesabını sil**, güncellenmiş gizlilik metni.
 
 **Gizlilik URL (Play + Apple aynı):**  
-https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html
+https://abdullah-bekir.github.io/planly-legal/
 
 Gist kaynağı: `docs/privacy.html` — değiştirdikten sonra GitHub Gist’i güncelle.
 
@@ -97,7 +97,7 @@ Adım adım metinler (Turkish açıklama, Review Notes): [APP_STORE_IOS.md](./AP
 
 Support URL önerisi (Play ile aynı politika sayfası):
 
-`https://gist.githubusercontent.com/abdullah-bekir/c7a5148c5458a345a4237aaf8eecd93a/raw/privacy.html#contact`
+`https://abdullah-bekir.github.io/planly-legal/#contact`
 
 (Gist’te `#contact` yoksa tam sayfa URL’si yeterli.)
 

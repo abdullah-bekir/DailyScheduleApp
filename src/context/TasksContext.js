@@ -11,6 +11,8 @@ import {
   loadStoredTasks,
   loadTaskOutbox,
   normalizeStoredTasks,
+  removeProcessedTaskOutboxOperation,
+  removeTaskOutboxForTask,
   saveStoredTasks,
   saveTaskOutbox,
 } from '../utils/taskStorage';
@@ -96,8 +98,16 @@ export function TasksProvider({ children }) {
       setTasksState([]);
       setCompletionTally(0);
 
-      // Auth henüz bitmediyse bekle; oturum yoksa da yerel veriyi göster (boş listeye düşme).
       if (supabaseConfigured && !authReady) return;
+
+      // Çıkış yapıldığında legacy (scopesuz) AsyncStorage anahtarlarını yükleme — yanlış veri / çakışma olmasın.
+      if (supabaseConfigured && authReady && !userId) {
+        if (cancelled || loadId !== storageLoadRef.current) return;
+        setTasksState([]);
+        setCompletionTally(0);
+        setTasksHydrated(true);
+        return;
+      }
 
       const [raw, tally] = await Promise.all([loadStoredTasks(storageUserId), loadCompletionTally(storageUserId)]);
       if (cancelled || loadId !== storageLoadRef.current) return;
@@ -160,6 +170,8 @@ export function TasksProvider({ children }) {
         }
         return false;
       }
+      // Sunucu güncel; bekleyen eski kayıt sonradan üzerine yazmasın.
+      await removeTaskOutboxForTask(ownerId, task?.id);
       return true;
     },
     [userId],
@@ -176,7 +188,6 @@ export function TasksProvider({ children }) {
       outboxDrainRef.current = true;
       try {
         const operations = await loadTaskOutbox(ownerId);
-        let remaining = operations;
         for (let index = 0; index < operations.length; index += 1) {
           if (userIdRef.current !== ownerId || sessionVersionRef.current !== sessionVersion) return false;
           const operation = operations[index];
@@ -188,11 +199,10 @@ export function TasksProvider({ children }) {
           if (userIdRef.current !== ownerId || sessionVersionRef.current !== sessionVersion) return false;
           if (error) {
             setTasksSyncError(error.message || i18n.t('settings.syncError'));
-            await saveTaskOutbox(ownerId, remaining);
             return false;
           }
-          remaining = operations.slice(index + 1);
-          const saved = await saveTaskOutbox(ownerId, remaining);
+          // Yalnızca gönderilen işlemi sil; boşaltma sırasında eklenenler kaybolmasın.
+          const saved = await removeProcessedTaskOutboxOperation(ownerId, operation);
           if (!saved) {
             setTasksSyncError(i18n.t('settings.syncError'));
             return false;
@@ -263,7 +273,9 @@ export function TasksProvider({ children }) {
 
   useEffect(() => {
     if (!tasksHydrated || !supabaseConfigured || !authReady || !userId) return;
-    runInitialCloudSync();
+    void runInitialCloudSync().catch(() => {
+      setTasksSyncError(i18n.t('settings.syncError'));
+    });
   }, [tasksHydrated, supabaseConfigured, authReady, userId, runInitialCloudSync]);
 
   const refreshTasksFromSupabase = useCallback(async () => {
@@ -327,6 +339,7 @@ export function TasksProvider({ children }) {
         }
         return false;
       }
+      await removeTaskOutboxForTask(ownerId, taskId);
       return true;
     },
     [userId],
@@ -510,29 +523,45 @@ export function TasksProvider({ children }) {
   const deleteCloudAccountAndData = useCallback(async () => {
     const sb = getSupabase();
     const ownerId = userId;
-    const outboxCleared = await saveTaskOutbox(storageUserId, []);
-    if (!outboxCleared) {
-      setTasksSyncError(i18n.t('settings.syncError'));
-      return false;
-    }
-    tasksRef.current = [];
-    setTasksState([]);
-    await persistTasks([]);
-    persistTally(0);
+    const clearLocalData = async () => {
+      const outboxCleared = await saveTaskOutbox(storageUserId, []);
+      tasksRef.current = [];
+      setTasksState([]);
+      await persistTasks([]);
+      persistTally(0);
+      return outboxCleared;
+    };
 
     if (sb && ownerId) {
-      const { error: deleteUserError } = await sb.auth.deleteUser();
-      if (deleteUserError) {
+      // Önce sunucu: yerel veri, hesap gerçekten silinmeden kaybolmasın.
+      let deleteError = null;
+      try {
+        const { error } = await sb.rpc('delete_own_account');
+        deleteError = error;
+      } catch (e) {
+        deleteError = e instanceof Error ? e : new Error(String(e));
+      }
+      if (deleteError) {
+        // Hesap silinemedi (ör. SQL fonksiyonu kurulu değil): en azından bulut görevlerini temizle.
         const { error: tasksError } = await sb.from('tasks').delete().eq('user_id', ownerId);
         if (tasksError) {
-          setTasksSyncError(deleteUserError.message || tasksError.message || i18n.t('settings.deleteCloudFailed'));
+          setTasksSyncError(deleteError.message || tasksError.message || i18n.t('settings.deleteCloudFailed'));
           return false;
         }
         await syncProfilePatch({ completion_tally: 0 });
-        setTasksSyncError(deleteUserError.message || i18n.t('settings.deleteCloudFailed'));
+        await clearLocalData();
+        setTasksSyncError(deleteError.message || i18n.t('settings.deleteCloudFailed'));
         return false;
       }
-      await sb.auth.signOut();
+      await clearLocalData();
+      try {
+        await sb.auth.signOut({ scope: 'local' });
+      } catch {
+        // Kullanıcı sunucuda zaten silindi; yerel oturum temizliği başarısız olsa da devam et.
+      }
+    } else if (!(await clearLocalData())) {
+      setTasksSyncError(i18n.t('settings.syncError'));
+      return false;
     }
 
     setTasksSyncError(null);

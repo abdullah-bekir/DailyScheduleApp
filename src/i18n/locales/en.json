@@ -202,7 +202,7 @@
     "chartCaption": "Top: completed / total tasks · Bottom: completion rate · Current period highlighted",
     "chartYearSecondary": "year",
     "premiumTitle": "Premium membership",
-    "premiumBody": "Unlock weekly, monthly and yearly charts plus Premium perks. Prices from the App Store or Google Play.",
+    "premiumBody": "Task statistics, charts, and Premium perks stay locked until you subscribe. Prices come from the App Store or Google Play.",
     "premiumPriceMonthly": "Monthly · {{price}}",
     "premiumPriceAnnual": "Annual · {{price}}",
     "premiumPricePending": "Prices appear after Play / App Store products are linked in RevenueCat.",
@@ -215,7 +215,10 @@
     "premiumBadgeActive": "Premium active",
     "premiumSeePlans": "See all plans",
     "premiumActiveTitle": "Premium is active",
-    "premiumActiveBody": "Thanks — extended charts and Premium benefits are active."
+    "premiumActiveBody": "Thanks — your task statistics and Premium benefits are active.",
+    "lockedSubtitle": "Task statistics unlock with a Premium subscription.",
+    "lockedTitle": "Statistics are locked",
+    "lockedBody": "No matter how many tasks you add, totals, charts, and the priority breakdown stay hidden until you buy monthly or yearly Premium."
   },
   "settings": {
     "eyebrow": "Planly",
@@ -368,7 +371,7 @@
     "subtitle": "Extended statistics and ongoing improvements. Billed through your app store account.",
     "benefitsTitle": "What's included",
     "benefitsSubtitle": "Sample benefits matched to the panel entitlement.",
-    "benefitNoAds": "Weekly, monthly and yearly progress charts",
+    "benefitNoAds": "All task statistics: totals, charts, and priority breakdown",
     "benefitUpdates": "Priority theme and appearance updates (subject to roadmap)",
     "benefitPrivacy": "Data and privacy practices stay the same; purchases are tied to your store account.",
     "plansTitle": "Plans",
@@ -390,11 +393,12 @@
     "legalAutoRenew": "Payment is charged to your {{store}} account. Subscriptions renew automatically unless you cancel at least 24 hours before the end of the current period.",
     "legalManage": "Manage or cancel: {{store}} → Subscriptions.",
     "legalPrivacyLink": "Privacy policy",
+    "legalTermsLink": "Terms of Use (EULA)",
     "manageSubscription": "Manage subscription",
     "storeGooglePlay": "Google Play",
     "storeAppStore": "App Store",
     "granularityLockedTitle": "Premium charts",
-    "granularityLockedBody": "Weekly, monthly and yearly views are part of Planly Premium. Daily chart stays free."
+    "granularityLockedBody": "Task statistics are part of Planly Premium. Subscribe to see them."
   },
   "languages": {
     "tr": "Türkçe",

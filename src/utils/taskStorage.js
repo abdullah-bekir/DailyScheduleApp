@@ -93,14 +93,54 @@ export async function saveTaskOutbox(userId, operations) {
   }
 }
 
-export async function enqueueTaskOutboxOperation(userId, operation) {
-  const nextOperation = normalizeOutboxOperation(operation);
-  if (!nextOperation) return [];
-  const current = await loadTaskOutbox(userId);
-  const withoutSameTask = current.filter((item) => item.taskId !== nextOperation.taskId);
-  const next = [...withoutSameTask, nextOperation];
-  const saved = await saveTaskOutbox(userId, next);
-  return saved ? next : current;
+// Outbox okuma-değiştirme-yazma işlemleri birbirini ezmesin diye sıraya alınır.
+let outboxQueue = Promise.resolve();
+
+function withOutboxLock(task) {
+  const run = outboxQueue.then(task, task);
+  outboxQueue = run.catch(() => {});
+  return run;
+}
+
+export function enqueueTaskOutboxOperation(userId, operation) {
+  return withOutboxLock(async () => {
+    const nextOperation = normalizeOutboxOperation(operation);
+    if (!nextOperation) return [];
+    const current = await loadTaskOutbox(userId);
+    const withoutSameTask = current.filter((item) => item.taskId !== nextOperation.taskId);
+    const next = [...withoutSameTask, nextOperation];
+    const saved = await saveTaskOutbox(userId, next);
+    return saved ? next : current;
+  });
+}
+
+/** Sunucuya doğrudan yazılan bir görev için bekleyen eski kuyruk kaydını siler. */
+export function removeTaskOutboxForTask(userId, taskId) {
+  return withOutboxLock(async () => {
+    const id = String(taskId ?? '').trim();
+    if (!id) return false;
+    const current = await loadTaskOutbox(userId);
+    const next = current.filter((item) => item.taskId !== id);
+    if (next.length === current.length) return true;
+    return saveTaskOutbox(userId, next);
+  });
+}
+
+/** Başarıyla gönderilen tek bir işlemi siler; boşaltma sırasında eklenen yeni işlemlere dokunmaz. */
+export function removeProcessedTaskOutboxOperation(userId, operation) {
+  return withOutboxLock(async () => {
+    const current = await loadTaskOutbox(userId);
+    const next = current.filter(
+      (item) =>
+        !(
+          item.taskId === operation.taskId &&
+          item.type === operation.type &&
+          item.task?.updatedAt === operation.task?.updatedAt
+        ),
+    );
+    if (next.length === current.length) return true;
+    return saveTaskOutbox(userId, next);
+  });
 }
 
 export function normalizeStoredTasks(data) {

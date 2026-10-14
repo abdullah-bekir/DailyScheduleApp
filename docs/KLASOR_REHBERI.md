@@ -29,7 +29,7 @@ Burada yaptığın değişiklikler: paket adı, izinler, imzalama, ikon/splash k
 | Klasör / dosya | Rol |
 |----------------|-----|
 | `assets/` | Uygulama ikonu, splash, favicon (Expo `app.json` ile bağlı). |
-| `scripts/` | Örn. ikon üretimi (`generate_app_icons.py`), yerel temizlik (`clean-local-artifacts.ps1`). |
+| `scripts/` | Onaylı logo entegrasyonu (`integrate_approved_logo_proposal.py`), yerel temizlik (`clean-local-artifacts.ps1`). |
 | `docs/` | Dokümantasyon (bu rehber, yayın notları, politikalar). iOS mağaza metinleri: `APP_STORE_IOS.md`. |
 
 ## Supabase SQL (`supabase/`)
@@ -65,7 +65,6 @@ Yeniden kullanılabilir parçalar; alt klasörler **alan**a göre:
 | `layout/` | Ekran başlığı, bölüm başlığı gibi yerleşim. |
 | `dashboard/` | Ana sayfa / özet kartları, görev satırı, ilerleme çubuğu vb. |
 | `tasks/` | Görev ekleme modalı, filtre / öncelik çipleri. |
-| `calendar/` | Hafta şeridi / takvim kartı. |
 | `settings/` | Ayarlar satırı bileşenleri. |
 | `sync/` | Bulut profil senkronu, yükleme banner’ı. |
 | `ads/` | AdMob banner ve uygulama açılış reklamı denetleyicisi (UI + tetikleyici). |

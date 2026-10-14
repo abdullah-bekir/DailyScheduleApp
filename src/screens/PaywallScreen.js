@@ -19,7 +19,7 @@ import PrimaryButton from '../components/common/PrimaryButton';
 import ScreenHero from '../components/layout/ScreenHero';
 import SectionHeader from '../components/layout/SectionHeader';
 import TextLink from '../components/common/TextLink';
-import { PRIVACY_POLICY_URL } from '../constants/legalUrls';
+import { PRIVACY_POLICY_URL, TERMS_URL } from '../constants/legalUrls';
 import { openExternalUrl, openSubscriptionManagement } from '../utils/openExternalUrl';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useTheme } from '../context/ThemeContext';
@@ -279,12 +279,15 @@ export default function PaywallScreen() {
               <Text style={styles.legalText}>{t('paywall.legalAutoRenew', { store: storeName })}</Text>
               <Text style={styles.legalText}>{t('paywall.legalManage', { store: storeName })}</Text>
               <TextLink title={t('paywall.manageSubscription')} onPress={() => openSubscriptionManagement()} />
-              <TextLink
-                title={t('paywall.legalPrivacyLink')}
-                onPress={() => openExternalUrl(PRIVACY_POLICY_URL)}
-              />
             </View>
           ) : null}
+          <View style={styles.legalBlock}>
+            <TextLink title={t('paywall.legalTermsLink')} onPress={() => openExternalUrl(TERMS_URL)} />
+            <TextLink
+              title={t('paywall.legalPrivacyLink')}
+              onPress={() => openExternalUrl(PRIVACY_POLICY_URL)}
+            />
+          </View>
         </View>
       </View>
     </ScrollView>

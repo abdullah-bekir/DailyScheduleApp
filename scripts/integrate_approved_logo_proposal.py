@@ -1,7 +1,7 @@
 """
 Onaylanan logo taslağını (JPG/PNG) Expo assets + Android native içine yazar.
 
-Varsayılan kaynak: assets/logo-proposals/planly-logo-proposal-v1-icon.jpg
+Varsayılan kaynak: assets/logo-proposals/planly-logo-approved-final.png
 
   python scripts/integrate_approved_logo_proposal.py
   python scripts/integrate_approved_logo_proposal.py path/to/source.jpg
