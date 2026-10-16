@@ -70,7 +70,11 @@ export async function showAppOpenIfReady() {
   if (!isAdsUiEnabled()) return false;
   if (!(await canShowAppOpenNow())) return false;
   if (!ensureAppOpen()) return false;
-  if (!loaded) return false;
+  if (!loaded) {
+    // İlk yükleme hata verdiyse (ağ yok / doluluk yok) bir sonraki fırsat için yeniden dene.
+    loadAppOpen();
+    return false;
+  }
   try {
     await appOpen.show();
     return true;

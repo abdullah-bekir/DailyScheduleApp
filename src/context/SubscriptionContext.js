@@ -104,6 +104,7 @@ export function SubscriptionProvider({ children }) {
   const [premiumPlans, setPremiumPlans] = useState(EMPTY_PLANS);
   const entitlementIdRef = useRef(entitlementId);
   entitlementIdRef.current = entitlementId;
+  const loggedInUserIdRef = useRef('');
 
   useEffect(() => {
     if (!billingConfigured) {
@@ -173,7 +174,24 @@ export function SubscriptionProvider({ children }) {
   useEffect(() => {
     if (!billingConfigured || !ready) return undefined;
     const id = typeof userId === 'string' ? userId.trim() : '';
-    if (!id) return undefined;
+    if (!id) {
+      // Çıkış yapıldı: önceki hesabın premium durumu çıkış ekranında görünmesin.
+      if (!loggedInUserIdRef.current) return undefined;
+      loggedInUserIdRef.current = '';
+      let loggedOut = false;
+      (async () => {
+        try {
+          const info = await Purchases.logOut();
+          if (!loggedOut && info) setIsPro(hasActivePremium(info, entitlementIdRef.current));
+        } catch {
+          /* RC zaten anonim olabilir */
+        }
+      })();
+      return () => {
+        loggedOut = true;
+      };
+    }
+    loggedInUserIdRef.current = id;
 
     let cancelled = false;
     (async () => {

@@ -72,7 +72,11 @@ export async function showInterstitialIfReady() {
   if (!isAdsUiEnabled()) return false;
   if (!(await canShowInterstitialNow())) return false;
   if (!ensureInterstitial()) return false;
-  if (!isLoaded) return false;
+  if (!isLoaded) {
+    // İlk yükleme hata verdiyse (ağ yok / doluluk yok) bir sonraki fırsat için yeniden dene.
+    loadInterstitial();
+    return false;
+  }
   try {
     await interstitial.show();
     return true;
