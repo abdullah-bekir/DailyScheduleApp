@@ -101,6 +101,8 @@ function createStyles(colors) {
       borderColor: colors.borderStrong,
       backgroundColor: colors.surfaceSubtle,
       padding: 14,
+      gap: 10,
+      alignItems: 'flex-start',
     },
     warnText: {
       fontSize: 13,
@@ -134,6 +136,7 @@ export default function PaywallScreen() {
     purchasePremium,
     restorePurchases,
     isPremiumActive,
+    refreshSubscription,
     ready,
     billingConfigured,
   } = useSubscription();
@@ -200,6 +203,15 @@ export default function PaywallScreen() {
     }
   }, [billingConfigured, isPremiumActive, restorePurchases, t]);
 
+  const onRetryPlans = useCallback(async () => {
+    setBusyId('retry');
+    try {
+      await refreshSubscription();
+    } finally {
+      setBusyId(null);
+    }
+  }, [refreshSubscription]);
+
   const missingProducts = ready && (!billingConfigured || !hasPurchasablePlans);
   const storeName = Platform.OS === 'ios' ? t('paywall.storeAppStore') : t('paywall.storeGooglePlay');
 
@@ -240,6 +252,10 @@ export default function PaywallScreen() {
             <Text style={styles.warnText}>
               {billingConfigured ? t('paywall.missingProducts') : t('paywall.billingNotConfigured')}
             </Text>
+            {billingConfigured ? (
+              <TextLink title={t('common.retry')} onPress={() => !busyId && onRetryPlans()} />
+            ) : null}
+            {busyId === 'retry' ? <ActivityIndicator color={colors.primary} /> : null}
           </View>
         ) : null}
 
