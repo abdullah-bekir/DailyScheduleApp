@@ -2,7 +2,7 @@
 
 Günlük görev ve plan uygulaması. Yerel saklama, Supabase senkronu, tema, 13 dil, AdMob ve RevenueCat paywall.
 
-**Sürüm:** 1.0.6  
+**Sürüm:** 1.0.11  
 **Stack:** Expo SDK 54 · React Native · Supabase
 
 ## Hızlı başlangıç
