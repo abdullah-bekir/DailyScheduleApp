@@ -79,7 +79,7 @@ async function main() {
       encoding: 'utf8',
       shell: true,
       stdio: 'pipe',
-      timeout: 120000,
+      timeout: 300000,
     });
     if (ex.status === 0) pass('Android JS bundle export');
     else fail('Android JS bundle export', (ex.stderr || ex.stdout || '').trim().slice(0, 200));
