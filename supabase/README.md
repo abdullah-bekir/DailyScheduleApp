@@ -8,8 +8,6 @@ Uygulama açılışında **kullanıcı adı + şifre** ile kayıt/giriş vardır
 |--------|--------|
 | `sql/schema.sql` | İlk kurulum: tam şema (`profiles`, `tasks`, RLS, tetikleyiciler). |
 | `sql/upgrades/` | Mevcut projeye **üst üste** uygulanan yükseltme betikleri. |
-| `sql/optional_alternatives/` | Farklı senaryolar — **birini** seçin, hepsini değil. |
-| `sql/settings/` | Ayarlar ekranı ile ilgili ek SQL. |
 
 Dosya sırası: kökteki `ROLLOUT_ORDER.txt`.
 

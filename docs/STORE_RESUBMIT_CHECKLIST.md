@@ -70,7 +70,7 @@ Internal/draft’tan **Production** veya kapalı teste yükselt → **İncelemey
 
 ### A5 — Supabase (hesap silme)
 
-Dashboard → **Authentication** → **Providers** → Anonymous: açık  
+Dashboard → **Authentication** → **Providers** → Anonymous: **kapalı**, Email: açık  
 Dashboard → **Authentication** → **Settings** → kullanıcıların hesabını silmesine izin ver (client `auth.deleteUser()` için).
 
 ---

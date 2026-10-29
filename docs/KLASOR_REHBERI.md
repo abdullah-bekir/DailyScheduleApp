@@ -42,8 +42,6 @@ Bu klasördeki `.sql` dosyaları **uygulama paketinden çalıştırılmaz**; Sup
 | `ROLLOUT_ORDER.txt` | Betikleri hangi sırayla çalıştıracağın. |
 | `sql/schema.sql` | İlk kurulum: `profiles`, `tasks`, RLS, tetikleyiciler. |
 | `sql/upgrades/` | Mevcut veritabanına **sonradan** eklenecek kolon/tablolar. |
-| `sql/optional_alternatives/` | Sadece görev tablosu eksik gibi **alternatif** kurulumlar (dosyalar birbirinin yerine; hepsini birden çalıştırma). |
-| `sql/settings/` | Ayarlar ekranı ile ilgili ek SQL. |
 
 ## Uygulama kaynak kodu (`src/`)
 

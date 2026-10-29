@@ -3,25 +3,20 @@ Supabase SQL Editor — çalıştırma sırası (DailyscheduleApp)
 1) İlk kurulum (boş veya yeni proje)
    → sql/schema.sql        (tam şema: profiles + tasks + RLS + tetikleyiciler)
 
-2) Yalnızca görevler tablosu eksikse (profiles zaten varsa)
-   → sql/optional_alternatives/gorevler_table_editor_gorunur.sql
-   VEYA sql/optional_alternatives/mobil_ana_sayfa_ve_gorevler.sql
-   VEYA sql/optional_alternatives/setup_tasks_only.sql
-
-3) Profilde premium kolonu vb. yükseltme
+2) Profilde premium kolonu vb. yükseltme
    → sql/upgrades/upgrade_profiles_premium_column.sql
 
-4) Görevlerde notlar / ekler kolonları vb.
+3) Görevlerde notlar / ekler kolonları vb.
    → sql/upgrades/upgrade_tasks_notes_attachments.sql
 
-5) Ayarlar ekranı ile ilgili ek SQL (gerekirse)
-   → sql/settings/settings_screen_sql.sql
+3b) Profilde dil kolonu (13 dil desteği)
+   → sql/upgrades/upgrade_profiles_language_code.sql
 
-6) Canlı projede istemci updated_at koruması (LWW senkron — bir kez)
+4) Canlı projede istemci updated_at koruması (LWW senkron — bir kez)
    → sql/patches/preserve_client_updated_at.sql
    (schema.sql zaten bu fonksiyonu içerir; eski canlı DB için patch şart)
 
-7) Hesabı silme (Ayarlar → hesabı ve bulut verisini sil) — bir kez
+5) Hesabı silme (Ayarlar → hesabı ve bulut verisini sil) — bir kez
    → sql/patches/delete_own_account.sql
    (Çalıştırılmazsa uygulama hesabı silemez; yalnızca görevleri temizler.)
 
