@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { pushProfilePatch } from '../lib/profileRemote';
 import {
@@ -20,6 +20,7 @@ export function AppSettingsProvider({ children }) {
   const [dailyPlanGoal, setDailyPlanGoalState] = useState(DEFAULT_DAILY_PLAN_GOAL);
   const [notificationsEnabled, setNotificationsEnabledState] = useState(true);
   const [hydrated, setHydrated] = useState(false);
+  const notificationsEnabledRef = useRef(true);
 
   useEffect(() => {
     let active = true;
@@ -30,13 +31,21 @@ export function AppSettingsProvider({ children }) {
       };
     }
     (async () => {
-      const [goal, notify] = await Promise.all([
-        loadDailyPlanGoal(storageUserId),
-        loadNotificationsEnabled(storageUserId),
-      ]);
-      if (!active) return;
-      setDailyPlanGoalState(goal);
-      setNotificationsEnabledState(notify);
+      try {
+        const [goal, notify] = await Promise.all([
+          loadDailyPlanGoal(storageUserId),
+          loadNotificationsEnabled(storageUserId),
+        ]);
+        if (!active) return;
+        setDailyPlanGoalState(goal);
+        notificationsEnabledRef.current = notify;
+        setNotificationsEnabledState(notify);
+      } catch {
+        if (!active) return;
+        setDailyPlanGoalState(DEFAULT_DAILY_PLAN_GOAL);
+        notificationsEnabledRef.current = true;
+        setNotificationsEnabledState(true);
+      }
       setHydrated(true);
     })();
     return () => {
@@ -56,11 +65,24 @@ export function AppSettingsProvider({ children }) {
   const setNotificationsEnabled = useCallback(
     async (enabled) => {
       const value = Boolean(enabled);
+      const previous = notificationsEnabledRef.current;
+      notificationsEnabledRef.current = value;
       setNotificationsEnabledState(value);
       await saveNotificationsEnabled(value, storageUserId);
       if (!supabaseConfigured) return { ok: true };
-      const result = await pushProfilePatch({ notifications_enabled: value });
-      return result ?? { ok: false };
+      let result;
+      try {
+        result = (await pushProfilePatch({ notifications_enabled: value })) ?? { ok: false };
+      } catch (error) {
+        result = { ok: false, error };
+      }
+      const localOnly = result.error === 'no_client' || result.error === 'no_session';
+      if (!result.ok && !localOnly) {
+        notificationsEnabledRef.current = previous;
+        setNotificationsEnabledState(previous);
+        await saveNotificationsEnabled(previous, storageUserId);
+      }
+      return result;
     },
     [storageUserId, supabaseConfigured],
   );
@@ -68,6 +90,7 @@ export function AppSettingsProvider({ children }) {
   const applyRemoteNotificationsEnabled = useCallback(
     async (enabled) => {
       const value = Boolean(enabled);
+      notificationsEnabledRef.current = value;
       setNotificationsEnabledState(value);
       await saveNotificationsEnabled(value, storageUserId);
     },
