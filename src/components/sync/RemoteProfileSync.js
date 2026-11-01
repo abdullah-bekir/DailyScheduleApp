@@ -15,15 +15,15 @@ import { getDailyReminderPermissionStatus } from '../../utils/dailyReminderNotif
  */
 export default function RemoteProfileSync() {
   const { authReady, userId, supabaseConfigured } = useSupabaseSession();
-  const { applyRemoteNotificationsEnabled } = useAppSettings();
+  const { notificationsEnabled, applyRemoteNotificationsEnabled } = useAppSettings();
   const { language, applyRemoteLanguage } = useLocale();
   const { themeMode, applyRemoteTheme } = useTheme();
   const { tasksDataReady, completionTally, applyRemoteCompletionTally } = useTasks();
-  const preferencesRef = useRef({ language, themeMode, completionTally });
+  const preferencesRef = useRef({ language, themeMode, completionTally, notificationsEnabled });
   const syncedUserRef = useRef(null);
   const userIdRef = useRef(userId);
 
-  preferencesRef.current = { language, themeMode, completionTally };
+  preferencesRef.current = { language, themeMode, completionTally, notificationsEnabled };
   userIdRef.current = userId;
 
   useEffect(() => {
@@ -66,7 +66,9 @@ export default function RemoteProfileSync() {
         const perm = await getDailyReminderPermissionStatus();
         if (!perm.granted) notifyOn = false;
       }
-      await applyRemoteNotificationsEnabled(notifyOn);
+      if (preferencesRef.current.notificationsEnabled === initialPreferences.notificationsEnabled) {
+        await applyRemoteNotificationsEnabled(notifyOn);
+      }
     })();
     return () => {
       cancelled = true;

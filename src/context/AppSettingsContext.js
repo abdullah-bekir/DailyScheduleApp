@@ -21,6 +21,7 @@ export function AppSettingsProvider({ children }) {
   const [notificationsEnabled, setNotificationsEnabledState] = useState(true);
   const [hydrated, setHydrated] = useState(false);
   const notificationsEnabledRef = useRef(true);
+  const notificationsChangeIdRef = useRef(0);
 
   useEffect(() => {
     let active = true;
@@ -40,8 +41,9 @@ export function AppSettingsProvider({ children }) {
         setDailyPlanGoalState(goal);
         notificationsEnabledRef.current = notify;
         setNotificationsEnabledState(notify);
-      } catch {
+      } catch (error) {
         if (!active) return;
+        console.warn('[app-settings] hydrate failed', error?.message || error);
         setDailyPlanGoalState(DEFAULT_DAILY_PLAN_GOAL);
         notificationsEnabledRef.current = true;
         setNotificationsEnabledState(true);
@@ -66,6 +68,7 @@ export function AppSettingsProvider({ children }) {
     async (enabled) => {
       const value = Boolean(enabled);
       const previous = notificationsEnabledRef.current;
+      const changeId = ++notificationsChangeIdRef.current;
       notificationsEnabledRef.current = value;
       setNotificationsEnabledState(value);
       await saveNotificationsEnabled(value, storageUserId);
@@ -77,7 +80,8 @@ export function AppSettingsProvider({ children }) {
         result = { ok: false, error };
       }
       const localOnly = result.error === 'no_client' || result.error === 'no_session';
-      if (!result.ok && !localOnly) {
+      const superseded = changeId !== notificationsChangeIdRef.current;
+      if (!result.ok && !localOnly && !superseded) {
         notificationsEnabledRef.current = previous;
         setNotificationsEnabledState(previous);
         await saveNotificationsEnabled(previous, storageUserId);
@@ -90,6 +94,7 @@ export function AppSettingsProvider({ children }) {
   const applyRemoteNotificationsEnabled = useCallback(
     async (enabled) => {
       const value = Boolean(enabled);
+      notificationsChangeIdRef.current += 1;
       notificationsEnabledRef.current = value;
       setNotificationsEnabledState(value);
       await saveNotificationsEnabled(value, storageUserId);
