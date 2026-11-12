@@ -6,8 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import PrimaryButton from '../common/PrimaryButton';
 import TextLink from '../common/TextLink';
 import { planDisplayPrice } from '../../lib/premiumPlans';
-import { useTheme } from '../../context/ThemeContext';
-import { cardShadow } from '../../theme/shadows';
+import { useTheme } from '../../context/ThemeContext';import { cardShadow } from '../../theme/shadows';
 
 function createStyles(colors, isDark, isPro) {
   return StyleSheet.create({

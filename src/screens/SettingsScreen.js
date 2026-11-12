@@ -20,9 +20,11 @@ import { openExternalUrl, openPrivacyContactEmail, openSupportEmail } from '../u
 import ScreenHero from '../components/layout/ScreenHero';
 import AccountAuthSection from '../components/settings/AccountAuthSection';
 import SettingsSectionCard from '../components/settings/SettingsSectionCard';
+import SettingsSubscriptionSection from '../components/settings/SettingsSubscriptionSection';
 import SettingsToggleRow from '../components/settings/SettingsToggleRow';
 import { useAppSettings } from '../context/AppSettingsContext';
 import { useLocale } from '../context/LocaleContext';
+import { useSubscription } from '../context/SubscriptionContext';
 import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTasks } from '../context/TasksContext';
 import { useTheme } from '../context/ThemeContext';
@@ -210,6 +212,15 @@ function createStyles(colors, isDark) {
       lineHeight: 20,
       paddingLeft: 4,
     },
+    groupLabel: {
+      fontSize: 12,
+      fontWeight: '800',
+      letterSpacing: 0.8,
+      textTransform: 'uppercase',
+      color: colors.textTertiary,
+      marginTop: 6,
+      marginLeft: 4,
+    },
     divider: {
       height: StyleSheet.hairlineWidth,
       backgroundColor: colors.border,
@@ -273,6 +284,7 @@ export default function SettingsScreen() {
   } = useAppSettings();
   const { tasksDataReady, tasksSyncError, retryCloudSync, resetAllTaskData, deleteCloudAccountAndData } =
     useTasks();
+  const { isPro } = useSubscription();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const [syncBusy, setSyncBusy] = useState(false);
   const [languagePickerOpen, setLanguagePickerOpen] = useState(false);
@@ -441,6 +453,10 @@ export default function SettingsScreen() {
               <Text style={styles.pillText}>{t('settings.goalPill', { goal: dailyPlanGoal })}</Text>
             </View>
             <View style={styles.pill}>
+              <Ionicons name={isPro ? 'diamond' : 'diamond-outline'} size={16} color={colors.primary} />
+              <Text style={styles.pillText}>{isPro ? t('settings.subStatusActive') : t('settings.subStatusFree')}</Text>
+            </View>
+            <View style={styles.pill}>
               <Ionicons name={isDark ? 'moon' : 'sunny-outline'} size={16} color={colors.primary} />
               <Text style={styles.pillText}>{isDark ? t('settings.darkTheme') : t('settings.lightTheme')}</Text>
             </View>
@@ -451,6 +467,7 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        <Text style={styles.groupLabel} accessibilityRole="header">{t('settings.groupAccount')}</Text>
         <SettingsSectionCard
           icon="person-outline"
           title={t('settings.accountTitle')}
@@ -458,6 +475,8 @@ export default function SettingsScreen() {
         >
           <AccountAuthSection />
         </SettingsSectionCard>
+
+        <SettingsSubscriptionSection />
 
         <SettingsSectionCard
           icon="cloud-outline"
@@ -483,6 +502,7 @@ export default function SettingsScreen() {
           ) : null}
         </SettingsSectionCard>
 
+        <Text style={styles.groupLabel} accessibilityRole="header">{t('settings.groupPreferences')}</Text>
         <SettingsSectionCard
           icon="color-palette-outline"
           title={t('settings.appearanceTitle')}
@@ -604,6 +624,7 @@ export default function SettingsScreen() {
           ) : null}
         </SettingsSectionCard>
 
+        <Text style={styles.groupLabel} accessibilityRole="header">{t('settings.groupAbout')}</Text>
         <SettingsSectionCard
           icon="document-text-outline"
           title={t('settings.legalTitle')}

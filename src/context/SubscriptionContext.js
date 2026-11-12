@@ -41,6 +41,25 @@ function hasActivePremium(info, entitlementId) {
   return false;
 }
 
+/** Aktif Premium hakkının ürün / bitiş / yenileme bilgisi (Ayarlar'daki abonelik kartı için). */
+function extractSubscriptionDetails(info, entitlementId) {
+  const active = info?.entitlements?.active;
+  if (!active || typeof active !== 'object') return null;
+  const want = String(entitlementId || 'premium').toLowerCase();
+  const key = Object.keys(active).find((k) => k.toLowerCase() === want);
+  const ent = key ? active[key] : null;
+  if (!ent) return null;
+  return {
+    productId: String(ent.productIdentifier ?? ''),
+    expiresAt: ent.expirationDate ?? null,
+    willRenew: ent.willRenew !== false,
+    isSandbox: Boolean(ent.isSandbox),
+    periodType: ent.periodType ?? null,
+    isTrial: ent.periodType === 'trial',
+    billingIssue: Boolean(ent.billingIssueDetectedAt),
+  };
+}
+
 async function loadPremiumPlans(offerings, productIds) {
   const fromPackages = pickPackagesFromOfferings(offerings, productIds);
   const plans = {
@@ -102,6 +121,11 @@ export function SubscriptionProvider({ children }) {
   const [isPro, setIsPro] = useState(false);
   const [offerings, setOfferings] = useState(null);
   const [premiumPlans, setPremiumPlans] = useState(EMPTY_PLANS);
+  const [subscriptionDetails, setSubscriptionDetails] = useState(null);
+  const commitInfo = useCallback((info, id) => {
+    setIsPro(hasActivePremium(info, id));
+    setSubscriptionDetails(extractSubscriptionDetails(info, id));
+  }, []);
   const entitlementIdRef = useRef(entitlementId);
   entitlementIdRef.current = entitlementId;
   const loggedInUserIdRef = useRef('');
@@ -110,6 +134,7 @@ export function SubscriptionProvider({ children }) {
     if (!billingConfigured) {
       setReady(true);
       setIsPro(false);
+      setSubscriptionDetails(null);
       setOfferings(null);
       setPremiumPlans(EMPTY_PLANS);
       return undefined;
@@ -122,7 +147,7 @@ export function SubscriptionProvider({ children }) {
 
     const applyInfo = (info) => {
       if (cancelled || !info) return;
-      setIsPro(hasActivePremium(info, entitlementId));
+      commitInfo(info, entitlementId);
     };
 
     const boot = async () => {
@@ -182,7 +207,7 @@ export function SubscriptionProvider({ children }) {
       (async () => {
         try {
           const info = await Purchases.logOut();
-          if (!loggedOut && info) setIsPro(hasActivePremium(info, entitlementIdRef.current));
+          if (!loggedOut && info) commitInfo(info, entitlementIdRef.current);
         } catch {
           /* RC zaten anonim olabilir */
         }
@@ -198,7 +223,7 @@ export function SubscriptionProvider({ children }) {
       try {
         const { customerInfo } = await Purchases.logIn(id);
         if (!cancelled && customerInfo) {
-          setIsPro(hasActivePremium(customerInfo, entitlementIdRef.current));
+          commitInfo(customerInfo, entitlementIdRef.current);
         }
         const off = await Purchases.getOfferings();
         if (!cancelled) {
@@ -228,7 +253,7 @@ export function SubscriptionProvider({ children }) {
       } else {
         throw createBillingError('NO_PRODUCT');
       }
-      setIsPro(hasActivePremium(customerInfo, entitlementId));
+      commitInfo(customerInfo, entitlementId);
       return customerInfo;
     },
     [billingConfigured, entitlementId, premiumPlans, userId],
@@ -241,7 +266,7 @@ export function SubscriptionProvider({ children }) {
       }
       await ensurePurchasesLoggedIn(userId);
       const { customerInfo } = await Purchases.purchasePackage(pkg);
-      setIsPro(hasActivePremium(customerInfo, entitlementId));
+      commitInfo(customerInfo, entitlementId);
       return customerInfo;
     },
     [billingConfigured, entitlementId, userId],
@@ -263,7 +288,7 @@ export function SubscriptionProvider({ children }) {
         await Purchases.invalidateCustomerInfoCache();
       }
       const info = await Purchases.getCustomerInfo();
-      setIsPro(hasActivePremium(info, entitlementId));
+      commitInfo(info, entitlementId);
       await reloadStoreAndPlans();
     } catch {
       /* ağ / mağaza geçici hatası */
@@ -277,7 +302,7 @@ export function SubscriptionProvider({ children }) {
     await ensurePurchasesLoggedIn(userId);
     let info = await Purchases.restorePurchases();
     info = await refreshCustomerInfoAfterRestore(info);
-    setIsPro(hasActivePremium(info, entitlementId));
+    commitInfo(info, entitlementId);
     await reloadStoreAndPlans();
     return info;
   }, [billingConfigured, entitlementId, reloadStoreAndPlans, userId]);
@@ -301,8 +326,12 @@ export function SubscriptionProvider({ children }) {
       isPremiumActive,
       entitlementId,
       billingConfigured,
+      subscriptionDetails,
+      productIds,
     }),
     [
+      subscriptionDetails,
+      productIds,
       ready,
       isPro,
       offerings,

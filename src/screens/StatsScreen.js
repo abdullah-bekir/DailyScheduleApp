@@ -9,6 +9,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AdMobBannerCard from '../components/ads/AdMobBannerCard';
 import PrimaryButton from '../components/common/PrimaryButton';
 import StatsPremiumCard from '../components/stats/StatsPremiumCard';
+import StatsPriorityCard from '../components/stats/StatsPriorityCard';
+import StatsSummaryCard from '../components/stats/StatsSummaryCard';
 import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner';
 import ScreenHero from '../components/layout/ScreenHero';
 import TaskFilterChips from '../components/tasks/TaskFilterChips';
@@ -796,69 +798,38 @@ export default function StatsScreen() {
         ) : null}
         {isPro && s.total > 0 ? (
           <>
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>{t('stats.general')}</Text>
-              <View style={styles.statRow}>
-                <View style={styles.statPill}>
-                  <Text style={styles.statValue}>{s.total}</Text>
-                  <Text style={styles.statLabel}>{t('common.total')}</Text>
-                </View>
-                <View style={styles.statPill}>
-                  <Text style={styles.statValue}>{s.done}</Text>
-                  <Text style={styles.statLabel}>{t('common.completed')}</Text>
-                </View>
-                <View style={styles.statPill}>
-                  <Text style={styles.statValue}>{s.pending}</Text>
-                  <Text style={styles.statLabel}>{t('stats.pending')}</Text>
-                </View>
-                <View style={styles.statPill}>
-                  <Text style={styles.statValue}>{displayTally}</Text>
-                  <Text style={styles.statLabel}>{t('stats.completionPoints')}</Text>
-                </View>
-              </View>
-
-              <View style={styles.tierBlock}>
-                <View style={styles.tierRow}>
-                  <Text style={styles.tierLevel}>{t('stats.tier', { level: tierMeta.level })}</Text>
-                  <Text style={styles.tierSub} numberOfLines={2}>
-                    {t('stats.tierSub', {
-                      within: tierMeta.within,
-                      size: TIER_SIZE,
-                      toNext: tierMeta.toNext,
-                    })}
-                  </Text>
-                </View>
-                <View style={styles.tierTrack}>
-                  <View style={[styles.tierFill, { width: `${tierMeta.pct}%` }]} />
-                </View>
-              </View>
-
-              <Text style={styles.hint}>
-                {t('stats.rateHint', {
-                  rate: s.rate,
-                  high: COMPLETION_WEIGHT.high,
-                  medium: COMPLETION_WEIGHT.medium,
-                  low: COMPLETION_WEIGHT.low,
-                  size: TIER_SIZE,
-                })}
-              </Text>
-            </View>
+            <StatsSummaryCard
+              stats={s}
+              points={displayTally}
+              tier={tierMeta}
+              tierSize={TIER_SIZE}
+              hintParams={{
+                high: COMPLETION_WEIGHT.high,
+                medium: COMPLETION_WEIGHT.medium,
+                low: COMPLETION_WEIGHT.low,
+                size: TIER_SIZE,
+              }}
+            />
 
             <View style={styles.card}>
               <Text style={styles.cardTitle}>{t('stats.todayWeek')}</Text>
               <View style={styles.statRow}>
-                <View style={styles.statPill}>
-                  <Text style={styles.statValue}>
-                    {s.todayDone}/{s.todayTotal || 0}
-                  </Text>
-                  <Text style={styles.statLabel}>{t('common.today')}</Text>
-                </View>
-                <View style={styles.statPill}>
-                  <Text style={styles.statValue}>
-                    {s.weekDone}/{s.weekTotal || 0}
-                  </Text>
-                  <Text style={styles.statLabel}>{t('stats.weekLabel')}</Text>
-                </View>
+                {[
+                  { key: 'today', label: t('common.today'), done: s.todayDone, total: s.todayTotal || 0 },
+                  { key: 'week', label: t('stats.weekLabel'), done: s.weekDone, total: s.weekTotal || 0 },
+                ].map((p) => (
+                  <View key={p.key} style={styles.statPill}>
+                    <Text style={styles.statValue}>
+                      {p.done}/{p.total}
+                    </Text>
+                    <Text style={styles.statLabel}>{p.label}</Text>
+                    <View style={styles.tierTrack}>
+                      <View
+                        style={[styles.tierFill, { width: `${p.total > 0 ? Math.round((p.done / p.total) * 100) : 0}%` }]}
+                      />
+                    </View>
+                  </View>
+                ))}
               </View>
               <Text style={styles.hint}>{formatDateKeyForDisplay(s.todayKey, dateLocale)}</Text>
             </View>
@@ -894,22 +865,21 @@ export default function StatsScreen() {
               <View style={styles.chartWell}>
                 <View style={styles.chartMetaRow}>
                   <Text style={styles.chartYCaption}>{t('stats.yAxis')}</Text>
-                  <Text style={styles.chartMiniHint}>{t(CHART_SUB_KEY[chartSeries.granularity])}</Text>
                 </View>
 
                 <View style={styles.chartPlotRow}>
                   <View style={styles.chartYBand}>
-                    {yTicks.map((t) => (
+                    {yTicks.map((tick) => (
                       <Text
-                        key={`yt-${t}`}
+                        key={`yt-${tick}`}
                         style={[
                           styles.chartYTick,
                           {
-                            bottom: Math.max(0, (t / chartSeries.maxBar) * CHART_PLOT_H - 7),
+                            bottom: Math.max(0, (tick / chartSeries.maxBar) * CHART_PLOT_H - 7),
                           },
                         ]}
                       >
-                        {t}
+                        {tick}
                       </Text>
                     ))}
                   </View>
@@ -1013,29 +983,7 @@ export default function StatsScreen() {
               </View>
             </View>
 
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>{t('stats.priority')}</Text>
-              <View style={styles.priorityWrap}>
-                <View style={[styles.priorityRow, { borderLeftColor: colors.danger }]}>
-                  <View style={styles.priorityMid}>
-                    <Text style={styles.priorityLabel}>{t('priority.high')}</Text>
-                  </View>
-                  <Text style={styles.priorityCount}>{s.priorityCounts.high}</Text>
-                </View>
-                <View style={[styles.priorityRow, { borderLeftColor: colors.warning }]}>
-                  <View style={styles.priorityMid}>
-                    <Text style={styles.priorityLabel}>{t('priority.medium')}</Text>
-                  </View>
-                  <Text style={styles.priorityCount}>{s.priorityCounts.medium}</Text>
-                </View>
-                <View style={[styles.priorityRow, { borderLeftColor: colors.success }]}>
-                  <View style={styles.priorityMid}>
-                    <Text style={styles.priorityLabel}>{t('priority.low')}</Text>
-                  </View>
-                  <Text style={styles.priorityCount}>{s.priorityCounts.low}</Text>
-                </View>
-              </View>
-            </View>
+            <StatsPriorityCard counts={s.priorityCounts} />
           </>
         ) : null}
 

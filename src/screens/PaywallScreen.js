@@ -131,6 +131,7 @@ export default function PaywallScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const {
+    isPro,
     premiumPlans,
     hasPurchasablePlans,
     purchasePremium,
@@ -148,7 +149,7 @@ export default function PaywallScreen() {
   const onPurchase = useCallback(
     async (period) => {
       const plan = period === 'annual' ? annualPlan : monthlyPlan;
-      if (!plan) return;
+      if (!plan || isPro) return;
       setBusyId(period);
       try {
         const info = await purchasePremium(period);
@@ -176,7 +177,7 @@ export default function PaywallScreen() {
         setBusyId(null);
       }
     },
-    [annualPlan, isPremiumActive, monthlyPlan, navigation, purchasePremium, t],
+    [annualPlan, isPremiumActive, isPro, monthlyPlan, navigation, purchasePremium, t],
   );
 
   const onRestore = useCallback(async () => {
@@ -212,13 +213,19 @@ export default function PaywallScreen() {
     }
   }, [refreshSubscription]);
 
-  const missingProducts = ready && (!billingConfigured || !hasPurchasablePlans);
+  const missingProducts = ready && !isPro && (!billingConfigured || !hasPurchasablePlans);
   const storeName = Platform.OS === 'ios' ? t('paywall.storeAppStore') : t('paywall.storeGooglePlay');
 
   return (
     <ScrollView style={styles.screen} showsVerticalScrollIndicator={false}>
       <View style={{ paddingTop: Math.max(insets.top, 12), paddingHorizontal: 16 }}>
-        <Pressable style={styles.closeBtn} onPress={() => navigation.goBack()} hitSlop={12}>
+        <Pressable
+          style={styles.closeBtn}
+          onPress={() => navigation.goBack()}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={t('common.close')}
+        >
           <Text style={styles.closeLabel}>{t('common.close')}</Text>
         </Pressable>
       </View>
@@ -233,11 +240,7 @@ export default function PaywallScreen() {
       <View style={[styles.body, { paddingBottom: Math.max(insets.bottom, 24) }]}>
         <SectionHeader title={t('paywall.benefitsTitle')} subtitle={t('paywall.benefitsSubtitle')} />
         <View>
-          {[
-            t('paywall.benefitNoAds'),
-            t('paywall.benefitUpdates'),
-            t('paywall.benefitPrivacy'),
-          ].map((line) => (
+          {[t('paywall.benefitNoAds'), t('paywall.benefitPrivacy')].map((line) => (
             <View key={line} style={styles.benefitRow}>
               <Text style={styles.benefitBullet}>✓</Text>
               <Text style={styles.benefitText}>{line}</Text>
@@ -259,7 +262,15 @@ export default function PaywallScreen() {
           </View>
         ) : null}
 
-        {monthlyPlan ? (
+        {isPro ? (
+          <View style={styles.warnBox}>
+            <Text style={styles.planTitle}>{t('stats.premiumActiveTitle')}</Text>
+            <Text style={styles.warnText}>{t('stats.premiumActiveBody')}</Text>
+            <TextLink title={t('paywall.manageSubscription')} onPress={() => openSubscriptionManagement()} />
+          </View>
+        ) : null}
+
+        {!isPro && monthlyPlan ? (
           <View style={styles.planCard}>
             <Text style={styles.planTitle}>{t('paywall.monthly')}</Text>
             <Text style={styles.planPrice}>{planDisplayPrice(monthlyPlan) ?? '—'}</Text>
@@ -272,7 +283,7 @@ export default function PaywallScreen() {
           </View>
         ) : null}
 
-        {annualPlan ? (
+        {!isPro && annualPlan ? (
           <View style={styles.planCard}>
             <Text style={styles.planTitle}>{t('paywall.annual')}</Text>
             <Text style={styles.planPrice}>{planDisplayPrice(annualPlan) ?? '—'}</Text>

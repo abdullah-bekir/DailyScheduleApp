@@ -10,6 +10,15 @@ const { spawnSync } = require('child_process');
 const root = path.resolve(__dirname, '..');
 let failed = 0;
 
+// src/*.js dosyaları ESM sözdizimi kullanıyor; package.json'a "type": "module" eklemek
+// Expo/Metro'yu etkileyebileceği için yalnızca bu betikte zararsız uyarıyı bastırıyoruz.
+const originalEmitWarning = process.emitWarning;
+process.emitWarning = function emitWarning(warning, ...args) {
+  const code = typeof args[0] === 'object' && args[0] ? args[0].code : args[1];
+  if (code === 'MODULE_TYPELESS_PACKAGE_JSON') return;
+  return originalEmitWarning.call(process, warning, ...args);
+};
+
 function pass(label) {
   console.log(`  ✓ ${label}`);
 }

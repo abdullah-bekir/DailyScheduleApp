@@ -28,7 +28,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "buildNumber": "33",
+      "buildNumber": "36",
       "bundleIdentifier": "com.abdullahbekir.DailyscheduleApp",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
