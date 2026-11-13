@@ -1,10 +1,11 @@
 import { Alert, Linking, Platform } from 'react-native';
+import Purchases from 'react-native-purchases';
 
 import { PRIVACY_CONTACT_EMAIL, SUPPORT_EMAIL } from '../constants/legalUrls';
 
 const SUBSCRIPTION_MANAGEMENT_URL =
   Platform.OS === 'ios'
-    ? 'https://apps.apple.com/account/subscriptions'
+    ? 'itms-apps://apps.apple.com/account/subscriptions'
     : 'https://play.google.com/store/account/subscriptions';
 
 function isMailtoUrl(url) {
@@ -50,6 +51,18 @@ export async function openPrivacyContactEmail(subject = 'Planly privacy request'
   return openExternalUrl(buildMailtoUrl(PRIVACY_CONTACT_EMAIL, subject));
 }
 
+/**
+ * Abonelik yönetimi: önce sistemin kendi abonelik ekranı (iOS'ta uygulama içi sayfa, iptal seçeneğiyle),
+ * olmazsa mağazanın abonelikler sayfası.
+ */
 export async function openSubscriptionManagement() {
+  try {
+    if (typeof Purchases.showManageSubscriptions === 'function') {
+      await Purchases.showManageSubscriptions();
+      return true;
+    }
+  } catch {
+    /* RevenueCat yapılandırılmamış veya sistem ekranı açılamadı — bağlantıya düş */
+  }
   return openExternalUrl(SUBSCRIPTION_MANAGEMENT_URL);
 }
