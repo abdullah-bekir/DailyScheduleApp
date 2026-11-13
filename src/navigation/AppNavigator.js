@@ -12,6 +12,7 @@ import { useTheme } from '../context/ThemeContext';
 import AuthWelcomeScreen from '../screens/AuthWelcomeScreen';
 import HomeScreen from '../screens/HomeScreen';
 import PaywallScreen from '../screens/PaywallScreen';
+import SettingsDetailScreen from '../screens/SettingsDetailScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import StatsScreen from '../screens/StatsScreen';
 import TaskDetailScreen from '../screens/TaskDetailScreen';
@@ -123,6 +124,7 @@ function RootStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Tabs" component={MainTabs} />
       <Stack.Screen name="TaskDetail" component={TaskDetailScreen} />
+      <Stack.Screen name="SettingsDetail" component={SettingsDetailScreen} />
       <Stack.Screen
         name="Paywall"
         component={PaywallScreen}

@@ -1,8 +1,9 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect, useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Purchases from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -24,6 +25,7 @@ import { showRewardedAd } from '../lib/ads/rewardedAd';
 import { cardShadow } from '../theme/shadows';
 import { COMPLETION_WEIGHT, TIER_SIZE } from '../utils/completionTally';
 import { formatDateKeyForDisplay } from '../utils/dateKey';
+import { openSubscriptionManagement } from '../utils/openExternalUrl';
 import {
   buildDailySeries,
   buildMonthlySeries,
@@ -58,10 +60,10 @@ function createStyles(colors, chartUi) {
     },
     card: {
       backgroundColor: colors.surface,
-      borderRadius: 22,
+      borderRadius: 24,
       borderWidth: 1,
       borderColor: colors.border,
-      padding: 16,
+      padding: 18,
       ...cardShadow(colors),
       gap: 14,
     },
@@ -81,23 +83,35 @@ function createStyles(colors, chartUi) {
       flexGrow: 1,
       minWidth: '28%',
       backgroundColor: colors.surfaceSubtle,
-      borderRadius: 18,
+      borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
       paddingVertical: 14,
       paddingHorizontal: 14,
+      gap: 8,
+    },
+    statHead: {
+      flexDirection: 'row',
+      alignItems: 'center',
       gap: 6,
     },
+    statPct: {
+      fontSize: 11,
+      fontWeight: '800',
+      color: colors.primary,
+      fontVariant: ['tabular-nums'],
+    },
     statValue: {
-      fontSize: 24,
+      fontSize: 28,
       fontWeight: '800',
       color: colors.textPrimary,
       letterSpacing: -0.6,
       fontVariant: ['tabular-nums'],
     },
     statLabel: {
-      fontSize: 11,
-      fontWeight: '600',
+      flex: 1,
+      fontSize: 12,
+      fontWeight: '700',
       color: colors.textSecondary,
       letterSpacing: -0.1,
     },
@@ -583,6 +597,15 @@ export default function StatsScreen() {
     navigation.navigate('Paywall');
   }, [navigation]);
 
+  const onManageSubscription = useCallback(() => {
+    const storeName = Platform.OS === 'ios' ? t('paywall.storeAppStore') : t('paywall.storeGooglePlay');
+    const steps = Platform.OS === 'ios' ? t('settings.subCancelStepsIos') : t('settings.subCancelStepsAndroid');
+    Alert.alert(t('settings.subCancelTitle'), `${steps}\n\n${t('settings.subCancelKeep')}`, [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('settings.subOpenStore', { store: storeName }), onPress: () => openSubscriptionManagement() },
+    ]);
+  }, [t]);
+
   const runPremiumPurchase = useCallback(
     async (period) => {
       if (purchaseBusy) return;
@@ -781,6 +804,7 @@ export default function StatsScreen() {
           onBuyMonthly={() => runPremiumPurchase('monthly')}
           onBuyAnnual={() => runPremiumPurchase('annual')}
           onOpenPaywall={openPaywall}
+          onManage={onManageSubscription}
           onRestore={() => !restoreBusy && !purchaseBusy && onRestorePurchases()}
         />
 
@@ -815,14 +839,20 @@ export default function StatsScreen() {
               <Text style={styles.cardTitle}>{t('stats.todayWeek')}</Text>
               <View style={styles.statRow}>
                 {[
-                  { key: 'today', label: t('common.today'), done: s.todayDone, total: s.todayTotal || 0 },
-                  { key: 'week', label: t('stats.weekLabel'), done: s.weekDone, total: s.weekTotal || 0 },
+                  { key: 'today', icon: 'today-outline', label: t('common.today'), done: s.todayDone, total: s.todayTotal || 0 },
+                  { key: 'week', icon: 'calendar-outline', label: t('stats.weekLabel'), done: s.weekDone, total: s.weekTotal || 0 },
                 ].map((p) => (
                   <View key={p.key} style={styles.statPill}>
+                    <View style={styles.statHead}>
+                      <Ionicons name={p.icon} size={16} color={colors.primary} />
+                      <Text style={styles.statLabel}>{p.label}</Text>
+                      <Text style={styles.statPct}>
+                        %{p.total > 0 ? Math.round((p.done / p.total) * 100) : 0}
+                      </Text>
+                    </View>
                     <Text style={styles.statValue}>
                       {p.done}/{p.total}
                     </Text>
-                    <Text style={styles.statLabel}>{p.label}</Text>
                     <View style={styles.tierTrack}>
                       <View
                         style={[styles.tierFill, { width: `${p.total > 0 ? Math.round((p.done / p.total) * 100) : 0}%` }]}

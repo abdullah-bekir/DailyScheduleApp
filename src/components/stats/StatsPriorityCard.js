@@ -23,8 +23,26 @@ function createStyles(colors) {
       letterSpacing: 0.7,
       textTransform: 'uppercase',
     },
+    stack: {
+      flexDirection: 'row',
+      height: 14,
+      borderRadius: 999,
+      overflow: 'hidden',
+      gap: 2,
+      backgroundColor: colors.surfaceSubtle,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    stackSeg: {
+      height: '100%',
+    },
     row: {
       gap: 8,
+      padding: 12,
+      borderRadius: 16,
+      backgroundColor: colors.surfaceSubtle,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
     rowHead: {
       flexDirection: 'row',
@@ -32,8 +50,8 @@ function createStyles(colors) {
       gap: 8,
     },
     dot: {
-      width: 10,
-      height: 10,
+      width: 12,
+      height: 12,
       borderRadius: 999,
     },
     label: {
@@ -87,6 +105,15 @@ export default function StatsPriorityCard({ counts }) {
   return (
     <View style={styles.card}>
       <Text style={styles.title}>{t('stats.priority')}</Text>
+      {total > 0 ? (
+        <View style={styles.stack} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+          {rows
+            .filter((r) => r.count > 0)
+            .map((r) => (
+              <View key={r.key} style={[styles.stackSeg, { flex: r.count, backgroundColor: r.color }]} />
+            ))}
+        </View>
+      ) : null}
       {rows.map((r) => {
         const pct = total > 0 ? Math.round((r.count / total) * 100) : 0;
         return (

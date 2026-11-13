@@ -17,6 +17,28 @@ function createStyles(colors) {
       gap: 16,
       ...cardShadow(colors),
     },
+    headRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    levelPill: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 999,
+      backgroundColor: colors.primaryLight,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    levelPillText: {
+      fontSize: 12,
+      fontWeight: '800',
+      color: colors.primary,
+    },
     eyebrow: {
       fontSize: 11,
       fontWeight: '800',
@@ -53,7 +75,7 @@ function createStyles(colors) {
       paddingBottom: 6,
     },
     track: {
-      height: 10,
+      height: 12,
       borderRadius: 999,
       backgroundColor: colors.surfaceSubtle,
       borderWidth: 1,
@@ -74,11 +96,11 @@ function createStyles(colors) {
       width: '48.5%',
       flexGrow: 1,
       backgroundColor: colors.surfaceSubtle,
-      borderRadius: 18,
+      borderRadius: 20,
       borderWidth: 1,
       borderColor: colors.border,
       padding: 14,
-      gap: 8,
+      gap: 10,
     },
     tileHead: {
       flexDirection: 'row',
@@ -86,14 +108,11 @@ function createStyles(colors) {
       gap: 8,
     },
     tileIcon: {
-      width: 28,
-      height: 28,
-      borderRadius: 10,
+      width: 32,
+      height: 32,
+      borderRadius: 11,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
     },
     tileLabel: {
       flex: 1,
@@ -102,15 +121,19 @@ function createStyles(colors) {
       color: colors.textSecondary,
     },
     tileValue: {
-      fontSize: 26,
+      fontSize: 28,
       fontWeight: '800',
       color: colors.textPrimary,
-      letterSpacing: -0.6,
+      letterSpacing: -0.8,
       fontVariant: ['tabular-nums'],
     },
     tierBox: {
-      gap: 8,
-      paddingTop: 2,
+      gap: 10,
+      padding: 14,
+      borderRadius: 20,
+      backgroundColor: colors.surfaceSubtle,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
     tierRow: {
       flexDirection: 'row',
@@ -139,12 +162,12 @@ function createStyles(colors) {
   });
 }
 
-function Tile({ styles, colors, icon, label, value }) {
+function Tile({ styles, colors, icon, label, value, tint }) {
   return (
     <View style={styles.tile} accessible accessibilityLabel={`${label}: ${value}`}>
       <View style={styles.tileHead}>
-        <View style={styles.tileIcon}>
-          <Ionicons name={icon} size={15} color={colors.primary} />
+        <View style={[styles.tileIcon, { backgroundColor: `${tint}1F` }]}>
+          <Ionicons name={icon} size={17} color={tint} />
         </View>
         <Text style={styles.tileLabel} numberOfLines={1}>
           {label}
@@ -166,7 +189,13 @@ export default function StatsSummaryCard({ stats, points, tier, tierSize, hintPa
 
   return (
     <View style={styles.card}>
-      <Text style={styles.eyebrow}>{t('stats.general')}</Text>
+      <View style={styles.headRow}>
+        <Text style={styles.eyebrow}>{t('stats.general')}</Text>
+        <View style={styles.levelPill}>
+          <Ionicons name="trophy-outline" size={14} color={colors.primary} />
+          <Text style={styles.levelPillText}>{t('stats.tier', { level: tier.level })}</Text>
+        </View>
+      </View>
 
       <View style={styles.rateRow}>
         <Text style={styles.rateValue} accessibilityLabel={`${t('stats.completionRate')}: ${rate}%`}>
@@ -182,21 +211,23 @@ export default function StatsSummaryCard({ stats, points, tier, tierSize, hintPa
       </View>
 
       <View style={styles.grid}>
-        <Tile styles={styles} colors={colors} icon="layers-outline" label={t('common.total')} value={stats.total} />
+        <Tile styles={styles} colors={colors} icon="layers-outline" label={t('common.total')} value={stats.total} tint={colors.primary} />
         <Tile
           styles={styles}
           colors={colors}
           icon="checkmark-done-outline"
           label={t('common.completed')}
           value={stats.done}
+          tint={colors.success}
         />
-        <Tile styles={styles} colors={colors} icon="hourglass-outline" label={t('stats.pending')} value={stats.pending} />
+        <Tile styles={styles} colors={colors} icon="hourglass-outline" label={t('stats.pending')} value={stats.pending} tint={colors.warning} />
         <Tile
           styles={styles}
           colors={colors}
           icon="sparkles-outline"
           label={t('stats.completionPoints')}
           value={points}
+          tint={colors.primary}
         />
       </View>
 

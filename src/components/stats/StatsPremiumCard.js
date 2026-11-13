@@ -6,7 +6,8 @@ import { StyleSheet, Text, View } from 'react-native';
 import PrimaryButton from '../common/PrimaryButton';
 import TextLink from '../common/TextLink';
 import { planDisplayPrice } from '../../lib/premiumPlans';
-import { useTheme } from '../../context/ThemeContext';import { cardShadow } from '../../theme/shadows';
+import { useTheme } from '../../context/ThemeContext';
+import { cardShadow } from '../../theme/shadows';
 
 function createStyles(colors, isDark, isPro) {
   return StyleSheet.create({
@@ -131,6 +132,7 @@ export default function StatsPremiumCard({
   onBuyAnnual,
   onOpenPaywall,
   onRestore,
+  onManage,
 }) {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
@@ -163,23 +165,34 @@ export default function StatsPremiumCard({
           </View>
         </View>
 
+        <View style={styles.planRow}>
+          <View style={[styles.planTile, !isPro && canBuyMonthly && styles.planTileHighlight]}>
+            <Text style={styles.planLabel}>{t('stats.premiumPlanMonthlyLabel')}</Text>
+            <Text style={monthlyPrice ? styles.planPrice : styles.planPriceMuted}>
+              {monthlyPrice ?? '—'}
+            </Text>
+          </View>
+          <View style={[styles.planTile, !isPro && canBuyAnnual && styles.planTileHighlight]}>
+            <Text style={styles.planLabel}>{t('stats.premiumPlanAnnualLabel')}</Text>
+            <Text style={annualPrice ? styles.planPrice : styles.planPriceMuted}>
+              {annualPrice ?? '—'}
+            </Text>
+          </View>
+        </View>
+
+        {isPro ? (
+          <View style={styles.actions}>
+            <PrimaryButton
+              title={t('settings.subManage')}
+              variant="outline"
+              onPress={onManage}
+              mutedCta
+            />
+          </View>
+        ) : null}
+
         {!isPro ? (
           <>
-            <View style={styles.planRow}>
-              <View style={[styles.planTile, canBuyMonthly && styles.planTileHighlight]}>
-                <Text style={styles.planLabel}>{t('stats.premiumPlanMonthlyLabel')}</Text>
-                <Text style={monthlyPrice ? styles.planPrice : styles.planPriceMuted}>
-                  {monthlyPrice ?? '—'}
-                </Text>
-              </View>
-              <View style={[styles.planTile, canBuyAnnual && styles.planTileHighlight]}>
-                <Text style={styles.planLabel}>{t('stats.premiumPlanAnnualLabel')}</Text>
-                <Text style={annualPrice ? styles.planPrice : styles.planPriceMuted}>
-                  {annualPrice ?? '—'}
-                </Text>
-              </View>
-            </View>
-
             {ready && (!billingConfigured || !hasPurchasablePlans) ? (
               <Text style={styles.pending}>
                 {billingConfigured ? t('stats.premiumPricePending') : t('paywall.billingNotConfigured')}

@@ -12,13 +12,13 @@ function createStyles(colors, tone) {
   return StyleSheet.create({
     card: {
       backgroundColor: isPremium ? colors.primaryLight : colors.surface,
-      borderRadius: 22,
+      borderRadius: 24,
       borderWidth: 1,
       borderColor: isPremium ? colors.primary : isDanger ? colors.danger : colors.border,
-      paddingHorizontal: 16,
-      paddingTop: 16,
-      paddingBottom: 16,
-      gap: 12,
+      paddingHorizontal: 18,
+      paddingTop: 18,
+      paddingBottom: 18,
+      gap: 16,
       ...cardShadow(colors, isPremium ? 'sm' : undefined),
       ...(isDanger ? { borderColor: `${colors.danger}44` } : {}),
     },
@@ -28,14 +28,12 @@ function createStyles(colors, tone) {
       gap: 12,
     },
     iconWrap: {
-      width: 42,
-      height: 42,
-      borderRadius: 14,
+      width: 44,
+      height: 44,
+      borderRadius: 15,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: isPremium ? colors.surface : colors.surfaceSubtle,
-      borderWidth: 1,
-      borderColor: colors.border,
+      backgroundColor: isDanger ? `${colors.danger}14` : isPremium ? colors.surface : `${colors.primary}12`,
     },
     headerText: {
       flex: 1,
@@ -53,6 +51,10 @@ function createStyles(colors, tone) {
       fontWeight: '500',
       color: colors.textSecondary,
       lineHeight: 18,
+    },
+    divider: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: isDanger ? `${colors.danger}33` : colors.border,
     },
     body: {
       gap: 12,
@@ -78,6 +80,7 @@ export default function SettingsSectionCard({ icon, title, subtitle, tone = 'def
           {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
         </View>
       </View>
+      {children ? <View style={styles.divider} /> : null}
       {children ? <View style={styles.body}>{children}</View> : null}
     </View>
   );
