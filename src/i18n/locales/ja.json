@@ -242,6 +242,7 @@
     "syncProgress": "同期中…",
     "syncProgressDetail": "クラウドとタスクを同期しています。",
     "syncError": "同期エラー",
+    "syncErrorDetail": "一部の変更を同期できませんでした。自動的に再試行されます。",
     "syncActive": "クラウド同期有効",
     "syncActiveDetail": "タスク、テーマ、設定は Supabase で同期されます。",
     "accountTitle": "Account",

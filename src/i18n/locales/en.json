@@ -242,6 +242,7 @@
     "syncProgress": "Syncing…",
     "syncProgressDetail": "Syncing tasks with cloud.",
     "syncError": "Sync error",
+    "syncErrorDetail": "Some changes could not be synced. They will be retried automatically.",
     "syncActive": "Cloud sync active",
     "syncActiveDetail": "Tasks, theme and preferences sync via Supabase.",
     "accountTitle": "Account",

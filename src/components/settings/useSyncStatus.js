@@ -49,7 +49,7 @@ export default function useSyncStatus() {
       return {
         tone: colors.danger,
         label: t('settings.syncError'),
-        detail: tasksSyncError,
+        detail: __DEV__ ? `${t('settings.syncErrorDetail')} (${tasksSyncError})` : t('settings.syncErrorDetail'),
         icon: 'alert-circle-outline',
       };
     }

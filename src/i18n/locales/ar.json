@@ -242,6 +242,7 @@
     "syncProgress": "جارٍ المزامنة…",
     "syncProgressDetail": "جارٍ مزامنة المهام مع السحابة.",
     "syncError": "خطأ في المزامنة",
+    "syncErrorDetail": "تعذّرت مزامنة بعض التغييرات. ستتم إعادة المحاولة تلقائيًا.",
     "syncActive": "المزامنة السحابية نشطة",
     "syncActiveDetail": "تُزامَن المهام والسمة والتفضيلات عبر Supabase.",
     "accountTitle": "Account",

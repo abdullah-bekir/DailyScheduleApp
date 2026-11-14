@@ -242,6 +242,7 @@
     "syncProgress": "Senkronize ediliyor…",
     "syncProgressDetail": "Görevler bulutla eşitleniyor.",
     "syncError": "Senkron hatası",
+    "syncErrorDetail": "Bazı değişiklikler eşitlenemedi. Otomatik olarak yeniden denenecek.",
     "syncActive": "Bulut senkronu aktif",
     "syncActiveDetail": "Görevler, tema ve tercihler Supabase ile eşitleniyor.",
     "accountTitle": "Hesap",

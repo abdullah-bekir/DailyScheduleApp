@@ -242,6 +242,7 @@
     "syncProgress": "सिंक हो रहा है…",
     "syncProgressDetail": "क्लाउड के साथ कार्य सिंक हो रहे हैं।",
     "syncError": "सिंक त्रुटि",
+    "syncErrorDetail": "कुछ बदलाव सिंक नहीं हो सके। अपने-आप दोबारा कोशिश की जाएगी।",
     "syncActive": "क्लाउड सिंक सक्रिय",
     "syncActiveDetail": "कार्य, थीम और प्राथमिकताएँ Supabase के माध्यम से सिंक होती हैं।",
     "accountTitle": "Account",

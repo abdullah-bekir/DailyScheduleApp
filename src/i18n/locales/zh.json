@@ -242,6 +242,7 @@
     "syncProgress": "同步中…",
     "syncProgressDetail": "正在与云端同步任务。",
     "syncError": "同步错误",
+    "syncErrorDetail": "部分更改未能同步，将自动重试。",
     "syncActive": "云同步已启用",
     "syncActiveDetail": "任务、主题和偏好通过 Supabase 同步。",
     "accountTitle": "Account",

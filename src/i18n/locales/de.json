@@ -242,6 +242,7 @@
     "syncProgress": "Synchronisieren…",
     "syncProgressDetail": "Aufgaben werden mit der Cloud synchronisiert.",
     "syncError": "Sync-Fehler",
+    "syncErrorDetail": "Einige Änderungen konnten nicht synchronisiert werden. Es wird automatisch erneut versucht.",
     "syncActive": "Cloud-Sync aktiv",
     "syncActiveDetail": "Aufgaben, Design und Einstellungen werden über Supabase synchronisiert.",
     "accountTitle": "Account",

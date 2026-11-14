@@ -242,6 +242,7 @@
     "syncProgress": "Synchronisation…",
     "syncProgressDetail": "Synchronisation des tâches avec le cloud.",
     "syncError": "Erreur de synchronisation",
+    "syncErrorDetail": "Certaines modifications n'ont pas pu être synchronisées. Une nouvelle tentative aura lieu automatiquement.",
     "syncActive": "Synchronisation cloud active",
     "syncActiveDetail": "Tâches, thème et préférences synchronisés via Supabase.",
     "accountTitle": "Account",

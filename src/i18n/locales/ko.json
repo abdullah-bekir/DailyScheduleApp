@@ -242,6 +242,7 @@
     "syncProgress": "동기화 중…",
     "syncProgressDetail": "클라우드와 작업 동기화 중.",
     "syncError": "동기화 오류",
+    "syncErrorDetail": "일부 변경 사항을 동기화하지 못했습니다. 자동으로 다시 시도합니다.",
     "syncActive": "클라우드 동기화 활성",
     "syncActiveDetail": "작업, 테마 및 설정이 Supabase로 동기화됩니다.",
     "accountTitle": "Account",
