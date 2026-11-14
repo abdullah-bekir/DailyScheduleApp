@@ -4,6 +4,7 @@ import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useLocale } from '../../context/LocaleContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useTasks } from '../../context/TasksContext';
 import { cardShadow } from '../../theme/shadows';
@@ -14,52 +15,43 @@ function priorityColor(colors, priority) {
     medium: colors.warning,
     low: colors.success,
   };
-  return map[priority] || colors.textSecondary;
+  return map[priority] || colors.textTertiary;
 }
 
-function createStyles(colors) {
+function createStyles(colors, isRtl) {
   return StyleSheet.create({
-    wrap: {
-      borderRadius: 18,
-      overflow: 'hidden',
-    },
     row: {
       flexDirection: 'row',
+      direction: isRtl ? 'rtl' : 'ltr',
       alignItems: 'center',
-      gap: 14,
+      gap: 12,
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 18,
-      paddingVertical: 14,
-      paddingHorizontal: 14,
+      borderRadius: 16,
+      paddingVertical: 12,
+      paddingHorizontal: 12,
       ...cardShadow(colors, 'sm'),
     },
-    priorityStripe: {
-      width: 4,
-      alignSelf: 'stretch',
-      borderRadius: 999,
-      minHeight: 36,
+    rowDone: {
+      backgroundColor: colors.surfaceSubtle,
     },
-    actionColumn: {
-      width: 28,
+    check: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      borderWidth: 2,
+      borderColor: colors.borderStrong,
       alignItems: 'center',
       justifyContent: 'center',
-      alignSelf: 'stretch',
-      gap: 4,
-      opacity: 0.92,
     },
-    actionLabel: {
-      fontSize: 8,
-      fontWeight: '800',
-      letterSpacing: 0.2,
-      textAlign: 'center',
-      lineHeight: 10,
-      maxWidth: 28,
+    checkDone: {
+      backgroundColor: colors.primary,
+      borderColor: colors.primary,
     },
     info: {
       flex: 1,
-      gap: 5,
+      gap: 6,
       minWidth: 0,
     },
     title: {
@@ -67,55 +59,58 @@ function createStyles(colors) {
       fontSize: 15,
       fontWeight: '600',
       letterSpacing: -0.2,
-      lineHeight: 21,
+      lineHeight: 20,
+      textAlign: isRtl ? 'right' : 'left',
     },
     titleDone: {
       textDecorationLine: 'line-through',
-      opacity: 0.62,
-      color: colors.textSecondary,
-    },
-    time: {
       color: colors.textTertiary,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      direction: isRtl ? 'rtl' : 'ltr',
+      alignItems: 'center',
+      gap: 12,
+    },
+    metaItem: {
+      flexDirection: 'row',
+      direction: isRtl ? 'rtl' : 'ltr',
+      alignItems: 'center',
+      gap: 5,
+    },
+    metaText: {
+      color: colors.textSecondary,
       fontSize: 12,
       fontWeight: '600',
-      letterSpacing: 0.2,
-      textTransform: 'uppercase',
+      letterSpacing: 0.1,
     },
-    statusBadge: {
-      borderRadius: 999,
-      paddingHorizontal: 11,
-      paddingVertical: 7,
-      borderWidth: 1,
+    dot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
     },
-    statusText: {
-      fontSize: 11,
-      fontWeight: '800',
-      letterSpacing: 0.4,
+    deleteBtn: {
+      width: 34,
+      height: 34,
+      borderRadius: 10,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.surfaceSubtle,
     },
-    doneBadge: {
-      backgroundColor: colors.badgeDoneBg,
-      borderColor: colors.border,
-    },
-    pendingBadge: {
-      backgroundColor: colors.badgePendingBg,
-      borderColor: colors.border,
-    },
-    doneText: {
-      color: colors.badgeDoneText,
-    },
-    pendingText: {
-      color: colors.badgePendingText,
+    pressed: {
+      opacity: 0.7,
     },
   });
 }
 
-const hintHitSlop = { top: 12, bottom: 12, left: 10, right: 10 };
+const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
 
 export default function TaskItem({ task }) {
   const navigation = useNavigation();
   const { t } = useTranslation();
+  const { isRtl } = useLocale();
   const { colors } = useTheme();
-  const styles = useMemo(() => createStyles(colors), [colors]);
+  const styles = useMemo(() => createStyles(colors, isRtl), [colors, isRtl]);
   const { toggleTaskDone, deleteTask, tasksMutationReady } = useTasks();
 
   const taskId = task?.id != null ? String(task.id).trim() : '';
@@ -123,18 +118,14 @@ export default function TaskItem({ task }) {
 
   const confirmDelete = useCallback(() => {
     if (!taskId) return;
-    Alert.alert(
-      t('tasks.deleteTitle'),
-      t('tasks.deleteBody', { title: titlePreview }),
-      [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => deleteTask(taskId),
-        },
-      ],
-    );
+    Alert.alert(t('tasks.deleteTitle'), t('tasks.deleteBody', { title: titlePreview }), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: () => deleteTask(taskId),
+      },
+    ]);
   }, [deleteTask, taskId, titlePreview, t]);
 
   const onToggle = useCallback(() => {
@@ -151,56 +142,61 @@ export default function TaskItem({ task }) {
     return null;
   }
 
-  const stripeColor = priorityColor(colors, task.priority);
-  const leftLabel = task.done ? t('tasks.undo') : t('tasks.complete');
+  const done = Boolean(task.done);
+  const dotColor = priorityColor(colors, task.priority);
+  const priorityLabel = ['high', 'medium', 'low'].includes(task.priority)
+    ? t(`priority.${task.priority}`)
+    : null;
 
   return (
-    <View style={styles.wrap} accessible={false}>
-      <View style={styles.row} accessible={false}>
-        <View style={[styles.priorityStripe, { backgroundColor: stripeColor }]} />
-        <Pressable
-          style={styles.actionColumn}
-          hitSlop={hintHitSlop}
-          onPress={onToggle}
-          disabled={!tasksMutationReady}
-          accessibilityRole="button"
-          accessibilityLabel={task.done ? t('tasks.undo') : t('tasks.complete')}
-        >
-          <Ionicons name="checkmark-circle-outline" size={22} color={colors.success} />
-          <Text style={[styles.actionLabel, { color: colors.success }]} numberOfLines={2}>
-            {leftLabel}
-          </Text>
-        </Pressable>
-        <Pressable
-          style={styles.info}
-          onPress={openDetail}
-          accessibilityRole="button"
-          accessibilityLabel={t('tasks.openDetail')}
-        >
-          <Text style={[styles.title, task.done && styles.titleDone]} numberOfLines={2}>
-            {task.title}
-          </Text>
-          <Text style={styles.time}>{task.time}</Text>
-        </Pressable>
-        <View style={[styles.statusBadge, task.done ? styles.doneBadge : styles.pendingBadge]}>
-          <Text style={[styles.statusText, task.done ? styles.doneText : styles.pendingText]}>
-            {task.done ? t('common.completed') : t('common.pending')}
-          </Text>
+    <View style={[styles.row, done && styles.rowDone]}>
+      <Pressable
+        style={[styles.check, done && styles.checkDone]}
+        hitSlop={hitSlop}
+        onPress={onToggle}
+        disabled={!tasksMutationReady}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: done }}
+        accessibilityLabel={done ? t('tasks.undo') : t('tasks.complete')}
+      >
+        {done ? <Ionicons name="checkmark" size={16} color={colors.onPrimary} /> : null}
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [styles.info, pressed && styles.pressed]}
+        onPress={openDetail}
+        accessibilityRole="button"
+        accessibilityLabel={t('tasks.openDetail')}
+      >
+        <Text style={[styles.title, done && styles.titleDone]} numberOfLines={2}>
+          {task.title}
+        </Text>
+        <View style={styles.metaRow}>
+          {task.time ? (
+            <View style={styles.metaItem}>
+              <Ionicons name="time-outline" size={13} color={colors.textTertiary} />
+              <Text style={styles.metaText}>{task.time}</Text>
+            </View>
+          ) : null}
+          {priorityLabel ? (
+            <View style={styles.metaItem}>
+              <View style={[styles.dot, { backgroundColor: dotColor }]} />
+              <Text style={styles.metaText}>{priorityLabel}</Text>
+            </View>
+          ) : null}
         </View>
-        <Pressable
-          style={styles.actionColumn}
-          hitSlop={hintHitSlop}
-          onPress={confirmDelete}
-          disabled={!tasksMutationReady}
-          accessibilityRole="button"
-          accessibilityLabel={t('common.delete')}
-        >
-          <Ionicons name="trash-outline" size={22} color={colors.danger} />
-          <Text style={[styles.actionLabel, { color: colors.danger }]} numberOfLines={2}>
-            {t('common.delete')}
-          </Text>
-        </Pressable>
-      </View>
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [styles.deleteBtn, pressed && styles.pressed]}
+        hitSlop={hitSlop}
+        onPress={confirmDelete}
+        disabled={!tasksMutationReady}
+        accessibilityRole="button"
+        accessibilityLabel={t('common.delete')}
+      >
+        <Ionicons name="trash-outline" size={18} color={colors.textSecondary} />
+      </Pressable>
     </View>
   );
 }

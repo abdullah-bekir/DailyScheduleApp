@@ -10,6 +10,7 @@ import AdMobBannerCard from '../components/ads/AdMobBannerCard';
 import TaskItem from '../components/dashboard/TaskItem';
 import ProgressBar from '../components/dashboard/ProgressBar';
 import PrimaryButton from '../components/common/PrimaryButton';
+import TaskFilterChips from '../components/tasks/TaskFilterChips';
 import ScreenHero from '../components/layout/ScreenHero';
 import TasksCloudLoadingBanner from '../components/sync/TasksCloudLoadingBanner';
 import { useAppSettings } from '../context/AppSettingsContext';
@@ -24,146 +25,121 @@ import { addDaysToDateKey, formatDateKeyForDisplay, getTodayDateKey } from '../u
 import { sortTasksByTime } from '../utils/sortTasks';
 
 function createStyles(colors, isRtl) {
+  const dir = isRtl ? 'rtl' : 'ltr';
   return StyleSheet.create({
     root: { flex: 1, backgroundColor: colors.background },
     body: { flex: 1, marginTop: -18, paddingHorizontal: 20 },
-    dateCard: {
+    card: {
       backgroundColor: colors.surface,
       borderWidth: 1,
       borderColor: colors.border,
-      borderRadius: 18,
-      padding: 12,
-      marginBottom: 12,
+      borderRadius: 20,
+      padding: 14,
+      marginBottom: 14,
       ...cardShadow(colors),
     },
     dateRow: {
       flexDirection: 'row',
-      direction: isRtl ? 'rtl' : 'ltr',
+      direction: dir,
       alignItems: 'center',
       justifyContent: 'space-between',
+      gap: 10,
     },
     navBtn: {
       width: 38,
       height: 38,
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.borderStrong,
+      borderRadius: 12,
       backgroundColor: colors.surfaceSubtle,
       alignItems: 'center',
       justifyContent: 'center',
     },
-    dateTextWrap: { flex: 1, alignItems: 'center' },
-    dateText: { fontSize: 16, fontWeight: '700', color: colors.textPrimary, textAlign: 'center' },
+    dateTextWrap: { flex: 1, alignItems: 'center', gap: 6 },
+    dateText: { fontSize: 16, fontWeight: '800', color: colors.textPrimary, textAlign: 'center', letterSpacing: -0.2 },
     todayChip: {
-      alignSelf: 'center',
-      marginTop: 10,
       flexDirection: 'row',
-      direction: isRtl ? 'rtl' : 'ltr',
+      direction: dir,
       alignItems: 'center',
-      gap: 6,
-      paddingHorizontal: 12,
-      paddingVertical: 7,
+      gap: 5,
+      paddingHorizontal: 10,
+      paddingVertical: 4,
       borderRadius: 999,
-      borderWidth: 1,
-      borderColor: colors.primary,
       backgroundColor: colors.primaryLight,
+      borderWidth: 1,
+      borderColor: colors.border,
     },
-    todayChipText: {
-      fontSize: 12,
-      fontWeight: '800',
-      color: colors.primary,
-    },
+    todayChipText: { fontSize: 11, fontWeight: '800', color: colors.textPrimary },
     daysStrip: {
-      marginTop: 10,
+      marginTop: 14,
       flexDirection: 'row',
-      direction: isRtl ? 'rtl' : 'ltr',
+      direction: dir,
       justifyContent: 'space-between',
       gap: 6,
     },
     dayCell: {
       flex: 1,
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surfaceSubtle,
+      borderRadius: 14,
       alignItems: 'center',
-      paddingVertical: 6,
+      paddingTop: 8,
+      paddingBottom: 7,
       minWidth: 0,
+      backgroundColor: colors.surfaceSubtle,
+      borderWidth: 1,
+      borderColor: 'transparent',
     },
-    dayCellSelected: {
-      borderColor: colors.primary,
-      backgroundColor: colors.primaryLight,
-    },
+    dayCellToday: { borderColor: colors.borderStrong },
+    dayCellSelected: { backgroundColor: colors.primary, borderColor: colors.primary },
     dayDow: {
       fontSize: 10,
       color: colors.textSecondary,
       fontWeight: '700',
       textTransform: 'uppercase',
     },
-    dayDom: {
-      marginTop: 2,
-      fontSize: 13,
-      color: colors.textPrimary,
-      fontWeight: '800',
-    },
-    progressCard: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 18,
-      padding: 14,
-      marginBottom: 12,
-      ...cardShadow(colors),
-      gap: 8,
-    },
-    planCard: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 18,
-      padding: 14,
-      marginBottom: 12,
-      ...cardShadow(colors),
-    },
-    planTitle: { fontSize: 16, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 },
-    planText: { fontSize: 13, color: colors.textSecondary, lineHeight: 19, marginBottom: 10 },
-    listCard: {
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: 16,
-      padding: 10,
-      ...cardShadow(colors, 'sm'),
-    },
-    statsRow: {
+    dayDom: { marginTop: 3, fontSize: 15, color: colors.textPrimary, fontWeight: '800' },
+    dayTextSelected: { color: colors.onPrimary },
+    dayDot: { marginTop: 5, width: 5, height: 5, borderRadius: 3, backgroundColor: 'transparent' },
+    dayDotOn: { backgroundColor: colors.textTertiary },
+    dayDotSelected: { backgroundColor: colors.onPrimary },
+    listHeader: {
       flexDirection: 'row',
-      gap: 8,
-      marginBottom: 10,
-    },
-    statPill: {
-      flex: 1,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.surfaceSubtle,
-      paddingHorizontal: 10,
-      paddingVertical: 9,
+      direction: dir,
       alignItems: 'center',
-      gap: 2,
+      justifyContent: 'space-between',
+      gap: 10,
+      marginBottom: 12,
     },
-    statLabel: {
-      fontSize: 11,
-      fontWeight: '700',
-      color: colors.textSecondary,
+    listTitleWrap: { flexDirection: 'row', direction: dir, alignItems: 'center', gap: 8, flexShrink: 1 },
+    listTitle: { fontSize: 17, fontWeight: '800', color: colors.textPrimary, letterSpacing: -0.3 },
+    countBadge: {
+      minWidth: 24,
+      paddingHorizontal: 7,
+      height: 22,
+      borderRadius: 11,
+      backgroundColor: colors.surfaceSubtle,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    statValue: {
-      fontSize: 14,
-      fontWeight: '800',
-      color: colors.textPrimary,
+    countText: { fontSize: 12, fontWeight: '800', color: colors.textSecondary },
+    addBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 14,
+      backgroundColor: colors.ctaMuted || colors.primary,
+      alignItems: 'center',
+      justifyContent: 'center',
     },
-    listTitle: { fontSize: 15, fontWeight: '800', color: colors.textPrimary, marginBottom: 8 },
-    taskList: { gap: 12 },
-    emptyText: { fontSize: 13, color: colors.textSecondary, textAlign: 'center', paddingVertical: 14 },
+    filterWrap: { marginBottom: 12 },
+    taskList: { gap: 10 },
+    empty: { alignItems: 'center', paddingVertical: 26, gap: 10 },
+    emptyIcon: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: colors.surfaceSubtle,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    emptyText: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', marginBottom: 6 },
+    emptyAction: { alignSelf: 'stretch', marginTop: 4 },
     footerPad: { height: 12 },
   });
 }
@@ -215,6 +191,7 @@ export default function TaskListScreen() {
   } = useTasks();
   const [selectedDateKey, setSelectedDateKey] = useState(getTodayDateKey());
   const [retryBusy, setRetryBusy] = useState(false);
+  const [filter, setFilter] = useState('all');
 
   const todayKey = getTodayDateKey();
   const isToday = selectedDateKey === todayKey;
@@ -231,6 +208,18 @@ export default function TaskListScreen() {
     const list = Array.isArray(tasks) ? tasks.filter((t) => t?.dateKey === selectedDateKey) : [];
     return sortTasksByTime(list);
   }, [tasks, selectedDateKey]);
+
+  const datesWithTasks = useMemo(() => {
+    const set = new Set();
+    if (Array.isArray(tasks)) tasks.forEach((x) => x?.dateKey && set.add(x.dateKey));
+    return set;
+  }, [tasks]);
+
+  const visibleTasks = useMemo(() => {
+    if (filter === 'done') return tasksForDate.filter((x) => x?.done);
+    if (filter === 'active') return tasksForDate.filter((x) => !x?.done);
+    return tasksForDate;
+  }, [tasksForDate, filter]);
 
   const subtitle = useMemo(
     () => formatDateKeyForDisplay(selectedDateKey, dateLocale),
@@ -272,42 +261,43 @@ export default function TaskListScreen() {
           retryBusy={retryBusy}
         />
 
-        <View style={styles.dateCard}>
+        <View style={styles.card}>
           <View style={styles.dateRow}>
             <Pressable
-              style={styles.navBtn}
+              style={({ pressed }) => [styles.navBtn, pressed && { opacity: 0.7 }]}
               onPress={() => setSelectedDateKey((prev) => addDaysToDateKey(prev, -1))}
               accessibilityRole="button"
               accessibilityLabel={t('tasks.prevDay')}
             >
-              <Ionicons name={isRtl ? 'chevron-forward' : 'chevron-back'} size={20} color={colors.primary} />
+              <Ionicons name={isRtl ? 'chevron-forward' : 'chevron-back'} size={20} color={colors.textPrimary} />
             </Pressable>
 
             <View style={styles.dateTextWrap}>
-              <Text style={styles.dateText}>{formatDateKeyForDisplay(selectedDateKey, dateLocale)}</Text>
+              <Text style={styles.dateText} numberOfLines={1}>
+                {formatDateKeyForDisplay(selectedDateKey, dateLocale)}
+              </Text>
+              {!isToday ? (
+                <Pressable
+                  style={styles.todayChip}
+                  onPress={() => setSelectedDateKey(todayKey)}
+                  accessibilityRole="button"
+                  accessibilityLabel={t('tasks.backToToday')}
+                >
+                  <Ionicons name="today-outline" size={12} color={colors.textPrimary} />
+                  <Text style={styles.todayChipText}>{t('tasks.backToToday')}</Text>
+                </Pressable>
+              ) : null}
             </View>
 
             <Pressable
-              style={styles.navBtn}
+              style={({ pressed }) => [styles.navBtn, pressed && { opacity: 0.7 }]}
               onPress={() => setSelectedDateKey((prev) => addDaysToDateKey(prev, 1))}
               accessibilityRole="button"
               accessibilityLabel={t('tasks.nextDay')}
             >
-              <Ionicons name={isRtl ? 'chevron-back' : 'chevron-forward'} size={20} color={colors.primary} />
+              <Ionicons name={isRtl ? 'chevron-back' : 'chevron-forward'} size={20} color={colors.textPrimary} />
             </Pressable>
           </View>
-
-          {!isToday ? (
-            <Pressable
-              style={styles.todayChip}
-              onPress={() => setSelectedDateKey(todayKey)}
-              accessibilityRole="button"
-              accessibilityLabel={t('tasks.backToToday')}
-            >
-              <Ionicons name="today-outline" size={14} color={colors.primary} />
-              <Text style={styles.todayChipText}>{t('tasks.backToToday')}</Text>
-            </Pressable>
-          ) : null}
 
           <View style={styles.daysStrip}>
             {dayStrip.map((d) => {
@@ -316,13 +306,22 @@ export default function TaskListScreen() {
               return (
                 <Pressable
                   key={key}
-                  style={[styles.dayCell, selected && styles.dayCellSelected]}
+                  style={[styles.dayCell, key === todayKey && styles.dayCellToday, selected && styles.dayCellSelected]}
                   onPress={() => setSelectedDateKey(key)}
                   accessibilityRole="button"
+                  accessibilityState={{ selected }}
                   accessibilityLabel={d.toLocaleDateString(dateLocale)}
                 >
-                  <Text style={styles.dayDow}>{d.toLocaleDateString(dateLocale, { weekday: 'short' })}</Text>
-                  <Text style={styles.dayDom}>{d.getDate()}</Text>
+                  <Text style={[styles.dayDow, selected && styles.dayTextSelected]}>
+                    {d.toLocaleDateString(dateLocale, { weekday: 'short' })}
+                  </Text>
+                  <Text style={[styles.dayDom, selected && styles.dayTextSelected]}>{d.getDate()}</Text>
+                  <View
+                    style={[
+                      styles.dayDot,
+                      datesWithTasks.has(key) && (selected ? styles.dayDotSelected : styles.dayDotOn),
+                    ]}
+                  />
                 </Pressable>
               );
             })}
@@ -330,7 +329,7 @@ export default function TaskListScreen() {
         </View>
 
         {tasksForDate.length > 0 ? (
-          <View style={styles.progressCard}>
+          <View style={styles.card}>
             <ProgressBar
               headerTitle={t('tasks.dayProgress')}
               progress={dayProgress}
@@ -344,35 +343,51 @@ export default function TaskListScreen() {
           </View>
         ) : null}
 
-        <View style={styles.planCard}>
-          <Text style={styles.planTitle}>{t('tasks.addPlanTitle')}</Text>
-          <Text style={styles.planText}>{t('tasks.addPlanBody')}</Text>
-          <PrimaryButton
-            title={t('tasks.addPlanBtn')}
-            onPress={() => openAddTaskModalForDate(selectedDateKey)}
-            disabled={!tasksMutationReady}
-            mutedCta
-          />
-        </View>
-
-        <View style={styles.listCard}>
-          <Text style={styles.listTitle}>{t('tasks.listTitle')}</Text>
-          <View style={styles.statsRow}>
-            <View style={styles.statPill}>
-              <Text style={styles.statLabel}>{t('common.total')}</Text>
-              <Text style={styles.statValue}>{tasksForDate.length}</Text>
+        <View style={styles.card}>
+          <View style={styles.listHeader}>
+            <View style={styles.listTitleWrap}>
+              <Text style={styles.listTitle}>{t('tasks.listTitle')}</Text>
+              <View style={styles.countBadge}>
+                <Text style={styles.countText}>{tasksForDate.length}</Text>
+              </View>
             </View>
-            <View style={styles.statPill}>
-              <Text style={styles.statLabel}>{t('common.completed')}</Text>
-              <Text style={styles.statValue}>{doneCount}</Text>
-            </View>
+            <Pressable
+              style={({ pressed }) => [styles.addBtn, pressed && { opacity: 0.8 }, !tasksMutationReady && { opacity: 0.5 }]}
+              onPress={() => openAddTaskModalForDate(selectedDateKey)}
+              disabled={!tasksMutationReady}
+              accessibilityRole="button"
+              accessibilityLabel={t('tasks.addPlanBtn')}
+            >
+              <Ionicons name="add" size={24} color={colors.onCtaMuted || colors.onPrimary} />
+            </Pressable>
           </View>
 
-          {tasksForDate.length === 0 ? (
-            <Text style={styles.emptyText}>{t('tasks.empty')}</Text>
+          {tasksForDate.length > 0 ? (
+            <View style={styles.filterWrap}>
+              <TaskFilterChips value={filter} onChange={setFilter} compact />
+            </View>
+          ) : null}
+
+          {visibleTasks.length === 0 ? (
+            <View style={styles.empty}>
+              <View style={styles.emptyIcon}>
+                <Ionicons name="checkmark-done-outline" size={26} color={colors.textTertiary} />
+              </View>
+              <Text style={styles.emptyText}>{t('tasks.empty')}</Text>
+              {tasksForDate.length === 0 ? (
+                <View style={styles.emptyAction}>
+                  <PrimaryButton
+                    title={t('tasks.addPlanBtn')}
+                    onPress={() => openAddTaskModalForDate(selectedDateKey)}
+                    disabled={!tasksMutationReady}
+                    mutedCta
+                  />
+                </View>
+              ) : null}
+            </View>
           ) : (
             <View style={styles.taskList}>
-              {tasksForDate.map((item) => (
+              {visibleTasks.map((item) => (
                 <TaskItem key={String(item.id)} task={item} />
               ))}
             </View>
