@@ -3,7 +3,7 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useFocusEffect, useNavigation, useScrollToTop } from '@react-navigation/native';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Purchases from 'react-native-purchases';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -25,7 +25,6 @@ import { showRewardedAd } from '../lib/ads/rewardedAd';
 import { cardShadow } from '../theme/shadows';
 import { COMPLETION_WEIGHT, TIER_SIZE } from '../utils/completionTally';
 import { formatDateKeyForDisplay } from '../utils/dateKey';
-import { openSubscriptionManagement } from '../utils/openExternalUrl';
 import {
   buildDailySeries,
   buildMonthlySeries,
@@ -597,15 +596,6 @@ export default function StatsScreen() {
     navigation.navigate('Paywall');
   }, [navigation]);
 
-  const onManageSubscription = useCallback(() => {
-    const storeName = Platform.OS === 'ios' ? t('paywall.storeAppStore') : t('paywall.storeGooglePlay');
-    const steps = Platform.OS === 'ios' ? t('settings.subCancelStepsIos') : t('settings.subCancelStepsAndroid');
-    Alert.alert(t('settings.subCancelTitle'), `${steps}\n\n${t('settings.subCancelKeep')}`, [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: t('settings.subOpenStore', { store: storeName }), onPress: () => openSubscriptionManagement() },
-    ]);
-  }, [t]);
-
   const runPremiumPurchase = useCallback(
     async (period) => {
       if (purchaseBusy) return;
@@ -804,7 +794,6 @@ export default function StatsScreen() {
           onBuyMonthly={() => runPremiumPurchase('monthly')}
           onBuyAnnual={() => runPremiumPurchase('annual')}
           onOpenPaywall={openPaywall}
-          onManage={onManageSubscription}
           onRestore={() => !restoreBusy && !purchaseBusy && onRestorePurchases()}
         />
 

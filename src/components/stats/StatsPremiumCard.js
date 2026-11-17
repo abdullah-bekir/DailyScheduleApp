@@ -132,7 +132,6 @@ export default function StatsPremiumCard({
   onBuyAnnual,
   onOpenPaywall,
   onRestore,
-  onManage,
 }) {
   const { t } = useTranslation();
   const { colors, isDark } = useTheme();
@@ -165,6 +164,7 @@ export default function StatsPremiumCard({
           </View>
         </View>
 
+        {!isPro ? (
         <View style={styles.planRow}>
           <View style={[styles.planTile, !isPro && canBuyMonthly && styles.planTileHighlight]}>
             <Text style={styles.planLabel}>{t('stats.premiumPlanMonthlyLabel')}</Text>
@@ -179,16 +179,6 @@ export default function StatsPremiumCard({
             </Text>
           </View>
         </View>
-
-        {isPro ? (
-          <View style={styles.actions}>
-            <PrimaryButton
-              title={t('settings.subManage')}
-              variant="outline"
-              onPress={onManage}
-              mutedCta
-            />
-          </View>
         ) : null}
 
         {!isPro ? (
