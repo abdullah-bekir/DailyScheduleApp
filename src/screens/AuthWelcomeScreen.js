@@ -18,6 +18,7 @@ import AppBrandMark from '../components/brand/AppBrandMark';
 import PrimaryButton from '../components/common/PrimaryButton';
 import TextLink from '../components/common/TextLink';
 import { TERMS_URL } from '../constants/legalUrls';
+import { useLocale } from '../context/LocaleContext';
 import { useSupabaseSession } from '../context/SupabaseContext';
 import { useTheme } from '../context/ThemeContext';
 import { openExternalUrl } from '../utils/openExternalUrl';
@@ -54,6 +55,32 @@ function createStyles(colors, isDark) {
     },
     form: {
       gap: 14,
+    },
+    languageRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      gap: 8,
+      marginTop: 28,
+    },
+    languageChip: {
+      paddingHorizontal: 12,
+      paddingVertical: 7,
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    languageChipSelected: {
+      borderColor: colors.primary,
+      backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+    },
+    languageChipText: {
+      fontSize: 13,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    languageChipTextSelected: {
+      color: colors.primary,
     },
     field: {
       gap: 6,
@@ -136,6 +163,7 @@ export default function AuthWelcomeScreen() {
   const { colors, isDark } = useTheme();
   const styles = useMemo(() => createStyles(colors, isDark), [colors, isDark]);
   const { signInWithEmail, signUpWithEmailAndUsername } = useSupabaseSession();
+  const { language, setLanguage, supportedLanguages } = useLocale();
 
   const [mode, setMode] = useState('login');
   const [username, setUsername] = useState('');
@@ -354,6 +382,26 @@ export default function AuthWelcomeScreen() {
               </View>
             </>
           )}
+        </View>
+
+        <View style={styles.languageRow} accessibilityRole="radiogroup">
+          {supportedLanguages.map(({ code }) => {
+            const selected = language === code;
+            return (
+              <Pressable
+                key={code}
+                accessibilityRole="radio"
+                accessibilityState={{ checked: selected }}
+                accessibilityLabel={t(`languages.${code}`)}
+                style={[styles.languageChip, selected && styles.languageChipSelected]}
+                onPress={() => setLanguage(code)}
+              >
+                <Text style={[styles.languageChipText, selected && styles.languageChipTextSelected]}>
+                  {t(`languages.${code}`)}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
