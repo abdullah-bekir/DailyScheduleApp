@@ -322,12 +322,12 @@
     "groupPreferences": "Einstellungen",
     "groupAbout": "Info",
     "groupData": "Daten",
-    "subBillingIssue": "Es gibt ein Problem mit Ihrer Zahlung. Aktualisieren Sie Ihre Zahlungsmethode in {{store}}, um Premium zu behalten.",
+    "subBillingIssue": "Es gibt ein Problem mit deiner Zahlung. Aktualisiere deine Zahlungsmethode in {{store}}, um Premium zu behalten.",
     "subTrial": "Kostenlose Testphase",
-    "subCancelTitle": "So kündigen Sie",
-    "subCancelStepsIos": "Einstellungen → Ihr Name → Abonnements → Planly → Abonnement kündigen.",
+    "subCancelTitle": "So kündigst du",
+    "subCancelStepsIos": "Einstellungen → dein Name → Abonnements → Planly → Abonnement kündigen.",
     "subCancelStepsAndroid": "Google Play → Profilsymbol → Zahlungen & Abos → Abos → Planly → Abo kündigen.",
-    "subCancelKeep": "Sie behalten Premium bis zum Ende des bereits bezahlten Zeitraums.",
+    "subCancelKeep": "Du behältst Premium bis zum Ende des bereits bezahlten Zeitraums.",
     "subOpenStore": "{{store}} öffnen"
   },
   "reminder": {
@@ -377,7 +377,7 @@
   "paywall": {
     "eyebrow": "Premium",
     "title": "Planly Premium",
-    "subtitle": "Abonnements verwenden RevenueCat; konfiguriere Produkte in App Store / Play Console und RevenueCat.",
+    "subtitle": "Erweiterte Statistiken und laufende Verbesserungen. Die Abrechnung erfolgt über dein Store-Konto.",
     "benefitsTitle": "Enthalten",
     "benefitsSubtitle": "Das bekommst du mit Premium.",
     "benefitNoAds": "Alle Aufgabenstatistiken: Summen, Diagramme und Prioritätsverteilung",
